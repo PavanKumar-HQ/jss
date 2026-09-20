@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ShoppingBag, Check, BookOpen, ArrowRight } from 'lucide-react';
 
 
-export default function BookCard({ book, onSelectBook, onAddToCart, isAddedToCart, staggerDelay = 0 }) {
+const BookCard = React.memo(function BookCard({ book, onSelectBook, onAddToCart, isAddedToCart, staggerDelay = 0 }) {
   const [imgError, setImgError] = useState(false);
 
   // Fallback clean book cover SVG in deep maroon
@@ -10,7 +10,7 @@ export default function BookCard({ book, onSelectBook, onAddToCart, isAddedToCar
 
   const imageSource = imgError 
     ? (book.localImage || fallbackCover)
-    : (book.imageUrl || book.localImage || fallbackCover);
+    : (book.webpImage || book.localImage || book.imageUrl || fallbackCover);
 
   return (
     <article
@@ -28,13 +28,18 @@ export default function BookCard({ book, onSelectBook, onAddToCart, isAddedToCar
         onClick={() => onSelectBook && onSelectBook(book)}
         title="Click to preview volume & sacred excerpt"
       >
-        <img
-          src={imageSource}
-          onError={() => setImgError(true)}
-          alt={`Cover of ${book.title}`}
-          className="book-card-cover-img"
-          loading="lazy"
-        />
+        <picture>
+          {!imgError && book.webpImage && <source srcSet={book.webpImage} type="image/webp" />}
+          {!imgError && book.localImage && <source srcSet={book.localImage} type="image/jpeg" />}
+          <img
+            src={imageSource}
+            onError={() => setImgError(true)}
+            alt={`Cover of ${book.title}`}
+            className="book-card-cover-img"
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
 
         {/* Hover Quick Action Cue */}
         <div
@@ -164,4 +169,6 @@ export default function BookCard({ book, onSelectBook, onAddToCart, isAddedToCar
       </div>
     </article>
   );
-}
+});
+
+export default BookCard;

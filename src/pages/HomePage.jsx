@@ -1,8 +1,9 @@
-import React from 'react';
-import { Search, BookOpen, ArrowRight, Layers, MapPin, Phone, CheckCircle2, Award, BookMarked } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { ArrowRight, BookOpen, Search, Library, Award } from 'lucide-react';
 
 import HeroParallax from '../components/HeroParallax';
 import BookCard from '../components/BookCard';
+import PeriodicalsSection from '../components/PeriodicalsSection';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export default function HomePage({
@@ -11,7 +12,7 @@ export default function HomePage({
   onSelectBook,
   onOpenExcerpt,
   onAddToCart,
-  cart = [],
+  cart,
   searchQuery,
   setSearchQuery,
   activeCategory,
@@ -22,8 +23,8 @@ export default function HomePage({
   const [periodicalsRef] = useScrollReveal();
   const [briefRef] = useScrollReveal();
 
-  // Select featured books from verified actual titles
-  const featuredBooks = products.slice(0, 4);
+  // Select featured books from verified actual titles (memoized)
+  const featuredBooks = useMemo(() => products.slice(0, 4), [products]);
 
   const quickCategories = [
     "Vachana Literature",

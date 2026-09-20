@@ -76,11 +76,16 @@ export default function BookDetailPage({
           {/* Left Column: Book Cover */}
           <div>
             <div className="product-cover-box">
-              <img
-                src={book.imageUrl || book.localImage}
-                alt={`Cover of ${book.title}`}
-                className="product-cover-img"
-              />
+              <picture>
+                {book.webpImage && <source srcSet={book.webpImage} type="image/webp" />}
+                {book.localImage && <source srcSet={book.localImage} type="image/jpeg" />}
+                <img
+                  src={book.webpImage || book.localImage || book.imageUrl}
+                  alt={`Cover of ${book.title}`}
+                  className="product-cover-img"
+                  decoding="async"
+                />
+              </picture>
             </div>
 
             {/* Indian Postal Shipping Guarantee Box */}

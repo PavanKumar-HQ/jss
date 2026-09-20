@@ -39,7 +39,7 @@ export default function BookPreviewModal({ book, onClose, onAddToCart, onNavigat
 
   const imageSource = imgError
     ? (book.localImage || fallbackCover)
-    : (book.imageUrl || book.localImage || fallbackCover);
+    : (book.webpImage || book.localImage || book.imageUrl || fallbackCover);
 
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="merged-modal-title">
@@ -197,18 +197,23 @@ export default function BookPreviewModal({ book, onClose, onAddToCart, onNavigat
                     justifyContent: 'center'
                   }}
                 >
-                  <img
-                    src={imageSource}
-                    onError={() => setImgError(true)}
-                    alt={`Cover of ${book.title}`}
-                    style={{
-                      maxHeight: '260px',
-                      maxWidth: '100%',
-                      objectFit: 'contain',
-                      borderRadius: 'var(--radius-xs)',
-                      boxShadow: '0 6px 18px rgba(0,0,0,0.18)'
-                    }}
-                  />
+                  <picture>
+                    {!imgError && book.webpImage && <source srcSet={book.webpImage} type="image/webp" />}
+                    {!imgError && book.localImage && <source srcSet={book.localImage} type="image/jpeg" />}
+                    <img
+                      src={imageSource}
+                      onError={() => setImgError(true)}
+                      alt={`Cover of ${book.title}`}
+                      decoding="async"
+                      style={{
+                        maxHeight: '260px',
+                        maxWidth: '100%',
+                        objectFit: 'contain',
+                        borderRadius: 'var(--radius-xs)',
+                        boxShadow: '0 6px 18px rgba(0,0,0,0.18)'
+                      }}
+                    />
+                  </picture>
                 </div>
 
                 {/* Quick tab trigger to excerpt */}

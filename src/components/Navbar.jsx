@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ShoppingBag, Search, MapPin, Phone, Menu, X, Globe, Truck, BookOpen, ChevronRight, ArrowRight } from 'lucide-react';
 import { BOOKS } from '../data/mockData';
 
-export default function Navbar({
+const Navbar = React.memo(function Navbar({
   currentRoute,
   onNavigate,
   cartCount,
@@ -297,7 +297,7 @@ export default function Navbar({
 
                   <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
                     {matchingBooks.map((book) => {
-                      const coverSrc = book.cover_image || `/${book.slug}/cover.jpg`;
+                      const coverSrc = book.webpImage || book.cover_image || `/${book.slug}/cover.webp`;
                       return (
                         <div
                           key={book.id}
@@ -321,20 +321,26 @@ export default function Navbar({
                           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-primary)')}
                           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#FFFFFF')}
                         >
-                          <img
-                            src={coverSrc}
-                            alt={book.title}
-                            onError={(e) => {
-                              e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="85" viewBox="0 0 60 85"><rect width="100%" height="100%" fill="%235E1624"/><text x="50%" y="50%" fill="%23FAF7F2" font-size="16" text-anchor="middle" dominant-baseline="middle">JSS</text></svg>';
-                            }}
-                            style={{
-                              width: '38px',
-                              height: '52px',
-                              objectFit: 'cover',
-                              borderRadius: '3px',
-                              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                            }}
-                          />
+                          <picture>
+                            <source srcSet={coverSrc} type="image/webp" />
+                            <source srcSet={`/${book.slug}/cover.jpg`} type="image/jpeg" />
+                            <img
+                              src={coverSrc}
+                              alt={book.title}
+                              loading="lazy"
+                              decoding="async"
+                              onError={(e) => {
+                                e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="85" viewBox="0 0 60 85"><rect width="100%" height="100%" fill="%235E1624"/><text x="50%" y="50%" fill="%23FAF7F2" font-size="16" text-anchor="middle" dominant-baseline="middle">JSS</text></svg>';
+                              }}
+                              style={{
+                                width: '38px',
+                                height: '52px',
+                                objectFit: 'cover',
+                                borderRadius: '3px',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                              }}
+                            />
+                          </picture>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {book.title}
@@ -495,4 +501,6 @@ export default function Navbar({
       )}
     </header>
   );
-}
+});
+
+export default Navbar;

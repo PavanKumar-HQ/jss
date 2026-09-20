@@ -9,5 +9,16 @@ export default defineConfig({
     watch: {
       ignored: ['**/books/**', '**/book-images/**', '**/*.png', '**/*.jpg', '**/*.csv', '**/*.json']
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          icons: ['lucide-react']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 600
   }
 });

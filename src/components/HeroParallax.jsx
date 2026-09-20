@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Award, BookOpen, Quote, ArrowRight, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 
-export default function HeroParallax({ activeCategory, setActiveCategory, languageMode, onNavigate, onInspectBook }) {
+const HeroParallax = React.memo(function HeroParallax({ activeCategory, setActiveCategory, languageMode, onNavigate, onInspectBook }) {
   // Flagship publications for the interactive 3D hero stage
   const spotlightBooks = [
     {
@@ -14,6 +14,7 @@ export default function HeroParallax({ activeCategory, setActiveCategory, langua
       price: 1000,
       binding: "Deluxe Hardbound Edition",
       image: "/shivapada-ratnakosha/cover.jpg",
+      webpImage: "/shivapada-ratnakosha/cover.webp",
       fallbackImage: "https://jssonline.org/wp-content/uploads/2021/11/7_Shivapada_Ratnakosha.jpg",
       quote: "ಶಿವಪದ ರತ್ನಕೋಶವು ಶೈವಾಗಮ, ವಚನ ಸಾಹಿತ್ಯ ಮತ್ತು ವೀರಶೈವ ಸಿದ್ಧಾಂತದ ಸಮಗ್ರ ಪಾರಿಭಾಷಿಕ ನಿಘಂಟು.",
       quoteAuthor: "Sri Suttur Math Editorial Archives"
@@ -28,6 +29,7 @@ export default function HeroParallax({ activeCategory, setActiveCategory, langua
       price: 350,
       binding: "Scholarly Hardbound Edition",
       image: "/patanjali-yoga-sutras/cover.jpg",
+      webpImage: "/patanjali-yoga-sutras/cover.webp",
       fallbackImage: "https://jssonline.org/wp-content/uploads/2021/11/Patanjali_Yoga_Sutras.jpg",
       quote: "ಯೋಗಶ್ಚಿತ್ತವೃತ್ತಿನಿರೋಧಃ — The restraint of the fluctuations of the mind is Yoga.",
       quoteAuthor: "Maharshi Patanjali • Classical Exegesis"
@@ -42,6 +44,7 @@ export default function HeroParallax({ activeCategory, setActiveCategory, langua
       price: 450,
       binding: "Commemorative Library Edition",
       image: "/the-heritage-of-sri-suttur-math/cover.jpg",
+      webpImage: "/the-heritage-of-sri-suttur-math/cover.webp",
       fallbackImage: "https://jssonline.org/wp-content/uploads/2021/11/Heritage_of_Sri_Suttur_Math.jpg",
       quote: "ಸಾಹಿತ್ಯದ ಮೂಲಕ ಸಾಮಾಜಿಕ ಹಾಗೂ ಧಾರ್ಮಿಕ ಜಾಗೃತಿ — Social transformation through literature.",
       quoteAuthor: "Mantra Maharshi His Holiness Sri Shivarathri Mahaswamiji"
@@ -56,6 +59,7 @@ export default function HeroParallax({ activeCategory, setActiveCategory, langua
       price: 220,
       binding: "Canonical Paperback Edition",
       image: "/sharanara-vachanagalu/cover.jpg",
+      webpImage: "/sharanara-vachanagalu/cover.webp",
       fallbackImage: "https://jssonline.org/wp-content/uploads/2021/11/Sharanara_Vachanagalu.jpg",
       quote: "ನುಡಿದರೆ ಮುತ್ತಿನ ಹಾರದಂತಿರಬೇಕು, ನುಡಿದರೆ ಮಾಣಿಕ್ಯದ ದೀಪ್ತಿಯಂತಿರಬೇಕು — Words should be like a garland of pearls.",
       quoteAuthor: "Jagajyothi Basavanna • 12th Century Vachana"
@@ -104,7 +108,7 @@ export default function HeroParallax({ activeCategory, setActiveCategory, langua
 
   const imageSource = imgError
     ? (currentSpotlight.fallbackImage || fallbackSvg)
-    : (currentSpotlight.image || currentSpotlight.fallbackImage || fallbackSvg);
+    : (currentSpotlight.webpImage || currentSpotlight.image || currentSpotlight.fallbackImage || fallbackSvg);
 
   return (
     <div className="hero-unique-wrapper" style={{ padding: '16px 0 28px' }}>
@@ -360,17 +364,27 @@ export default function HeroParallax({ activeCategory, setActiveCategory, langua
                         position: 'relative'
                       }}
                     >
-                      <img
-                        key={currentSpotlight.id}
-                        src={imageSource}
-                        alt={currentSpotlight.title}
-                        onError={() => setImgError(true)}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover'
-                        }}
-                      />
+                      <picture style={{ width: '100%', height: '100%' }}>
+                        {!imgError && currentSpotlight.webpImage && (
+                          <source srcSet={currentSpotlight.webpImage} type="image/webp" />
+                        )}
+                        {!imgError && currentSpotlight.image && (
+                          <source srcSet={currentSpotlight.image} type="image/jpeg" />
+                        )}
+                        <img
+                          key={currentSpotlight.id}
+                          src={imageSource}
+                          alt={currentSpotlight.title}
+                          onError={() => setImgError(true)}
+                          loading="eager"
+                          decoding="async"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      </picture>
                     </div>
                   </div>
 
@@ -551,4 +565,6 @@ export default function HeroParallax({ activeCategory, setActiveCategory, langua
       </div>
     </div>
   );
-}
+});
+
+export default HeroParallax;

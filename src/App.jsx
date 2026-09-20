@@ -1,24 +1,44 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { DataService, BOOKS } from './data/mockData';
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
+import { BOOKS } from './data/mockData';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
-import CataloguePage from './pages/CataloguePage';
-import BookDetailPage from './pages/BookDetailPage';
-import CategoriesPage from './pages/CategoriesPage';
-import BulkOrdersPage from './pages/BulkOrdersPage';
-import AboutPage from './pages/AboutPage';
-import ContactPage from './pages/ContactPage';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import BookPreviewModal from './components/BookPreviewModal';
-import OrderTrackingModal from './components/OrderTrackingModal';
 import { CheckCircle2 } from 'lucide-react';
 
+// Lazy-loaded secondary routes & heavy modals for code splitting & minimal initial bundle
+const CataloguePage = React.lazy(() => import('./pages/CataloguePage'));
+const BookDetailPage = React.lazy(() => import('./pages/BookDetailPage'));
+const CategoriesPage = React.lazy(() => import('./pages/CategoriesPage'));
+const BulkOrdersPage = React.lazy(() => import('./pages/BulkOrdersPage'));
+const AboutPage = React.lazy(() => import('./pages/AboutPage'));
+const ContactPage = React.lazy(() => import('./pages/ContactPage'));
+const CartPage = React.lazy(() => import('./pages/CartPage'));
+const CheckoutPage = React.lazy(() => import('./pages/CheckoutPage'));
+const BookPreviewModal = React.lazy(() => import('./components/BookPreviewModal'));
+const OrderTrackingModal = React.lazy(() => import('./components/OrderTrackingModal'));
 
+function PageLoader() {
+  return (
+    <div style={{ minHeight: '50vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px' }}>
+      <div
+        style={{
+          width: '32px',
+          height: '32px',
+          border: '3px solid #E2DACB',
+          borderTopColor: '#5E1624',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite'
+        }}
+      />
+      <span style={{ fontSize: '0.84rem', color: '#6B625D', letterSpacing: '0.5px' }}>
+        Loading JSS Granthamale...
+      </span>
+    </div>
+  );
+}
 
 export default function App() {
-  const [products, setProducts] = useState(BOOKS);
+  const [products] = useState(BOOKS);
   const [languageMode, setLanguageMode] = useState('en');
 
   // Client-Side Routing State
@@ -37,7 +57,6 @@ export default function App() {
   // Unified Modal State (Quick Preview & Sample Excerpt Merged)
   const [selectedBook, setSelectedBook] = useState(null);
   const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
-
 
   // Cart State (Persisted in localStorage)
   const [cart, setCart] = useState(() => {
@@ -68,10 +87,11 @@ export default function App() {
   // Toast State
   const [toastMessage, setToastMessage] = useState('');
 
-  const showToast = (msg) => {
+  const showToast = useCallback((msg) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(''), 2800);
-  };
+    const timer = setTimeout(() => setToastMessage(''), 2800);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Browser Navigation History Listener
   useEffect(() => {
@@ -89,8 +109,8 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Central Router Dispatcher
-  const navigate = (to) => {
+  // Central Router Dispatcher (Memoized)
+  const navigate = useCallback((to) => {
     let clean = to;
     if (!clean.startsWith('/')) {
       clean = `/${clean}`;
@@ -107,10 +127,10 @@ export default function App() {
 
     setCurrentRoute(clean);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
 
-  // Cart Operations
-  const handleAddToCart = (bookToAdd) => {
+  // Memoized Cart Operations
+  const handleAddToCart = useCallback((bookToAdd) => {
     const format = bookToAdd.selectedVariant || bookToAdd.format || 'Paperback';
     const qty = bookToAdd.quantity || 1;
     const price = bookToAdd.price;
@@ -137,6 +157,7 @@ export default function App() {
           author: bookToAdd.author,
           category: bookToAdd.category,
           cover_image: bookToAdd.cover_image || bookToAdd.imageUrl,
+          webpImage: bookToAdd.webpImage,
           price: price,
           format: format,
           quantity: qty
@@ -145,11 +166,11 @@ export default function App() {
     });
 
     showToast(`Added "${bookToAdd.title}" to cart`);
-  };
+  }, [showToast]);
 
-  const handleUpdateQuantity = (id, format, newQty) => {
+  const handleUpdateQuantity = useCallback((id, format, newQty) => {
     if (newQty <= 0) {
-      handleRemoveFromCart(id, format);
+      setCart((prev) => prev.filter((item) => !(item.id === id && (item.format || 'Paperback') === (format || 'Paperback'))));
       return;
     }
     setCart((prevCart) =>
@@ -159,27 +180,48 @@ export default function App() {
           : item
       )
     );
-  };
+  }, []);
 
-  const handleRemoveFromCart = (id, format) => {
+  const handleRemoveFromCart = useCallback((id, format) => {
     setCart((prevCart) =>
       prevCart.filter(
         (item) => !(item.id === id && (item.format || 'Paperback') === (format || 'Paperback'))
       )
     );
-  };
+  }, []);
 
-  const handleClearCart = () => {
+  const handleClearCart = useCallback(() => {
     setCart([]);
-  };
+  }, []);
 
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setSearchQuery('');
     setActiveCategory('All Categories');
     setActiveSeries('All Series');
     setActiveLanguage('All Languages');
     setPriceMax(2000);
-  };
+  }, []);
+
+  // Modal Handlers
+  const handleSelectBook = useCallback((book) => {
+    setSelectedBook(book);
+  }, []);
+
+  const handleOpenExcerpt = useCallback((book) => {
+    setSelectedBook({ ...book, initialTab: 'excerpt' });
+  }, []);
+
+  const handleCloseBookModal = useCallback(() => {
+    setSelectedBook(null);
+  }, []);
+
+  const handleOpenTrackingModal = useCallback(() => {
+    setIsTrackingModalOpen(true);
+  }, []);
+
+  const handleCloseTrackingModal = useCallback(() => {
+    setIsTrackingModalOpen(false);
+  }, []);
 
   // Parse Route and Determine Active View
   const routeView = useMemo(() => {
@@ -239,7 +281,9 @@ export default function App() {
     }
   }, [routeView]);
 
-  const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const totalCartCount = useMemo(() => {
+    return cart.reduce((acc, item) => acc + item.quantity, 0);
+  }, [cart]);
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', overflowX: 'hidden' }}>
@@ -253,102 +297,104 @@ export default function App() {
         setSearchQuery={setSearchQuery}
         languageMode={languageMode}
         setLanguageMode={setLanguageMode}
-        onSelectBook={(book) => setSelectedBook(book)}
-        onOpenTrackingModal={() => setIsTrackingModalOpen(true)}
+        onSelectBook={handleSelectBook}
+        onOpenTrackingModal={handleOpenTrackingModal}
       />
 
-      {/* Main Routed Page Content */}
+      {/* Main Routed Page Content with Suspense */}
       <main style={{ flex: 1 }}>
-        {routeView.type === 'home' && (
-          <HomePage
-            products={products}
-            onNavigate={navigate}
-            onSelectBook={(book) => setSelectedBook(book)}
-            onOpenExcerpt={(book) => setSelectedBook({ ...book, initialTab: 'excerpt' })}
-            onAddToCart={handleAddToCart}
-            cart={cart}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            activeCategory={activeCategory}
-            setActiveCategory={setActiveCategory}
-            languageMode={languageMode}
-          />
-        )}
+        <Suspense fallback={<PageLoader />}>
+          {routeView.type === 'home' && (
+            <HomePage
+              products={products}
+              onNavigate={navigate}
+              onSelectBook={handleSelectBook}
+              onOpenExcerpt={handleOpenExcerpt}
+              onAddToCart={handleAddToCart}
+              cart={cart}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              activeCategory={activeCategory}
+              setActiveCategory={setActiveCategory}
+              languageMode={languageMode}
+            />
+          )}
 
-        {routeView.type === 'books' && (
-          <CataloguePage
-            products={products}
-            onSelectBook={(book) => setSelectedBook(book)}
-            onOpenExcerpt={(book) => setSelectedBook({ ...book, initialTab: 'excerpt' })}
-            onAddToCart={handleAddToCart}
-            cart={cart}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            activeCategory={activeCategory}
-            setActiveCategory={setActiveCategory}
-            activeSeries={activeSeries}
-            setActiveSeries={setActiveSeries}
-            activeLanguage={activeLanguage}
-            setActiveLanguage={setActiveLanguage}
-            priceMax={priceMax}
-            setPriceMax={setPriceMax}
-            onResetFilters={handleResetFilters}
-          />
-        )}
+          {routeView.type === 'books' && (
+            <CataloguePage
+              products={products}
+              onSelectBook={handleSelectBook}
+              onOpenExcerpt={handleOpenExcerpt}
+              onAddToCart={handleAddToCart}
+              cart={cart}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              activeCategory={activeCategory}
+              setActiveCategory={setActiveCategory}
+              activeSeries={activeSeries}
+              setActiveSeries={setActiveSeries}
+              activeLanguage={activeLanguage}
+              setActiveLanguage={setActiveLanguage}
+              priceMax={priceMax}
+              setPriceMax={setPriceMax}
+              onResetFilters={handleResetFilters}
+            />
+          )}
 
-        {routeView.type === 'book-detail' && (
-          <BookDetailPage
-            book={routeView.data}
-            allBooks={products}
-            onNavigate={navigate}
-            onAddToCart={handleAddToCart}
-            onBuyNow={(b) => {
-              handleAddToCart(b);
-              navigate('/cart');
-            }}
-            cart={cart}
-            languageMode={languageMode}
-          />
-        )}
+          {routeView.type === 'book-detail' && (
+            <BookDetailPage
+              book={routeView.data}
+              allBooks={products}
+              onNavigate={navigate}
+              onAddToCart={handleAddToCart}
+              onBuyNow={(b) => {
+                handleAddToCart(b);
+                navigate('/cart');
+              }}
+              cart={cart}
+              languageMode={languageMode}
+            />
+          )}
 
-        {routeView.type === 'categories' && (
-          <CategoriesPage
-            onNavigate={navigate}
-            onSelectCategory={(catName) => {
-              setActiveCategory(catName);
-              navigate('/books');
-            }}
-          />
-        )}
+          {routeView.type === 'categories' && (
+            <CategoriesPage
+              onNavigate={navigate}
+              onSelectCategory={(catName) => {
+                setActiveCategory(catName);
+                navigate('/books');
+              }}
+            />
+          )}
 
-        {routeView.type === 'bulk-orders' && (
-          <BulkOrdersPage onNavigate={navigate} />
-        )}
+          {routeView.type === 'bulk-orders' && (
+            <BulkOrdersPage onNavigate={navigate} />
+          )}
 
-        {routeView.type === 'about' && (
-          <AboutPage onNavigate={navigate} />
-        )}
+          {routeView.type === 'about' && (
+            <AboutPage onNavigate={navigate} />
+          )}
 
-        {routeView.type === 'contact' && (
-          <ContactPage onNavigate={navigate} />
-        )}
+          {routeView.type === 'contact' && (
+            <ContactPage onNavigate={navigate} />
+          )}
 
-        {routeView.type === 'cart' && (
-          <CartPage
-            cart={cart}
-            onUpdateQuantity={handleUpdateQuantity}
-            onRemoveItem={handleRemoveFromCart}
-            onNavigate={navigate}
-          />
-        )}
+          {routeView.type === 'cart' && (
+            <CartPage
+              cart={cart}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemoveItem={handleRemoveFromCart}
+              onNavigate={navigate}
+            />
+          )}
 
-        {routeView.type === 'checkout' && (
-          <CheckoutPage
-            cart={cart}
-            onClearCart={handleClearCart}
-            onNavigate={navigate}
-          />
-        )}
+          {routeView.type === 'checkout' && (
+            <CheckoutPage
+              cart={cart}
+              onClearCart={handleClearCart}
+              onNavigate={navigate}
+            />
+          )}
+        </Suspense>
       </main>
 
       {/* Institutional 4-Column Footer */}
@@ -356,27 +402,27 @@ export default function App() {
         onNavigate={navigate}
         onOpenLocation={() => navigate('/contact')}
         onOpenBulkEnquiry={() => navigate('/bulk-orders')}
-        onOpenTrackingModal={() => setIsTrackingModalOpen(true)}
+        onOpenTrackingModal={handleOpenTrackingModal}
       />
 
-      {/* Unified Book Preview & Excerpt Modal */}
-      {selectedBook && (
-        <BookPreviewModal
-          book={selectedBook}
-          onClose={() => setSelectedBook(null)}
-          onAddToCart={handleAddToCart}
-          onNavigate={navigate}
-        />
-      )}
+      {/* Suspended Modals */}
+      <Suspense fallback={null}>
+        {selectedBook && (
+          <BookPreviewModal
+            book={selectedBook}
+            onClose={handleCloseBookModal}
+            onAddToCart={handleAddToCart}
+            onNavigate={navigate}
+          />
+        )}
 
-      {/* Order Consignment Tracking Modal */}
-      {isTrackingModalOpen && (
-        <OrderTrackingModal
-          isOpen={isTrackingModalOpen}
-          onClose={() => setIsTrackingModalOpen(false)}
-        />
-      )}
-
+        {isTrackingModalOpen && (
+          <OrderTrackingModal
+            isOpen={isTrackingModalOpen}
+            onClose={handleCloseTrackingModal}
+          />
+        )}
+      </Suspense>
 
       {/* Toast Notification Alert */}
       {toastMessage && (
@@ -405,7 +451,6 @@ export default function App() {
           <CheckCircle2 size={16} color="#E5C368" />
           <span>{toastMessage}</span>
         </div>
-
       )}
 
     </div>

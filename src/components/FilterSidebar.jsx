@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Filter, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { mockCategories, mockSeries, mockLanguages } from '../data/mockData';
 
-export default function FilterSidebar({
+const FilterSidebar = React.memo(function FilterSidebar({
   activeCategory,
   setActiveCategory,
   activeSeries,
@@ -164,4 +164,6 @@ export default function FilterSidebar({
       </div>
     </aside>
   );
-}
+});
+
+export default FilterSidebar;

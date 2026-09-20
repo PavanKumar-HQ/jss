@@ -84,6 +84,7 @@ export const mockProducts = rawBooks.map((item, index) => {
     sampleExcerpt: item.titleKannada ? `ವಚನ ಹಾಗೂ ಧರ್ಮ ಸಾಹಿತ್ಯದ ಉದ್ಗ್ರಂಥ: ${item.title}. ಶ್ರೀ ಸುತ್ತೂರು ಮಠದ ಪ್ರಕಾಶನ.` : null,
     imageUrl: item.image_url,
     localImage: item.local_image_filename ? `/${item.local_image_filename.replace(/^books\//, '')}` : null,
+    webpImage: item.local_image_filename ? `/${item.local_image_filename.replace(/^books\//, '').replace(/\.(jpg|jpeg|png)$/i, '.webp')}` : null,
     sourceUrl: item.source_url
   };
 });
