@@ -1,190 +1,494 @@
-import React, { useState } from 'react';
-import { ShoppingBag, Search, MapPin, Phone, BookOpen, Heart, Menu, X, Layers, Globe } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ShoppingBag, Search, MapPin, Phone, Menu, X, Globe, Truck, BookOpen, ChevronRight, ArrowRight } from 'lucide-react';
+import { BOOKS } from '../data/mockData';
 
 export default function Navbar({
+  currentRoute,
+  onNavigate,
   cartCount,
-  onOpenCart,
-  onOpenLocation,
-  onOpenBulkEnquiry,
   searchQuery,
   setSearchQuery,
-  activeCategory,
-  setActiveCategory,
   languageMode,
-  setLanguageMode
+  setLanguageMode,
+  onSelectBook,
+  onOpenTrackingModal
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchContainerRef = useRef(null);
+
+  const handleLinkClick = (route, e) => {
+    e.preventDefault();
+    onNavigate(route);
+    setIsMobileMenuOpen(false);
+  };
+
+  // Filter matching books for the live search dropdown
+  const matchingBooks = searchQuery && searchQuery.trim().length >= 2
+    ? BOOKS.filter((b) => {
+        const q = searchQuery.toLowerCase();
+        return (
+          b.title?.toLowerCase().includes(q) ||
+          b.titleKannada?.toLowerCase().includes(q) ||
+          b.author?.toLowerCase().includes(q) ||
+          b.category?.toLowerCase().includes(q)
+        );
+      }).slice(0, 5)
+    : [];
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  const navItems = [
+    { label: 'Home', route: '/' },
+    { label: 'Books', route: '/books' },
+    { label: 'Categories', route: '/categories' },
+    { label: 'Bulk Orders', route: '/bulk-orders' },
+    { label: 'About', route: '/about' },
+    { label: 'Contact', route: '/contact' }
+  ];
 
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 900, backgroundColor: '#5E1624', color: '#FFFFFF', boxShadow: '0 2px 10px rgba(0,0,0,0.15)' }}>
-      {/* Top Utility Announcement Bar */}
-      <div style={{ backgroundColor: '#3F0E18', padding: '6px 0', fontSize: '0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <button
-              onClick={onOpenLocation}
-              style={{ background: 'none', border: 'none', color: '#FBF9F5', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '0.8rem' }}
-              aria-label="View JSS Book House Mysuru Store Location & Hours"
-            >
-              <MapPin size={13} color="#C85A17" />
-              <span>JSS Book House, Mysuru (09:30 AM – 06:00 PM)</span>
-            </button>
-            <span style={{ opacity: 0.4 }}>|</span>
-            <a href="tel:08212548212" style={{ color: '#FBF9F5', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Phone size={13} color="#C85A17" />
+    <header className="site-header" role="banner" style={{ position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+      {/* Top Utility Strip */}
+      <div className="header-top-bar" style={{ backgroundColor: 'var(--color-maroon)', color: '#FAF7F2', padding: '5px 0', fontSize: '0.78rem' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'nowrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <MapPin size={12} color="#E5C368" />
+              <span>JSS Book House, Dr. Shivarathri Rajendra Circle, Mysuru</span>
+            </span>
+            <span className="desktop-only" style={{ opacity: 0.4 }}>|</span>
+            <span className="desktop-only">Mon–Sat: 09:30 AM – 06:00 PM</span>
+            <span className="desktop-only" style={{ opacity: 0.4 }}>|</span>
+            <a href="tel:08212548212" style={{ color: '#FAF7F2', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Phone size={12} color="#E5C368" />
               <span>0821-2548212</span>
             </a>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Track Consignment Button */}
             <button
-              onClick={onOpenBulkEnquiry}
-              style={{ background: 'none', border: 'none', color: '#D97706', fontWeight: 600, cursor: 'pointer', fontSize: '0.8rem' }}
+              onClick={() => onOpenTrackingModal && onOpenTrackingModal()}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#E5C368',
+                cursor: 'pointer',
+                fontSize: '0.76rem',
+                fontWeight: 600,
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                whiteSpace: 'nowrap'
+              }}
             >
-              Institutional & School Bulk Orders
+              <Truck size={12} />
+              <span>Track Consignment</span>
             </button>
+
+            <span className="desktop-only" style={{ opacity: 0.4 }}>|</span>
+
+            <button
+              className="desktop-only"
+              onClick={() => onNavigate('/bulk-orders')}
+              style={{ background: 'none', border: 'none', color: '#FAF7F2', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 500, padding: 0 }}
+            >
+              Bulk Orders
+            </button>
+
+            <span style={{ opacity: 0.4 }}>|</span>
+
             <button
               onClick={() => setLanguageMode(languageMode === 'en' ? 'kn' : 'en')}
-              style={{ background: 'rgba(255,255,255,0.12)', border: 'none', color: '#FFFFFF', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem' }}
-              title="Toggle Kannada / English Language Display"
+              style={{
+                background: 'rgba(255,255,255,0.15)',
+                border: 'none',
+                color: '#FFFFFF',
+                padding: '2px 8px',
+                borderRadius: 'var(--radius-xs)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '0.74rem',
+                whiteSpace: 'nowrap'
+              }}
+              title="Toggle English / Kannada Display"
             >
-              <Globe size={12} />
-              <span>{languageMode === 'en' ? 'ಕನ್ನಡ Display' : 'English Display'}</span>
+              <Globe size={11} />
+              <span>{languageMode === 'en' ? 'ಕನ್ನಡ' : 'English'}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Header Bar */}
-      <div className="container" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-        {/* Logo & Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ backgroundColor: '#FBF9F5', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="100" height="100" rx="16" fill="#5E1624"/>
-              <path d="M20 72 C35 60 50 65 50 82 C50 65 65 60 80 72 L80 35 C65 25 50 30 50 45 C50 30 35 25 20 35 Z" fill="#FBF9F5"/>
-              <path d="M50 82 L50 45" stroke="#C85A17" strokeWidth="4" strokeLinecap="round"/>
-              <circle cx="50" cy="22" r="8" fill="#D97706"/>
-            </svg>
-          </div>
-          <div>
-            <span className="text-serif" style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.5px', display: 'block', lineHeight: 1.2 }}>
-              JSS PUBLICATIONS
-            </span>
-            <span className="text-kannada" style={{ fontSize: '0.78rem', opacity: 0.88, display: 'block', marginTop: '2px' }}>
-              {languageMode === 'kn' ? 'ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆ' : 'Jagadguru Sri Shivarathreeshwara Granthamale'}
-            </span>
-          </div>
-        </div>
-
-        {/* Live Search Input (Desktop) */}
-        <div style={{ flex: 1, maxWidth: '420px', margin: '0 16px', position: 'relative' }} className="desktop-only">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={languageMode === 'kn' ? "ಪುಸ್ತಕ, ಲೇಖಕ ಅಥವಾ ವಚನ ಹುಡುಕಿ..." : "Search title, author, or series (e.g. Basavanna, Yoga)..."}
-            style={{
-              width: '100%',
-              padding: '10px 16px 10px 38px',
-              borderRadius: '20px',
-              border: '1px solid rgba(255,255,255,0.2)',
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              color: '#FFFFFF',
-              fontSize: '0.9rem',
-              outline: 'none'
-            }}
-          />
-          <Search size={16} color="#FBF9F5" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', opacity: 0.7 }} />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#FFF', cursor: 'pointer', opacity: 0.7 }}
-            >
-              <X size={14} />
-            </button>
-          )}
-        </div>
-
-        {/* Quick Action Icons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button
-            onClick={onOpenCart}
-            className="btn btn-primary btn-sm"
-            aria-label={`View Shopping Bag with ${cartCount} items`}
-            style={{ position: 'relative' }}
+      {/* Main Navigation Bar */}
+      <div className="container">
+        <div className="header-main-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+          {/* JSS Publications Brand Identity */}
+          <a
+            href="/"
+            onClick={(e) => handleLinkClick('/', e)}
+            style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}
+            aria-label="JSS Publications Home"
           >
-            <ShoppingBag size={18} />
-            <span>Bag</span>
-            {cartCount > 0 && (
+            <div
+              style={{
+                backgroundColor: 'var(--color-maroon)',
+                padding: '6px',
+                borderRadius: 'var(--radius-sm)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(94, 22, 36, 0.2)'
+              }}
+            >
+              <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+                <rect width="100" height="100" rx="14" fill="#5E1624"/>
+                <path d="M20 72 C35 60 50 65 50 82 C50 65 65 60 80 72 L80 35 C65 25 50 30 50 45 C50 30 35 25 20 35 Z" fill="#FAF7F2"/>
+                <path d="M50 82 L50 45" stroke="#B84E1A" strokeWidth="4" strokeLinecap="round"/>
+                <circle cx="50" cy="22" r="8" fill="#E5C368"/>
+              </svg>
+            </div>
+            <div>
+              <span className="text-brand" style={{ fontSize: '1.18rem', fontWeight: 700, letterSpacing: '0.6px', color: 'var(--color-maroon)', display: 'block', lineHeight: 1.15 }}>
+                JSS PUBLICATIONS
+              </span>
+              <span className="text-kannada" style={{ fontSize: '0.78rem', color: 'var(--color-saffron)', display: 'block', lineHeight: 1.2 }}>
+                {languageMode === 'kn' ? 'ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆ' : 'Jagadguru Sri Shivarathreeshwara Granthamale'}
+              </span>
+            </div>
+          </a>
+
+          {/* Desktop Navigation Links */}
+          <nav className="desktop-only" aria-label="Main Navigation">
+            <ul className="header-nav-links" style={{ display: 'flex', gap: '20px', listStyle: 'none', margin: 0, padding: 0 }}>
+              {navItems.map((item) => {
+                const isActive = currentRoute === item.route || (item.route !== '/' && currentRoute.startsWith(item.route));
+                return (
+                  <li key={item.route}>
+                    <a
+                      href={item.route}
+                      onClick={(e) => handleLinkClick(item.route, e)}
+                      className={`header-nav-link ${isActive ? 'active' : ''}`}
+                      style={{
+                        textDecoration: 'none',
+                        fontSize: '0.92rem',
+                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? 'var(--color-accent-maroon)' : 'var(--color-text-charcoal)',
+                        padding: '6px 4px',
+                        borderBottom: isActive ? '2px solid var(--color-accent-gold)' : '2px solid transparent',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* Right Actions: Live Search & Cart */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Live Search Bar with Instant Autocomplete Dropdown */}
+            <div ref={searchContainerRef} style={{ position: 'relative' }} className="desktop-only">
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setIsSearchFocused(true);
+                  }}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setIsSearchFocused(false);
+                      onNavigate('/books');
+                    }
+                  }}
+                  placeholder="Search books, authors..."
+                  style={{
+                    width: isSearchFocused || searchQuery ? '240px' : '190px',
+                    padding: '7px 12px 7px 32px',
+                    fontSize: '0.84rem',
+                    borderRadius: 'var(--radius-pill)',
+                    border: isSearchFocused ? '1px solid var(--color-accent-gold)' : '1px solid var(--color-border)',
+                    backgroundColor: isSearchFocused ? '#FFFFFF' : 'var(--color-bg-cream)',
+                    outline: 'none',
+                    transition: 'all 0.2s ease',
+                    boxShadow: isSearchFocused ? '0 0 0 3px rgba(197, 155, 39, 0.15)' : 'none'
+                  }}
+                />
+                <Search
+                  size={14}
+                  color="var(--color-text-muted)"
+                  style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)' }}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setIsSearchFocused(false);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      right: '8px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 0,
+                      color: 'var(--color-text-muted)'
+                    }}
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+
+              {/* Floating Instant Search Dropdown Popover */}
+              {isSearchFocused && matchingBooks.length > 0 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
+                    right: 0,
+                    width: '380px',
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1.5px solid var(--color-border-subtle)',
+                    boxShadow: '0 12px 32px rgba(94, 22, 36, 0.15)',
+                    zIndex: 9999,
+                    overflow: 'hidden',
+                    animation: 'fadeIn 0.15s ease-out'
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: '10px 14px',
+                      backgroundColor: 'var(--color-bg-cream)',
+                      borderBottom: '1px solid var(--color-border-subtle)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--color-accent-maroon)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Suggested Publications
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                      {matchingBooks.length} results
+                    </span>
+                  </div>
+
+                  <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
+                    {matchingBooks.map((book) => {
+                      const coverSrc = book.cover_image || `/${book.slug}/cover.jpg`;
+                      return (
+                        <div
+                          key={book.id}
+                          onClick={() => {
+                            setIsSearchFocused(false);
+                            if (onSelectBook) {
+                              onSelectBook(book);
+                            } else {
+                              onNavigate(`/books/${book.id}`);
+                            }
+                          }}
+                          style={{
+                            display: 'flex',
+                            gap: '12px',
+                            padding: '10px 14px',
+                            borderBottom: '1px solid var(--color-border-light)',
+                            cursor: 'pointer',
+                            alignItems: 'center',
+                            transition: 'background-color 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-primary)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#FFFFFF')}
+                        >
+                          <img
+                            src={coverSrc}
+                            alt={book.title}
+                            onError={(e) => {
+                              e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="85" viewBox="0 0 60 85"><rect width="100%" height="100%" fill="%235E1624"/><text x="50%" y="50%" fill="%23FAF7F2" font-size="16" text-anchor="middle" dominant-baseline="middle">JSS</text></svg>';
+                            }}
+                            style={{
+                              width: '38px',
+                              height: '52px',
+                              objectFit: 'cover',
+                              borderRadius: '3px',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {book.title}
+                            </div>
+                            {book.titleKannada && (
+                              <div className="text-kannada" style={{ fontSize: '0.74rem', color: 'var(--color-accent-saffron)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {book.titleKannada}
+                              </div>
+                            )}
+                            <div style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)' }}>
+                              {book.author}
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--color-accent-maroon)' }}>
+                              ₹{book.price}
+                            </span>
+                            <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--color-accent-saffron)' }}>
+                              Quick View →
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setIsSearchFocused(false);
+                      onNavigate('/books');
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      backgroundColor: 'var(--color-bg-cream)',
+                      border: 'none',
+                      borderTop: '1px solid var(--color-border-subtle)',
+                      color: 'var(--color-accent-maroon)',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>View all matching books in catalogue</span>
+                    <ArrowRight size={13} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Shopping Cart Button */}
+            <button
+              onClick={() => onNavigate('/cart')}
+              className="btn btn-primary btn-sm"
+              style={{ gap: '6px', borderRadius: 'var(--radius-pill)', padding: '6px 14px' }}
+              aria-label={`Shopping Cart with ${cartCount} items`}
+            >
+              <ShoppingBag size={15} />
+              <span className="desktop-only">Cart</span>
               <span
                 style={{
-                  position: 'absolute',
-                  top: '-6px',
-                  right: '-6px',
-                  backgroundColor: '#D97706',
-                  color: '#FFFFFF',
-                  borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+                  backgroundColor: '#FFFFFF',
+                  color: 'var(--color-maroon)',
+                  borderRadius: '10px',
+                  padding: '1px 6px',
+                  fontSize: '0.72rem',
+                  fontWeight: 700
                 }}
               >
                 {cartCount}
               </span>
-            )}
-          </button>
+            </button>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            style={{ background: 'none', border: 'none', color: '#FFF', cursor: 'pointer', padding: '4px' }}
-            className="mobile-only"
-            aria-label="Toggle navigation menu"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="mobile-only btn btn-outline btn-sm"
+              style={{ padding: '6px 10px' }}
+              aria-label="Toggle navigation menu"
+            >
+              {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Drawer Navigation */}
       {isMobileMenuOpen && (
-        <div style={{ backgroundColor: '#3F0E18', padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          <div style={{ position: 'relative', marginBottom: '12px' }}>
+        <div
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderTop: '1px solid var(--color-border)',
+            padding: '16px 20px',
+            boxShadow: 'var(--shadow-md)'
+          }}
+          className="mobile-only"
+        >
+          <div style={{ marginBottom: '14px' }}>
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search catalogue..."
-              style={{
-                width: '100%',
-                padding: '10px 14px 10px 36px',
-                borderRadius: '8px',
-                border: '1px solid rgba(255,255,255,0.2)',
-                backgroundColor: 'rgba(255,255,255,0.12)',
-                color: '#FFF',
-                fontSize: '0.9rem'
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (currentRoute !== '/books') onNavigate('/books');
               }}
+              placeholder="Search books by title, author, category..."
+              className="form-input"
+              style={{ padding: '8px 12px' }}
             />
-            <Search size={16} color="#FFF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.7 }} />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {navItems.map((item) => (
+              <a
+                key={item.route}
+                href={item.route}
+                onClick={(e) => handleLinkClick(item.route, e)}
+                style={{
+                  color: currentRoute === item.route ? 'var(--color-maroon)' : 'var(--color-text-charcoal)',
+                  fontWeight: currentRoute === item.route ? 700 : 500,
+                  fontSize: '0.95rem',
+                  padding: '8px 0',
+                  borderBottom: '1px solid var(--color-border-light)'
+                }}
+              >
+                {item.label}
+              </a>
+            ))}
+
             <button
-              onClick={() => { onOpenBulkEnquiry(); setIsMobileMenuOpen(false); }}
-              style={{ textAlign: 'left', background: 'none', border: 'none', color: '#D97706', padding: '8px 0', fontWeight: 600, fontSize: '0.95rem' }}
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                if (onOpenTrackingModal) onOpenTrackingModal();
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                textAlign: 'left',
+                padding: '8px 0',
+                color: 'var(--color-accent-maroon)',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer'
+              }}
             >
-              Institutional & School Bulk Enquiries
-            </button>
-            <button
-              onClick={() => { onOpenLocation(); setIsMobileMenuOpen(false); }}
-              style={{ textAlign: 'left', background: 'none', border: 'none', color: '#FFF', padding: '8px 0', fontSize: '0.95rem' }}
-            >
-              JSS Book House Location & Operating Hours
+              <Truck size={16} />
+              <span>Track Consignment</span>
             </button>
           </div>
         </div>

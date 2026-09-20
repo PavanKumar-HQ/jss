@@ -1,137 +1,165 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Eye, BookOpen, Star, Check } from 'lucide-react';
+import { ShoppingBag, Check, BookOpen, ArrowRight } from 'lucide-react';
 
-export default function BookCard({ book, onSelectBook, onAddToCart, isAddedToCart }) {
+
+export default function BookCard({ book, onSelectBook, onAddToCart, isAddedToCart, staggerDelay = 0 }) {
   const [imgError, setImgError] = useState(false);
 
-  // Fallback placeholder cover SVG
-  const fallbackCover = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="420" viewBox="0 0 300 420"><rect width="100%" height="100%" fill="%235E1624"/><rect x="15" y="15" width="270" height="390" fill="none" stroke="%23D97706" stroke-width="2"/><text x="50%" y="45%" fill="%23FBF9F5" font-size="20" font-family="serif" text-anchor="middle" font-weight="bold">${encodeURIComponent(book.title)}</text><text x="50%" y="55%" fill="%23C85A17" font-size="14" font-family="sans-serif" text-anchor="middle">${encodeURIComponent(book.author || 'JSS Publications')}</text></svg>`;
+  // Fallback clean book cover SVG in deep maroon
+  const fallbackCover = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="420" viewBox="0 0 300 420"><rect width="100%" height="100%" fill="%235E1624"/><rect x="12" y="12" width="276" height="396" fill="none" stroke="%23E2DACB" stroke-width="1.5"/><text x="50%" y="46%" fill="%23FFFFFF" font-size="17" font-family="serif" text-anchor="middle" font-weight="bold">${encodeURIComponent(book.title)}</text><text x="50%" y="54%" fill="%23E5C368" font-size="12" font-family="sans-serif" text-anchor="middle">${encodeURIComponent(book.author || 'JSS Publications')}</text></svg>`;
+
+  const imageSource = imgError 
+    ? (book.localImage || fallbackCover)
+    : (book.imageUrl || book.localImage || fallbackCover);
 
   return (
-    <article className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Cover Image Container */}
+    <article
+      className="book-card animate-fade-in"
+      aria-label={`${book.title} by ${book.author}`}
+      style={{
+        animationDelay: `${staggerDelay}ms`,
+        borderRadius: 'var(--radius-md)',
+        transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+      }}
+    >
+      {/* Book Cover Container with Micro-interaction */}
       <div
-        style={{
-          position: 'relative',
-          backgroundColor: '#F3EFE6',
-          height: '240px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          cursor: 'pointer'
-        }}
-        onClick={() => onSelectBook(book)}
+        className="book-card-cover-wrap"
+        onClick={() => onSelectBook && onSelectBook(book)}
+        title="Click to preview volume & sacred excerpt"
       >
         <img
-          src={imgError ? fallbackCover : book.imageUrl}
+          src={imageSource}
           onError={() => setImgError(true)}
-          alt={`Cover image of ${book.title} published by JSS Publications`}
-          style={{
-            maxHeight: '210px',
-            maxWidth: '150px',
-            objectFit: 'contain',
-            boxShadow: '0 4px 10px rgba(0,0,0,0.18)',
-            transition: 'transform 0.3s ease'
-          }}
-          className="book-cover-hover"
+          alt={`Cover of ${book.title}`}
+          className="book-card-cover-img"
+          loading="lazy"
         />
 
-        {/* Category & Variant Badge Overlays */}
-        <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {book.variant && (
-            <span className="badge badge-burgundy" style={{ backgroundColor: '#5E1624', color: '#FFF' }}>
-              {book.variant}
-            </span>
-          )}
-          {book.hasVariants && (
-            <span className="badge badge-gold" style={{ backgroundColor: '#D97706', color: '#FFF' }}>
-              Multiple Editions
-            </span>
-          )}
-        </div>
-
-        {/* Quick Preview Hover Trigger */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelectBook(book);
-          }}
-          className="btn btn-sm btn-secondary"
+        {/* Hover Quick Action Cue */}
+        <div
+          className="book-cover-overlay-cue"
           style={{
             position: 'absolute',
-            bottom: '12px',
-            padding: '6px 14px',
-            fontSize: '0.8rem',
-            opacity: 0.95
+            bottom: '10px',
+            backgroundColor: 'rgba(35, 4, 8, 0.88)',
+            color: '#FAF7F2',
+            padding: '4px 12px',
+            borderRadius: 'var(--radius-pill)',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            opacity: 0,
+            transform: 'translateY(6px)',
+            transition: 'all 0.2s ease',
+            pointerEvents: 'none',
+            border: '1px solid rgba(229, 195, 104, 0.3)'
           }}
         >
-          <Eye size={14} />
-          <span>Quick View</span>
-        </button>
+          <BookOpen size={11} color="#E5C368" />
+          <span>Peek Inside</span>
+        </div>
       </div>
 
-      {/* Book Information Body */}
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+      {/* Book Details */}
+      <div className="book-card-details" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1, padding: '14px 14px 12px' }}>
         <div>
-          <span style={{ fontSize: '0.78rem', color: '#C85A17', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-            {book.category || 'General Publication'}
+          {/* Category */}
+          <span className="book-card-category">
+            {book.category || 'Vachana Literature'}
           </span>
 
+          {/* Book Title */}
           <h3
-            className="text-serif"
-            onClick={() => onSelectBook(book)}
-            style={{
-              fontSize: '1.05rem',
-              fontWeight: 700,
-              lineHeight: 1.3,
-              marginBottom: '4px',
-              color: '#1C1917',
-              cursor: 'pointer'
-            }}
+            className="book-card-title"
+            onClick={() => onSelectBook && onSelectBook(book)}
+            title={book.title}
           >
             {book.title}
           </h3>
 
-          {book.titleKannada && (
-            <span className="text-kannada" style={{ fontSize: '0.88rem', color: '#57534E', display: 'block', marginBottom: '8px' }}>
+          {/* Kannada Title */}
+          {book.titleKannada && book.titleKannada !== book.title && (
+            <span className="book-card-kannada">
               {book.titleKannada}
             </span>
           )}
 
-          <p style={{ fontSize: '0.82rem', color: '#57534E', marginBottom: '12px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {book.author ? `By ${book.author}` : 'JSS Publications Division'}
+          {/* Author */}
+          <p className="book-card-author">
+            {book.author}
           </p>
+
+          {/* Language & Metadata */}
+          <div className="book-card-meta">
+            <span>{book.language ? (book.language.includes('(') ? book.language.split('(')[0].trim() : book.language) : 'Kannada'}</span>
+            {book.pages && <span> · {book.pages} pp</span>}
+            {book.hasVariants ? (
+              <span style={{ color: 'var(--color-saffron)', fontWeight: 600, display: 'block', marginTop: '2px' }}>
+                Paperback & Hardbound
+              </span>
+            ) : (
+              <span> · Standard Folio</span>
+            )}
+          </div>
         </div>
 
-        {/* Price & Action Row */}
-        <div style={{ borderTop: '1px solid #E7E5E4', paddingTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-          <div>
-            <span style={{ fontSize: '1.15rem', fontWeight: 700, color: '#5E1624' }}>
+        {/* Price & Primary Action Buttons */}
+        <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid var(--color-border-light)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+            <span className="book-card-price">
               ₹{book.price.toLocaleString('en-IN')}
             </span>
-            {book.specialPrice && (
-              <span style={{ fontSize: '0.78rem', color: '#57534E', display: 'block' }}>
-                Deluxe: ₹{book.specialPrice.toLocaleString('en-IN')}
-              </span>
-            )}
-            <span style={{ fontSize: '0.72rem', color: '#166534', display: 'block', fontWeight: 600 }}>
-              GST Exempt (0%)
+            <span style={{ fontSize: '0.72rem', color: 'var(--color-green)', fontWeight: 600 }}>
+              0% GST
             </span>
           </div>
 
-          <button
-            onClick={() => onAddToCart(book)}
-            className={`btn btn-sm ${isAddedToCart ? 'btn-outline' : 'btn-primary'}`}
-            style={{
-              borderColor: isAddedToCart ? '#166534' : undefined,
-              color: isAddedToCart ? '#166534' : undefined
-            }}
-            aria-label={`Add ${book.title} to shopping bag`}
-          >
-            {isAddedToCart ? <Check size={14} /> : <ShoppingBag size={14} />}
-            <span>{isAddedToCart ? 'In Bag' : 'Add to Bag'}</span>
-          </button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+            {/* Merged Preview & Excerpt Button */}
+            <button
+              type="button"
+              onClick={() => onSelectBook && onSelectBook(book)}
+              className="btn btn-outline btn-sm"
+              style={{
+                padding: '6px 6px',
+                fontSize: '0.78rem',
+                gap: '4px',
+                justifyContent: 'center',
+                borderRadius: 'var(--radius-pill)',
+                borderColor: 'var(--color-border-dark)',
+                minHeight: '34px'
+              }}
+              title="Preview details and read sacred excerpt"
+            >
+              <BookOpen size={13} color="var(--color-maroon)" />
+              <span>Preview</span>
+            </button>
+
+            {/* Add to Cart Button */}
+            <button
+              type="button"
+              onClick={() => onAddToCart && onAddToCart(book)}
+              className={`btn btn-sm ${isAddedToCart ? 'btn-secondary' : 'btn-primary'}`}
+              style={{
+                padding: '6px 8px',
+                fontSize: '0.78rem',
+                gap: '4px',
+                justifyContent: 'center',
+                borderRadius: 'var(--radius-pill)',
+                borderColor: isAddedToCart ? 'var(--color-green)' : undefined,
+                color: isAddedToCart ? 'var(--color-green)' : undefined,
+                minHeight: '34px'
+              }}
+              title={`Add ${book.title} to cart`}
+              aria-label={`Add ${book.title} to cart`}
+            >
+              {isAddedToCart ? <Check size={13} /> : <ShoppingBag size={13} />}
+              <span>{isAddedToCart ? 'Added' : 'Add'}</span>
+            </button>
+          </div>
         </div>
       </div>
     </article>

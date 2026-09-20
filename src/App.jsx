@@ -1,84 +1,176 @@
-import React, { useState, useEffect } from 'react';
-import { DataService } from './data/mockData';
-import PageLoader from './components/PageLoader';
+import React, { useState, useEffect, useMemo } from 'react';
+import { DataService, BOOKS } from './data/mockData';
 import Navbar from './components/Navbar';
-import HeroParallax from './components/HeroParallax';
-import BookCard from './components/BookCard';
-import BookDetailModal from './components/BookDetailModal';
-import SampleExcerptModal from './components/SampleExcerptModal';
-import FilterSidebar from './components/FilterSidebar';
-import CartDrawer from './components/CartDrawer';
-import CheckoutModal from './components/CheckoutModal';
-import PeriodicalsSection from './components/PeriodicalsSection';
-import InstitutionalEnquiryModal from './components/InstitutionalEnquiryModal';
-import LocationSection from './components/LocationSection';
 import Footer from './components/Footer';
-import { BookOpen, AlertCircle, Sparkles, Filter, SlidersHorizontal } from 'lucide-react';
+import HomePage from './pages/HomePage';
+import CataloguePage from './pages/CataloguePage';
+import BookDetailPage from './pages/BookDetailPage';
+import CategoriesPage from './pages/CategoriesPage';
+import BulkOrdersPage from './pages/BulkOrdersPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import BookPreviewModal from './components/BookPreviewModal';
+import OrderTrackingModal from './components/OrderTrackingModal';
+import { CheckCircle2 } from 'lucide-react';
+
+
 
 export default function App() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState(BOOKS);
+  const [languageMode, setLanguageMode] = useState('en');
 
-  // Filter States
+  // Client-Side Routing State
+  const getInitialRoute = () => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace(/^#/, '');
+      if (hash) return hash.startsWith('/') ? hash : `/${hash}`;
+      const path = window.location.pathname;
+      return path && path !== '' ? path : '/';
+    }
+    return '/';
+  };
+
+  const [currentRoute, setCurrentRoute] = useState(getInitialRoute);
+
+  // Unified Modal State (Quick Preview & Sample Excerpt Merged)
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
+
+
+  // Cart State (Persisted in localStorage)
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem('jss_granthamale_cart');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('jss_granthamale_cart', JSON.stringify(cart));
+    } catch (e) {
+      console.warn('Could not persist cart:', e);
+    }
+  }, [cart]);
+
+  // Filter & Search State
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All Categories');
   const [activeSeries, setActiveSeries] = useState('All Series');
   const [activeLanguage, setActiveLanguage] = useState('All Languages');
   const [priceMax, setPriceMax] = useState(2000);
-  const [languageMode, setLanguageMode] = useState('en');
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Modal / Drawer States
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [selectedExcerptBook, setSelectedExcerptBook] = useState(null);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [isBulkEnquiryOpen, setIsBulkEnquiryOpen] = useState(false);
+  // Toast State
   const [toastMessage, setToastMessage] = useState('');
 
-  // Initial Data Ingestion
-  useEffect(() => {
-    DataService.getProducts().then((data) => {
-      setProducts(data);
-      setLoading(false);
-    });
-  }, []);
-
-  // Toast Notification Trigger
   const showToast = (msg) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(''), 2500);
+    setTimeout(() => setToastMessage(''), 2800);
   };
 
-  // Add to Bag Logic
-  const handleAddToCart = (bookToAdd) => {
-    setCart((prevCart) => {
-      const existing = prevCart.find(
-        (item) => item.id === bookToAdd.id && item.selectedVariant === (bookToAdd.selectedVariant || 'regular')
-      );
-      if (existing) {
-        return prevCart.map((item) =>
-          item.id === bookToAdd.id && item.selectedVariant === (bookToAdd.selectedVariant || 'regular')
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+  // Browser Navigation History Listener
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash.replace(/^#/, '');
+      if (hash) {
+        setCurrentRoute(hash.startsWith('/') ? hash : `/${hash}`);
+      } else {
+        setCurrentRoute(window.location.pathname || '/');
       }
-      return [...prevCart, { ...bookToAdd, quantity: 1, selectedVariant: bookToAdd.selectedVariant || 'regular' }];
-    });
-    showToast(`Added "${bookToAdd.title}" to Shopping Bag`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Central Router Dispatcher
+  const navigate = (to) => {
+    let clean = to;
+    if (!clean.startsWith('/')) {
+      clean = `/${clean}`;
+    }
+    if (clean === '/home') {
+      clean = '/';
+    }
+
+    try {
+      window.history.pushState({}, '', clean);
+    } catch (e) {
+      window.location.hash = clean;
+    }
+
+    setCurrentRoute(clean);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleUpdateQuantity = (id, newQty) => {
+  // Cart Operations
+  const handleAddToCart = (bookToAdd) => {
+    const format = bookToAdd.selectedVariant || bookToAdd.format || 'Paperback';
+    const qty = bookToAdd.quantity || 1;
+    const price = bookToAdd.price;
+
+    setCart((prevCart) => {
+      const existingIndex = prevCart.findIndex(
+        (item) => item.id === bookToAdd.id && (item.format || 'Paperback') === format
+      );
+
+      if (existingIndex > -1) {
+        const updated = [...prevCart];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: updated[existingIndex].quantity + qty
+        };
+        return updated;
+      }
+      return [
+        ...prevCart,
+        {
+          id: bookToAdd.id,
+          title: bookToAdd.title,
+          titleKannada: bookToAdd.titleKannada,
+          author: bookToAdd.author,
+          category: bookToAdd.category,
+          cover_image: bookToAdd.cover_image || bookToAdd.imageUrl,
+          price: price,
+          format: format,
+          quantity: qty
+        }
+      ];
+    });
+
+    showToast(`Added "${bookToAdd.title}" to cart`);
+  };
+
+  const handleUpdateQuantity = (id, format, newQty) => {
     if (newQty <= 0) {
-      handleRemoveFromCart(id);
+      handleRemoveFromCart(id, format);
       return;
     }
-    setCart((prevCart) => prevCart.map((item) => (item.id === id ? { ...item, quantity: newQty } : item)));
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === id && (item.format || 'Paperback') === (format || 'Paperback')
+          ? { ...item, quantity: newQty }
+          : item
+      )
+    );
   };
 
-  const handleRemoveFromCart = (id) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+  const handleRemoveFromCart = (id, format) => {
+    setCart((prevCart) =>
+      prevCart.filter(
+        (item) => !(item.id === id && (item.format || 'Paperback') === (format || 'Paperback'))
+      )
+    );
+  };
+
+  const handleClearCart = () => {
+    setCart([]);
   };
 
   const handleResetFilters = () => {
@@ -89,227 +181,233 @@ export default function App() {
     setPriceMax(2000);
   };
 
-  // Filter Computation
-  const filteredProducts = products.filter((p) => {
-    if (searchQuery.trim() !== '') {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = p.title.toLowerCase().includes(q) || (p.titleKannada && p.titleKannada.toLowerCase().includes(q));
-      const matchAuthor = p.author && p.author.toLowerCase().includes(q);
-      const matchCat = p.category && p.category.toLowerCase().includes(q);
-      if (!matchTitle && !matchAuthor && !matchCat) return false;
-    }
-    if (activeCategory !== 'All Categories' && p.category !== activeCategory) return false;
-    if (activeSeries !== 'All Series' && p.series !== activeSeries) return false;
-    if (activeLanguage !== 'All Languages' && !p.language.includes(activeLanguage)) return false;
-    if (p.price > priceMax) return false;
-    return true;
-  });
+  // Parse Route and Determine Active View
+  const routeView = useMemo(() => {
+    const path = currentRoute.split('?')[0];
 
-  const cartTotalCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+    // Book Detail Route: /books/:id or /books/:slug
+    if (path.startsWith('/books/')) {
+      const bookSlug = path.replace('/books/', '').trim();
+      const matchedBook = products.find(
+        (b) => String(b.id) === String(bookSlug) || (b.slug && b.slug === bookSlug)
+      );
+      return { type: 'book-detail', data: matchedBook, slug: bookSlug };
+    }
+
+    if (path === '/books') return { type: 'books' };
+    if (path === '/categories') return { type: 'categories' };
+    if (path === '/bulk-orders') return { type: 'bulk-orders' };
+    if (path === '/about') return { type: 'about' };
+    if (path === '/contact') return { type: 'contact' };
+    if (path === '/cart') return { type: 'cart' };
+    if (path === '/checkout') return { type: 'checkout' };
+
+    return { type: 'home' };
+  }, [currentRoute, products]);
+
+  // Set Page Title for Institutional SEO
+  useEffect(() => {
+    switch (routeView.type) {
+      case 'books':
+        document.title = 'Catalogue of Publications | JSS Granthamale, Mysuru';
+        break;
+      case 'book-detail':
+        document.title = routeView.data
+          ? `${routeView.data.title} | JSS Publications`
+          : 'Book Details | JSS Publications';
+        break;
+      case 'categories':
+        document.title = 'Publishing Folios & Series | JSS Granthamale';
+        break;
+      case 'bulk-orders':
+        document.title = 'Institutional & Library Procurement | JSS Publications';
+        break;
+      case 'about':
+        document.title = 'Heritage & History | JSS Granthamale, Mysuru';
+        break;
+      case 'contact':
+        document.title = 'Contact & Retail Counter | JSS Book House';
+        break;
+      case 'cart':
+        document.title = 'Shopping Cart | JSS Publications';
+        break;
+      case 'checkout':
+        document.title = 'Postal Dispatch & Checkout | JSS Publications';
+        break;
+      default:
+        document.title = 'JSS Publications | Jagadguru Sri Shivarathreeshwara Granthamale, Mysuru';
+    }
+  }, [routeView]);
+
+  const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', overflowX: 'hidden' }}>
-      {/* Initial Session Page Loader (Shows only on main site load once) */}
-      <PageLoader />
-
-      {/* Navigation Bar */}
+      
+      {/* Institutional Top Navbar */}
       <Navbar
-        cartCount={cartTotalCount}
-        onOpenCart={() => setIsCartOpen(true)}
-        onOpenLocation={() => {
-          const locElem = document.getElementById('store-location-section');
-          if (locElem) locElem.scrollIntoView({ behavior: 'smooth' });
-        }}
-        onOpenBulkEnquiry={() => setIsBulkEnquiryOpen(true)}
+        currentRoute={currentRoute}
+        onNavigate={navigate}
+        cartCount={totalCartCount}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
         languageMode={languageMode}
         setLanguageMode={setLanguageMode}
+        onSelectBook={(book) => setSelectedBook(book)}
+        onOpenTrackingModal={() => setIsTrackingModalOpen(true)}
       />
 
-      {/* Parallax Hero Banner */}
-      <HeroParallax
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-        languageMode={languageMode}
-      />
+      {/* Main Routed Page Content */}
+      <main style={{ flex: 1 }}>
+        {routeView.type === 'home' && (
+          <HomePage
+            products={products}
+            onNavigate={navigate}
+            onSelectBook={(book) => setSelectedBook(book)}
+            onOpenExcerpt={(book) => setSelectedBook({ ...book, initialTab: 'excerpt' })}
+            onAddToCart={handleAddToCart}
+            cart={cart}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            activeCategory={activeCategory}
+            setActiveCategory={setActiveCategory}
+            languageMode={languageMode}
+          />
+        )}
 
-      {/* Main Content Area - Fluid Full Screen Space Usage */}
-      <main className="container" style={{ flex: 1, padding: '36px 20px', width: '100%' }}>
-        {/* Mobile Filter Toggle */}
-        <div className="mobile-only" style={{ marginBottom: '16px' }}>
-          <button
-            onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-            className="btn btn-outline"
-            style={{ width: '100%', justifyContent: 'space-between' }}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <SlidersHorizontal size={18} color="#C85A17" />
-              <span>Filter Publications ({filteredProducts.length} items)</span>
-            </span>
-            <span className="badge badge-burgundy">{activeCategory}</span>
-          </button>
-        </div>
+        {routeView.type === 'books' && (
+          <CataloguePage
+            products={products}
+            onSelectBook={(book) => setSelectedBook(book)}
+            onOpenExcerpt={(book) => setSelectedBook({ ...book, initialTab: 'excerpt' })}
+            onAddToCart={handleAddToCart}
+            cart={cart}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            activeCategory={activeCategory}
+            setActiveCategory={setActiveCategory}
+            activeSeries={activeSeries}
+            setActiveSeries={setActiveSeries}
+            activeLanguage={activeLanguage}
+            setActiveLanguage={setActiveLanguage}
+            priceMax={priceMax}
+            setPriceMax={setPriceMax}
+            onResetFilters={handleResetFilters}
+          />
+        )}
 
-        {/* Collision Aware Main Grid */}
-        <div className="main-layout-grid">
-          {/* Sidebar Filter Container */}
-          <div className={`sidebar-container ${isMobileFilterOpen ? 'mobile-filter-drawer-open' : ''}`}>
-            <FilterSidebar
-              activeCategory={activeCategory}
-              setActiveCategory={(cat) => { setActiveCategory(cat); setIsMobileFilterOpen(false); }}
-              activeSeries={activeSeries}
-              setActiveSeries={(s) => { setActiveSeries(s); setIsMobileFilterOpen(false); }}
-              activeLanguage={activeLanguage}
-              setActiveLanguage={(l) => { setActiveLanguage(l); setIsMobileFilterOpen(false); }}
-              priceMax={priceMax}
-              setPriceMax={setPriceMax}
-              onResetFilters={handleResetFilters}
-            />
-          </div>
+        {routeView.type === 'book-detail' && (
+          <BookDetailPage
+            book={routeView.data}
+            allBooks={products}
+            onNavigate={navigate}
+            onAddToCart={handleAddToCart}
+            onBuyNow={(b) => {
+              handleAddToCart(b);
+              navigate('/cart');
+            }}
+            cart={cart}
+            languageMode={languageMode}
+          />
+        )}
 
-          {/* Product Grid Area */}
-          <div style={{ width: '100%' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-              <div>
-                <h2 className="text-serif" style={{ fontSize: '1.4rem', fontWeight: 700, color: '#5E1624' }}>
-                  {activeCategory === 'All Categories' ? 'All 49 Published Titles' : activeCategory}
-                </h2>
-                <span style={{ fontSize: '0.88rem', color: '#57534E' }}>
-                  Showing {filteredProducts.length} authentic books from JSS Granthamale Catalogue
-                </span>
-              </div>
+        {routeView.type === 'categories' && (
+          <CategoriesPage
+            onNavigate={navigate}
+            onSelectCategory={(catName) => {
+              setActiveCategory(catName);
+              navigate('/books');
+            }}
+          />
+        )}
 
-              {(searchQuery || activeCategory !== 'All Categories' || activeSeries !== 'All Series' || activeLanguage !== 'All Languages') && (
-                <button onClick={handleResetFilters} className="btn btn-outline btn-sm">
-                  Clear Active Filters
-                </button>
-              )}
-            </div>
+        {routeView.type === 'bulk-orders' && (
+          <BulkOrdersPage onNavigate={navigate} />
+        )}
 
-            {/* Products Grid - Collision-Aware Auto-Fill */}
-            {filteredProducts.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: '#FFFFFF', borderRadius: '10px', border: '1px solid #E7E5E4' }}>
-                <BookOpen size={48} color="#D6D3D1" style={{ marginBottom: '12px' }} />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1C1917' }}>
-                  No publications found matching your search criteria
-                </h3>
-                <p style={{ fontSize: '0.88rem', color: '#57534E', marginTop: '4px', marginBottom: '16px' }}>
-                  Try resetting filters or searching with a different term like "Basavanna" or "Yoga".
-                </p>
-                <button onClick={handleResetFilters} className="btn btn-primary btn-sm">
-                  Reset All Filters
-                </button>
-              </div>
-            ) : (
-              <div className="products-fluid-grid">
-                {filteredProducts.map((book) => (
-                  <BookCard
-                    key={book.id}
-                    book={book}
-                    onSelectBook={(b) => setSelectedBook(b)}
-                    onAddToCart={(b) => handleAddToCart(b)}
-                    isAddedToCart={cart.some((item) => item.id === book.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        {routeView.type === 'about' && (
+          <AboutPage onNavigate={navigate} />
+        )}
+
+        {routeView.type === 'contact' && (
+          <ContactPage onNavigate={navigate} />
+        )}
+
+        {routeView.type === 'cart' && (
+          <CartPage
+            cart={cart}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemoveItem={handleRemoveFromCart}
+            onNavigate={navigate}
+          />
+        )}
+
+        {routeView.type === 'checkout' && (
+          <CheckoutPage
+            cart={cart}
+            onClearCart={handleClearCart}
+            onNavigate={navigate}
+          />
+        )}
       </main>
 
-      {/* Periodicals & Annual Panchanga Section */}
-      <PeriodicalsSection
-        onAddToCart={handleAddToCart}
-        languageMode={languageMode}
-      />
-
-      {/* Physical Store Location Section */}
-      <div id="store-location-section">
-        <LocationSection />
-      </div>
-
-      {/* Footer */}
+      {/* Institutional 4-Column Footer */}
       <Footer
-        onOpenLocation={() => {
-          const locElem = document.getElementById('store-location-section');
-          if (locElem) locElem.scrollIntoView({ behavior: 'smooth' });
-        }}
-        onOpenBulkEnquiry={() => setIsBulkEnquiryOpen(true)}
-        languageMode={languageMode}
+        onNavigate={navigate}
+        onOpenLocation={() => navigate('/contact')}
+        onOpenBulkEnquiry={() => navigate('/bulk-orders')}
+        onOpenTrackingModal={() => setIsTrackingModalOpen(true)}
       />
 
-      {/* Modals & Drawers */}
+      {/* Unified Book Preview & Excerpt Modal */}
       {selectedBook && (
-        <BookDetailModal
+        <BookPreviewModal
           book={selectedBook}
           onClose={() => setSelectedBook(null)}
           onAddToCart={handleAddToCart}
-          onOpenExcerpt={(b) => setSelectedExcerptBook(b)}
+          onNavigate={navigate}
         />
       )}
 
-      {selectedExcerptBook && (
-        <SampleExcerptModal
-          book={selectedExcerptBook}
-          onClose={() => setSelectedExcerptBook(null)}
+      {/* Order Consignment Tracking Modal */}
+      {isTrackingModalOpen && (
+        <OrderTrackingModal
+          isOpen={isTrackingModalOpen}
+          onClose={() => setIsTrackingModalOpen(false)}
         />
       )}
 
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cartItems={cart}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveFromCart}
-        onProceedToCheckout={() => {
-          setIsCartOpen(false);
-          setIsCheckoutOpen(true);
-        }}
-      />
 
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        cartItems={cart}
-        onOrderSuccess={() => {
-          setCart([]);
-          setIsCheckoutOpen(false);
-        }}
-      />
-
-      <InstitutionalEnquiryModal
-        isOpen={isBulkEnquiryOpen}
-        onClose={() => setIsBulkEnquiryOpen(false)}
-      />
-
-      {/* Toast Notification Container */}
+      {/* Toast Notification Alert */}
       {toastMessage && (
         <div
+          role="status"
+          aria-live="polite"
           style={{
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            backgroundColor: '#5E1624',
+            backgroundColor: '#1E0408',
             color: '#FFFFFF',
             padding: '12px 20px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+            borderRadius: 'var(--radius-pill)',
+            boxShadow: '0 8px 24px rgba(30, 4, 8, 0.35)',
+            border: '1px solid #C59B27',
             zIndex: 9999,
-            fontSize: '0.9rem',
-            fontWeight: 500,
+            fontSize: '0.88rem',
+            fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '10px',
             animation: 'fadeIn 0.2s ease-out'
           }}
         >
-          <Sparkles size={16} color="#D97706" />
+          <CheckCircle2 size={16} color="#E5C368" />
           <span>{toastMessage}</span>
         </div>
+
       )}
+
     </div>
   );
 }

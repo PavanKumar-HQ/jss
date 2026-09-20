@@ -1,49 +1,114 @@
 import React from 'react';
-import { BookOpen, Calendar, Mail, CheckCircle } from 'lucide-react';
+import { BookOpen, Calendar, Mail, CheckCircle, Award } from 'lucide-react';
 import { mockPeriodicals } from '../data/mockData';
 
 export default function PeriodicalsSection({ onAddToCart, languageMode }) {
   return (
-    <section style={{ backgroundColor: '#F3EFE6', padding: '48px 0', borderTop: '1px solid #E7E5E4', borderBottom: '1px solid #E7E5E4' }}>
+    <section
+      id="periodicals-section"
+      style={{
+        backgroundColor: '#F3ECE0',
+        padding: '64px 0',
+        borderTop: '1px solid var(--color-border)',
+        borderBottom: '1px solid var(--color-border)',
+        position: 'relative'
+      }}
+      aria-label="JSS Periodicals and Annual Panchangas"
+    >
       <div className="container">
-        <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 36px' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#C85A17', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Periodical Subscriptions & Calendars
-          </span>
-          <h2 className="text-serif" style={{ fontSize: '1.8rem', fontWeight: 700, color: '#5E1624', marginTop: '6px' }}>
-            {languageMode === 'kn' ? 'ನಿಯತಕಾಲಿಕೆಗಳು ಹಾಗೂ ಪಂಚಾಂಗ' : 'JSS Periodicals & Annual Panchangas'}
+        {/* Section Header */}
+        <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 40px' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 12px',
+              borderRadius: 'var(--radius-full)',
+              backgroundColor: 'rgba(197, 155, 39, 0.15)',
+              border: '1px solid var(--color-gold-border)',
+              marginBottom: '12px'
+            }}
+          >
+            <Award size={13} color="#C59B27" />
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#8C6B14', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+              Annual Postal Subscriptions & Calendars
+            </span>
+          </div>
+
+          <h2
+            className="text-serif-display"
+            style={{
+              fontSize: 'clamp(1.8rem, 3.2vw, 2.4rem)',
+              fontWeight: 700,
+              color: '#2E060D',
+              lineHeight: 1.2,
+              marginBottom: '10px'
+            }}
+          >
+            {languageMode === 'kn' ? 'ನಿಯತಕಾಲಿಕೆಗಳು ಹಾಗೂ ವಾರ್ಷಿಕ ಪಂಚಾಂಗ' : 'JSS Periodicals & Sacred Almanac'}
           </h2>
-          <p style={{ fontSize: '0.92rem', color: '#57534E', marginTop: '8px' }}>
-            Subscribe to continuous cultural journals published by JSS Granthamale since 1967. Delivered directly to your postal address.
+
+          <p style={{ fontSize: '0.94rem', color: '#524944', lineHeight: 1.6 }}>
+            {languageMode === 'kn'
+              ? '೧೯೬೭ ರಿಂದ ನಿರಂತರವಾಗಿ ಪ್ರಕಟವಾಗುತ್ತಿರುವ ಜೆ.ಎಸ್.ಎಸ್ ಸಾಂಸ್ಕೃತಿಕ ಪತ್ರಿಕೆಗಳು. ಅಂಚೆ ಮೂಲಕ ನೇರವಾಗಿ ನಿಮ್ಮ ಮನೆಗೆ ತಲುಪಿಸಲಾಗುವುದು.'
+              : 'Subscribe to prestigious cultural journals published by JSS Granthamale since 1967. Delivered directly to your doorstep across India.'}
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+        {/* Periodicals Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '26px' }}>
           {mockPeriodicals.map((p) => (
-            <div key={p.id} className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div
+              key={p.id}
+              className="card-book"
+              style={{
+                padding: '24px',
+                backgroundColor: '#FFFFFF',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--color-border)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}
+            >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', gap: '8px', marginBottom: '12px' }}>
-                  <span className="badge badge-burgundy" style={{ backgroundColor: '#5E1624', color: '#FFF' }}>
+                {/* Vintage Journal Badge */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px' }}>
+                  <span className="badge badge-gold" style={{ fontSize: '0.72rem' }}>
                     {p.frequency}
                   </span>
-                  <span style={{ fontSize: '0.78rem', color: '#57534E' }}>Est. {p.foundedYear}</span>
+                  <span style={{ fontSize: '0.76rem', color: '#79706A', fontWeight: 600 }}>
+                    Est. {p.foundedYear} • ISSN: {p.issn || 'Registered'}
+                  </span>
                 </div>
 
-                <h3 className="text-serif" style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1C1917', marginBottom: '6px' }}>
+                <h3 className="text-serif-display" style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1A1615', marginBottom: '8px' }}>
                   {p.name}
                 </h3>
 
-                <p style={{ fontSize: '0.85rem', color: '#57534E', marginBottom: '16px', lineHeight: 1.5 }}>
+                <p style={{ fontSize: '0.86rem', color: '#524944', marginBottom: '20px', lineHeight: 1.55 }}>
                   {p.description}
                 </p>
               </div>
 
-              <div style={{ borderTop: '1px solid #E7E5E4', paddingTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div
+                style={{
+                  borderTop: '1px solid var(--color-border-subtle)',
+                  paddingTop: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}
+              >
                 <div>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#5E1624' }}>
+                  <span style={{ fontSize: '1.35rem', fontWeight: 800, color: '#4A0E17', fontFamily: 'var(--font-serif-display)' }}>
                     ₹{p.priceYearly}
                   </span>
-                  <span style={{ fontSize: '0.75rem', color: '#57534E', display: 'block' }}>Annual Postal Subscription</span>
+                  <span style={{ fontSize: '0.74rem', color: '#79706A', display: 'block' }}>
+                    Annual Postal Subscription
+                  </span>
                 </div>
 
                 <button
@@ -58,8 +123,10 @@ export default function PeriodicalsSection({ onAddToCart, languageMode }) {
                     })
                   }
                   className="btn btn-primary btn-sm"
+                  style={{ gap: '6px' }}
                 >
-                  Subscribe Now
+                  <Mail size={14} />
+                  <span>Subscribe</span>
                 </button>
               </div>
             </div>
