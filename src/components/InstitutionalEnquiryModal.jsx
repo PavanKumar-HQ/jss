@@ -61,7 +61,7 @@ export default function InstitutionalEnquiryModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        <div style={{ padding: '28px', backgroundColor: '#FAF7F2' }}>
+        <div style={{ padding: 'clamp(16px, 4vw, 26px)', backgroundColor: '#FAF7F2' }}>
           {!submitted ? (
             <form onSubmit={handleSubmit}>
               <p style={{ fontSize: '0.88rem', color: '#524944', lineHeight: 1.6, marginBottom: '20px' }}>
@@ -82,7 +82,7 @@ export default function InstitutionalEnquiryModal({ isOpen, onClose }) {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1A1615', marginBottom: '4px' }}>
                     Contact Person / Designation *

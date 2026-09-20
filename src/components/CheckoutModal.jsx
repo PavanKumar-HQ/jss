@@ -77,7 +77,7 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, onOrderSucce
         </div>
 
         {/* Modal Body */}
-        <div style={{ padding: '24px 28px', backgroundColor: '#FAF7F2' }}>
+        <div style={{ padding: 'clamp(16px, 4vw, 26px)', backgroundColor: '#FAF7F2' }}>
           {step === 'address' && (
             <form
               onSubmit={(e) => {
@@ -92,7 +92,7 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, onOrderSucce
                 <span style={{ fontSize: '0.78rem', color: '#79706A' }}>Step 1 of 2</span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1A1615', marginBottom: '4px' }}>
                     Full Name *
@@ -152,7 +152,7 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, onOrderSucce
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '22px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', marginBottom: '22px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1A1615', marginBottom: '4px' }}>City *</label>
                   <input

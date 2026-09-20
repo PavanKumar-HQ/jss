@@ -118,58 +118,65 @@ export default function BookPreviewModal({ book, onClose, onAddToCart, onNavigat
           style={{
             backgroundColor: '#FAF7F2',
             borderBottom: '1px solid var(--color-border)',
-            padding: '8px 24px 0',
+            padding: '8px clamp(12px, 3.5vw, 24px) 0',
             display: 'flex',
-            gap: '8px'
+            gap: '8px',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none'
           }}
         >
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
             style={{
-              padding: '10px 18px',
+              padding: '10px clamp(10px, 2.5vw, 18px)',
               border: 'none',
               borderBottom: activeTab === 'overview' ? '3px solid var(--color-maroon)' : '3px solid transparent',
               backgroundColor: 'transparent',
               color: activeTab === 'overview' ? 'var(--color-maroon)' : 'var(--color-text-muted)',
               fontWeight: activeTab === 'overview' ? 700 : 500,
-              fontSize: '0.88rem',
+              fontSize: '0.86rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
               transition: 'all var(--transition-fast)'
             }}
           >
             <BookOpen size={15} />
-            <span>Book Overview & Specifications</span>
+            <span>Overview & Specs</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('excerpt')}
             style={{
-              padding: '10px 18px',
+              padding: '10px clamp(10px, 2.5vw, 18px)',
               border: 'none',
               borderBottom: activeTab === 'excerpt' ? '3px solid var(--color-saffron)' : '3px solid transparent',
               backgroundColor: 'transparent',
               color: activeTab === 'excerpt' ? 'var(--color-saffron)' : 'var(--color-text-muted)',
               fontWeight: activeTab === 'excerpt' ? 700 : 500,
-              fontSize: '0.88rem',
+              fontSize: '0.86rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
               transition: 'all var(--transition-fast)'
             }}
           >
             <Quote size={15} />
-            <span>Read Sample Excerpt (ವಚನ ದರ್ಶನ)</span>
+            <span>Sample Excerpt (ವಚನ)</span>
           </button>
         </div>
 
         {/* Modal Scrollable Body */}
-        <div style={{ padding: '24px', overflowY: 'auto', flex: 1, backgroundColor: activeTab === 'overview' ? '#FFFFFF' : '#FAF7F2' }}>
+        <div style={{ padding: 'clamp(14px, 3.5vw, 24px)', overflowY: 'auto', flex: 1, backgroundColor: activeTab === 'overview' ? '#FFFFFF' : '#FAF7F2' }}>
           
           {/* TAB 1: BOOK OVERVIEW & PURCHASE CONTROLS */}
           {activeTab === 'overview' && (
