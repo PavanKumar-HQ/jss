@@ -28,7 +28,7 @@ const BookCard = React.memo(function BookCard({ book, onSelectBook, onAddToCart,
         onClick={() => onSelectBook && onSelectBook(book)}
         title="Click to preview volume & sacred excerpt"
       >
-        <picture>
+        <picture style={{ width: '100%', height: '100%', display: 'block' }}>
           {!imgError && book.webpImage && <source srcSet={book.webpImage} type="image/webp" />}
           {!imgError && book.localImage && <source srcSet={book.localImage} type="image/jpeg" />}
           <img
