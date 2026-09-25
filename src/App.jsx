@@ -3,56 +3,39 @@ import { BOOKS } from './data/mockData';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
-import { CheckCircle2 } from 'lucide-react';
-
-// Lazy-loaded secondary routes & heavy modals for code splitting & minimal initial bundle
-const CataloguePage = React.lazy(() => import('./pages/CataloguePage'));
-const BookDetailPage = React.lazy(() => import('./pages/BookDetailPage'));
-const CategoriesPage = React.lazy(() => import('./pages/CategoriesPage'));
-const BulkOrdersPage = React.lazy(() => import('./pages/BulkOrdersPage'));
-const AboutPage = React.lazy(() => import('./pages/AboutPage'));
-const ContactPage = React.lazy(() => import('./pages/ContactPage'));
-const CartPage = React.lazy(() => import('./pages/CartPage'));
-const CheckoutPage = React.lazy(() => import('./pages/CheckoutPage'));
-const BookPreviewModal = React.lazy(() => import('./components/BookPreviewModal'));
-const OrderTrackingModal = React.lazy(() => import('./components/OrderTrackingModal'));
+import CataloguePage from './pages/CataloguePage';
+import BookDetailPage from './pages/BookDetailPage';
+import CategoriesPage from './pages/CategoriesPage';
+import BulkOrdersPage from './pages/BulkOrdersPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import BookPreviewModal from './components/BookPreviewModal';
+import OrderTrackingModal from './components/OrderTrackingModal';
 import FlippingBookLoader from './components/FlippingBookLoader';
 import useScrollReveal from './hooks/useScrollReveal';
-
-function PageLoader() {
-  return (
-    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <FlippingBookLoader message="Loading JSS Granthamale..." subtitle="ವಚನ ಧರ್ಮ ಹಾಗೂ ಸಾಹಿತ್ಯ ದರ್ಶನ" />
-    </div>
-  );
-}
+import { CheckCircle2 } from 'lucide-react';
 
 export default function App() {
   // Activate dynamic scroll reveal globally
   useScrollReveal();
 
-  const [initialLoading, setInitialLoading] = useState(() => {
-    try {
-      return !sessionStorage.getItem('jss_session_loaded');
-    } catch {
-      return false;
-    }
-  });
+  // Loading animation only on first load and browser refresh
+  const [initialLoading, setInitialLoading] = useState(true);
   const [fadeLoader, setFadeLoader] = useState(false);
 
   useEffect(() => {
-    if (!initialLoading) return;
-    try {
-      sessionStorage.setItem('jss_session_loaded', '1');
-    } catch {}
-
     const timer = setTimeout(() => {
       setFadeLoader(true);
-      const hideTimer = setTimeout(() => setInitialLoading(false), 400);
+      const hideTimer = setTimeout(() => {
+        setInitialLoading(false);
+      }, 400);
       return () => clearTimeout(hideTimer);
     }, 850);
+
     return () => clearTimeout(timer);
-  }, [initialLoading]);
+  }, []);
 
   const [products] = useState(BOOKS);
   const [languageMode, setLanguageMode] = useState('en');
@@ -317,10 +300,9 @@ export default function App() {
         onOpenTrackingModal={handleOpenTrackingModal}
       />
 
-      {/* Main Routed Page Content with Suspense */}
+      {/* Main Routed Page Content */}
       <main style={{ flex: 1 }}>
-        <Suspense fallback={<PageLoader />}>
-          {routeView.type === 'home' && (
+        {routeView.type === 'home' && (
             <HomePage
               products={products}
               onNavigate={navigate}
@@ -411,7 +393,6 @@ export default function App() {
               onNavigate={navigate}
             />
           )}
-        </Suspense>
       </main>
 
       {/* Institutional 4-Column Footer */}
