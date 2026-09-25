@@ -4,11 +4,10 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: '0.0.0.0',
     port: 3000,
     open: true,
-    watch: {
-      ignored: ['**/books/**', '**/book-images/**', '**/*.png', '**/*.jpg', '**/*.csv', '**/*.json']
-    }
+    cors: true
   },
   build: {
     rollupOptions: {

@@ -4,11 +4,11 @@ import BookCard from '../components/BookCard';
 import FilterSidebar from '../components/FilterSidebar';
 
 export default function CataloguePage({
-  products,
+  products = [],
   onSelectBook,
   onOpenExcerpt,
   onAddToCart,
-  cart,
+  cart = [],
   searchQuery,
   setSearchQuery,
   activeCategory,
@@ -19,16 +19,17 @@ export default function CataloguePage({
   setActiveLanguage,
   priceMax,
   setPriceMax,
-  onResetFilters
+  onResetFilters,
+  onNavigate
 }) {
   const [sortBy, setSortBy] = useState('relevance');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-
+  const [visibleCount, setVisibleCount] = useState(24);
 
   // Compute filtered & sorted products
   const filteredProducts = useMemo(() => {
     let list = products.filter((p) => {
-      if (searchQuery.trim() !== '') {
+      if (searchQuery && searchQuery.trim() !== '') {
         const q = searchQuery.toLowerCase();
         const matchTitle = p.title.toLowerCase().includes(q) || (p.titleKannada && p.titleKannada.toLowerCase().includes(q));
         const matchAuthor = p.author && p.author.toLowerCase().includes(q);
@@ -58,31 +59,48 @@ export default function CataloguePage({
   }, [products, searchQuery, activeCategory, activeSeries, activeLanguage, priceMax, sortBy]);
 
   const hasActiveFilters = 
-    searchQuery.trim() !== '' ||
+    (searchQuery && searchQuery.trim() !== '') ||
     activeCategory !== 'All Categories' || 
     activeSeries !== 'All Series' || 
     activeLanguage !== 'All Languages' || 
     priceMax < 2000;
 
+  // O(1) set lookup to prevent 49x linear search on every render
+  const cartIdSet = useMemo(() => new Set(cart.map((item) => item.id)), [cart]);
+
+  const visibleBooks = filteredProducts.slice(0, visibleCount);
+
   return (
     <div className="catalogue-page-section">
       <div className="container">
-        {/* Mobile Filter Toggle Button */}
+        {/* Mobile Filter & Sort Triggers */}
         <div className="mobile-only" style={{ marginBottom: '16px' }}>
-          <button
-            onClick={() => setIsMobileFilterOpen(true)}
-            className="btn btn-outline"
-            style={{ width: '100%', justifyContent: 'space-between' }}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <SlidersHorizontal size={16} color="var(--color-maroon)" />
-              <span>Filters ({filteredProducts.length} publications)</span>
-            </span>
-            <span className="badge badge-maroon">{activeCategory}</span>
-          </button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => setIsMobileFilterOpen(true)}
+              className="btn btn-outline"
+              style={{ justifyContent: 'center', gap: '6px' }}
+            >
+              <SlidersHorizontal size={14} color="var(--color-maroon)" />
+              <span>Filters ({filteredProducts.length})</span>
+            </button>
+
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="form-select"
+              style={{ fontSize: '0.84rem', padding: '8px' }}
+            >
+              <option value="relevance">Sort: Relevance</option>
+              <option value="title-asc">Title: A–Z</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+          </div>
         </div>
 
-        {/* Mobile Filter Drawer */}
+        {/* Mobile Filter Drawer Overlay */}
         {isMobileFilterOpen && (
           <div
             style={{
@@ -108,10 +126,13 @@ export default function CataloguePage({
               onClick={(e) => e.stopPropagation()}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '10px', borderBottom: '1px solid var(--color-border)' }}>
-                <strong style={{ color: 'var(--color-maroon)', fontSize: '1rem' }}>Filters</strong>
+                <strong style={{ color: 'var(--color-maroon)', fontSize: '0.94rem', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                  Catalogue Filters
+                </strong>
                 <button
                   onClick={() => setIsMobileFilterOpen(false)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+                  aria-label="Close filters"
                 >
                   <X size={18} />
                 </button>
@@ -133,9 +154,9 @@ export default function CataloguePage({
           </div>
         )}
 
-        {/* Main Catalogue Grid Layout: Left Sidebar, Right Catalogue */}
+        {/* Main Catalogue Layout: Left Filters, Right Products */}
         <div className="catalogue-container-grid">
-          {/* Desktop Left Filter Sidebar */}
+          {/* Desktop Left Sidebar */}
           <div className="desktop-only">
             <FilterSidebar
               activeCategory={activeCategory}
@@ -151,31 +172,31 @@ export default function CataloguePage({
             />
           </div>
 
-          {/* Right Content Area */}
+          {/* Right Product Catalogue */}
           <div>
-            {/* Catalogue Header Bar */}
-            <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--color-border)' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '8px' }}>
+            {/* Header Bar */}
+            <div style={{ marginBottom: '18px', paddingBottom: '14px', borderBottom: '1px solid var(--color-border)' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
-                  <h1 className="text-serif" style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--color-maroon)' }}>
-                    {activeCategory === 'All Categories' ? 'Books' : activeCategory}
+                  <h1 className="text-serif" style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-text-charcoal)', marginBottom: '2px' }}>
+                    {activeCategory === 'All Categories' ? 'Catalogue of Publications' : activeCategory}
                   </h1>
-                  <p style={{ fontSize: '0.88rem', color: 'var(--color-text-muted)' }}>
-                    Showing {filteredProducts.length} publications from the official JSS Granthamale catalogue
+                  <p style={{ fontSize: '0.84rem', color: 'var(--color-text-muted)' }}>
+                    Showing {filteredProducts.length} of {products.length} publications in print · Jagadguru Sri Shivarathreeshwara Granthamale
                   </p>
                 </div>
 
-                {/* Sort Dropdown */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <label htmlFor="sort-select" style={{ fontSize: '0.84rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                    Sort:
+                {/* Desktop Sort Dropdown */}
+                <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label htmlFor="cat-sort-select" style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                    Sort by:
                   </label>
                   <select
-                    id="sort-select"
+                    id="cat-sort-select"
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                     className="form-select"
-                    style={{ padding: '6px 12px', fontSize: '0.84rem', width: 'auto' }}
+                    style={{ padding: '5px 10px', fontSize: '0.84rem', width: 'auto' }}
                   >
                     <option value="relevance">Relevance</option>
                     <option value="title-asc">Title: A–Z</option>
@@ -188,43 +209,44 @@ export default function CataloguePage({
 
               {/* Active Filter Chips */}
               {hasActiveFilters && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--color-text-subtle)', fontWeight: 600 }}>Active Filters:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '10px' }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--color-text-subtle)', fontWeight: 600 }}>Active Filters:</span>
 
                   {searchQuery && (
                     <span className="badge badge-maroon">
                       Search: "{searchQuery}"
-                      <X size={12} style={{ cursor: 'pointer', marginLeft: '3px' }} onClick={() => setSearchQuery('')} />
+                      <X size={11} style={{ cursor: 'pointer', marginLeft: '3px' }} onClick={() => setSearchQuery('')} />
                     </span>
                   )}
                   {activeCategory !== 'All Categories' && (
                     <span className="badge badge-maroon">
                       {activeCategory}
-                      <X size={12} style={{ cursor: 'pointer', marginLeft: '3px' }} onClick={() => setActiveCategory('All Categories')} />
+                      <X size={11} style={{ cursor: 'pointer', marginLeft: '3px' }} onClick={() => setActiveCategory('All Categories')} />
                     </span>
                   )}
                   {activeSeries !== 'All Series' && (
-                    <span className="badge badge-saffron">
+                    <span className="badge badge-gold">
                       Series: {activeSeries}
-                      <X size={12} style={{ cursor: 'pointer', marginLeft: '3px' }} onClick={() => setActiveSeries('All Series')} />
+                      <X size={11} style={{ cursor: 'pointer', marginLeft: '3px' }} onClick={() => setActiveSeries('All Series')} />
                     </span>
                   )}
                   {activeLanguage !== 'All Languages' && (
                     <span className="badge badge-neutral">
                       Language: {activeLanguage}
-                      <X size={12} style={{ cursor: 'pointer', marginLeft: '3px' }} onClick={() => setActiveLanguage('All Languages')} />
+                      <X size={11} style={{ cursor: 'pointer', marginLeft: '3px' }} onClick={() => setActiveLanguage('All Languages')} />
                     </span>
                   )}
                   {priceMax < 2000 && (
                     <span className="badge badge-neutral">
                       ≤ ₹{priceMax}
-                      <X size={12} style={{ cursor: 'pointer', marginLeft: '3px' }} onClick={() => setPriceMax(2000)} />
+                      <X size={11} style={{ cursor: 'pointer', marginLeft: '3px' }} onClick={() => setPriceMax(2000)} />
                     </span>
                   )}
 
                   <button
+                    type="button"
                     onClick={onResetFilters}
-                    style={{ background: 'none', border: 'none', color: 'var(--color-saffron)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: 'var(--color-maroon)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
                   >
                     Clear All
                   </button>
@@ -232,43 +254,57 @@ export default function CataloguePage({
               )}
             </div>
 
-            {/* Book Cards Grid or Useful Empty State */}
+            {/* Book Results Grid */}
             {filteredProducts.length === 0 ? (
               <div
                 style={{
                   textAlign: 'center',
-                  padding: '64px 20px',
+                  padding: '48px 20px',
                   backgroundColor: '#FFFFFF',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--color-border)'
                 }}
               >
-                <BookOpen size={40} color="var(--color-border-dark)" style={{ marginBottom: '12px' }} />
-                <h3 className="text-serif" style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-charcoal)', marginBottom: '6px' }}>
-                  No publications found for your search criteria
+                <BookOpen size={36} color="var(--color-text-subtle)" style={{ marginBottom: '10px' }} />
+                <h3 className="text-serif" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-charcoal)', marginBottom: '4px' }}>
+                  No publications match your criteria
                 </h3>
-                <p style={{ fontSize: '0.88rem', color: 'var(--color-text-muted)', maxWidth: '420px', margin: '0 auto 16px' }}>
-                  Try another title, author or category, or reset the active filters to browse the complete catalogue.
+                <p style={{ fontSize: '0.86rem', color: 'var(--color-text-muted)', maxWidth: '400px', margin: '0 auto 16px' }}>
+                  Try adjusting your search terms or clearing the selected filters to view all 49 publications.
                 </p>
-                <button onClick={onResetFilters} className="btn btn-primary btn-sm">
-                  Reset Filters
+                <button type="button" onClick={onResetFilters} className="btn btn-primary btn-sm">
+                  Reset All Filters
                 </button>
               </div>
             ) : (
-              <div className="books-grid">
-                {filteredProducts.map((book, idx) => (
-                  <BookCard
-                    key={book.id}
-                    book={book}
-                    staggerDelay={Math.min(idx * 35, 400)}
-                    onSelectBook={onSelectBook}
-                    onAddToCart={onAddToCart}
-                    isAddedToCart={cart.some((item) => item.id === book.id)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="books-grid">
+                  {visibleBooks.map((book) => (
+                    <BookCard
+                      key={book.id}
+                      book={book}
+                      onSelectBook={onSelectBook}
+                      onAddToCart={onAddToCart}
+                      isAddedToCart={cartIdSet.has(book.id)}
+                      onNavigate={onNavigate}
+                    />
+                  ))}
+                </div>
 
-
+                {/* Progressive Load More if not all are visible */}
+                {visibleCount < filteredProducts.length && (
+                  <div style={{ textAlign: 'center', marginTop: '36px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount((prev) => prev + 24)}
+                      className="btn btn-secondary"
+                      style={{ padding: '10px 24px' }}
+                    >
+                      Load More Publications ({filteredProducts.length - visibleCount} remaining)
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

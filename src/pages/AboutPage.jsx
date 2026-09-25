@@ -397,11 +397,11 @@ export default function AboutPage({ onNavigate }) {
                 The JSS Mahavidyapeetha Ecosystem
               </span>
             </div>
-            <h3 className="text-serif-display" style={{ fontSize: '1.45rem', fontWeight: 700, color: 'var(--color-accent-maroon)', marginBottom: '10px' }}>
-              300+ Educational Institutions Across India & Abroad
+            <h3 className="text-serif" style={{ fontSize: '1.45rem', fontWeight: 700, color: 'var(--color-maroon)', marginBottom: '10px' }}>
+              Educational & Spiritual Mission of JSS Mahavidyapeetha
             </h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.65 }}>
-              From pre-primary schools to renowned research universities, medical colleges, engineering academies, and polytechnics across Karnataka, Tamil Nadu, Uttar Pradesh, and overseas in the UAE and USA — JSS Mahavidyapeetha educates over 100,000 students annually. The Publications Division serves as the spiritual and cultural compass of this extensive educational mission.
+            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-body)', lineHeight: 1.65 }}>
+              JSS Mahavidyapeetha operates schools, collegiate institutions, and technical colleges across Karnataka and beyond. The Publications Division serves as the spiritual and cultural compass of this extensive educational mission, ensuring that scholarly editions of Indian philosophy, Vachana literature, and moral classics are preserved and made accessible.
             </p>
           </div>
 

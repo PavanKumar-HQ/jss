@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * Universal Scroll Reveal Hook
- * Supports both:
- * 1. const [ref, isRevealed] = useScrollReveal(options);
- * 2. useScrollReveal(); // observes all .reveal-on-scroll elements automatically
+ * Universal Scroll Reveal Hook with dynamic DOM mutation tracking
  */
 export function useScrollReveal(options = {}) {
   const elementRef = useRef(null);
@@ -13,6 +10,7 @@ export function useScrollReveal(options = {}) {
   useEffect(() => {
     if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
       setIsRevealed(true);
+      document.querySelectorAll('.reveal-on-scroll').forEach(el => el.classList.add('revealed'));
       return;
     }
 
@@ -30,26 +28,54 @@ export function useScrollReveal(options = {}) {
       },
       {
         root: null,
-        rootMargin: options.rootMargin || '0px 0px -40px 0px',
-        threshold: options.threshold || 0.1
+        rootMargin: options.rootMargin || '0px 0px -30px 0px',
+        threshold: options.threshold || 0.08
       }
     );
 
-    // Observe specific attached ref
-    if (elementRef.current) {
-      observer.observe(elementRef.current);
-    }
+    const observeAll = () => {
+      if (elementRef.current) {
+        observer.observe(elementRef.current);
+      }
+      const elements = document.querySelectorAll('.reveal-on-scroll:not(.revealed)');
+      elements.forEach((el) => {
+        // If already in viewport on initial load, reveal immediately
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('revealed');
+        } else {
+          observer.observe(el);
+        }
+      });
+    };
 
-    // Also observe all elements with .reveal-on-scroll class
-    const elements = document.querySelectorAll('.reveal-on-scroll:not(.revealed)');
-    elements.forEach((el) => observer.observe(el));
+    observeAll();
+
+    // Re-check when children or routes change
+    const mutationObserver = new MutationObserver(() => {
+      observeAll();
+    });
+
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    // Fail-safe: Reveal everything after 600ms so nothing can ever get stuck invisible
+    const fallbackTimer = setTimeout(() => {
+      document.querySelectorAll('.reveal-on-scroll:not(.revealed)').forEach((el) => {
+        el.classList.add('revealed');
+      });
+      setIsRevealed(true);
+    }, 600);
 
     return () => {
+      clearTimeout(fallbackTimer);
       observer.disconnect();
+      mutationObserver.disconnect();
     };
   }, [options.rootMargin, options.threshold]);
 
-  // Return iterable array so destructuring [ref, isRevealed] always succeeds
   return [elementRef, isRevealed];
 }
 

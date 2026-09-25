@@ -16,28 +16,44 @@ const CartPage = React.lazy(() => import('./pages/CartPage'));
 const CheckoutPage = React.lazy(() => import('./pages/CheckoutPage'));
 const BookPreviewModal = React.lazy(() => import('./components/BookPreviewModal'));
 const OrderTrackingModal = React.lazy(() => import('./components/OrderTrackingModal'));
+import FlippingBookLoader from './components/FlippingBookLoader';
+import useScrollReveal from './hooks/useScrollReveal';
 
 function PageLoader() {
   return (
-    <div style={{ minHeight: '50vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px' }}>
-      <div
-        style={{
-          width: '32px',
-          height: '32px',
-          border: '3px solid #E2DACB',
-          borderTopColor: '#5E1624',
-          borderRadius: '50%',
-          animation: 'spin 0.8s linear infinite'
-        }}
-      />
-      <span style={{ fontSize: '0.84rem', color: '#6B625D', letterSpacing: '0.5px' }}>
-        Loading JSS Granthamale...
-      </span>
+    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <FlippingBookLoader message="Loading JSS Granthamale..." subtitle="ವಚನ ಧರ್ಮ ಹಾಗೂ ಸಾಹಿತ್ಯ ದರ್ಶನ" />
     </div>
   );
 }
 
 export default function App() {
+  // Activate dynamic scroll reveal globally
+  useScrollReveal();
+
+  const [initialLoading, setInitialLoading] = useState(() => {
+    try {
+      return !sessionStorage.getItem('jss_session_loaded');
+    } catch {
+      return false;
+    }
+  });
+  const [fadeLoader, setFadeLoader] = useState(false);
+
+  useEffect(() => {
+    if (!initialLoading) return;
+    try {
+      sessionStorage.setItem('jss_session_loaded', '1');
+    } catch {}
+
+    const timer = setTimeout(() => {
+      setFadeLoader(true);
+      const hideTimer = setTimeout(() => setInitialLoading(false), 400);
+      return () => clearTimeout(hideTimer);
+    }, 850);
+    return () => clearTimeout(timer);
+  }, [initialLoading]);
+
   const [products] = useState(BOOKS);
   const [languageMode, setLanguageMode] = useState('en');
 
@@ -338,6 +354,7 @@ export default function App() {
               priceMax={priceMax}
               setPriceMax={setPriceMax}
               onResetFilters={handleResetFilters}
+              onNavigate={navigate}
             />
           )}
 
@@ -433,23 +450,50 @@ export default function App() {
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            backgroundColor: '#1E0408',
+            backgroundColor: 'var(--color-maroon)',
             color: '#FFFFFF',
-            padding: '12px 20px',
-            borderRadius: 'var(--radius-pill)',
-            boxShadow: '0 8px 24px rgba(30, 4, 8, 0.35)',
-            border: '1px solid #C59B27',
+            padding: '10px 18px',
+            borderRadius: 'var(--radius-xs)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+            border: '1px solid #DFBF5F',
             zIndex: 9999,
-            fontSize: '0.88rem',
+            fontSize: '0.86rem',
             fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
+            gap: '8px',
             animation: 'fadeIn 0.2s ease-out'
           }}
         >
-          <CheckCircle2 size={16} color="#E5C368" />
+          <CheckCircle2 size={16} color="#DFBF5F" />
           <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Initial Page Loading Overlay with Flipping Book Animation */}
+      {initialLoading && (
+        <div
+          className="initial-page-loader-overlay"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: '#FAF7F2',
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: fadeLoader ? 0 : 1,
+            pointerEvents: fadeLoader ? 'none' : 'auto',
+            transition: 'opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}
+        >
+          <FlippingBookLoader
+            message="Jagadguru Sri Shivarathreeshwara Granthamale"
+            subtitle="ಜ್ಞಾನವೇ ಬೆಳಕು · ಜೆಎಸ್‌ಎಸ್ ಪ್ರಕಾಶನ, ಮೈಸೂರು"
+          />
         </div>
       )}
 
