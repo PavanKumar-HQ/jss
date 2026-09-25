@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, Sparkles, Feather, Bookmark, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Sparkles, Feather } from 'lucide-react';
 
 const VACHANAS = [
   {
@@ -65,38 +65,128 @@ Having taken birth in this mortal world, one must bear both praise and blame wit
 
 export default function InteractiveVachanaFlipper({ onNavigate }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [targetIndex, setTargetIndex] = useState(0);
+  const [flipState, setFlipState] = useState('idle'); // 'idle' | 'flipping-next' | 'flipping-prev'
   const [activeMobileTab, setActiveMobileTab] = useState('kannada'); // 'kannada' | 'english'
-  const [isAnimating, setIsAnimating] = useState(false);
 
   const currentVachana = VACHANAS[currentIndex];
+  const targetVachana = VACHANAS[targetIndex];
 
   const handleNext = () => {
-    if (isAnimating) return;
-    setIsAnimating(true);
+    if (flipState !== 'idle') return;
+    const next = (currentIndex + 1) % VACHANAS.length;
+    setTargetIndex(next);
+    setFlipState('flipping-next');
+
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % VACHANAS.length);
-      setIsAnimating(false);
-    }, 280);
+      setCurrentIndex(next);
+      setFlipState('idle');
+    }, 650);
   };
 
   const handlePrev = () => {
-    if (isAnimating) return;
-    setIsAnimating(true);
+    if (flipState !== 'idle') return;
+    const prev = (currentIndex - 1 + VACHANAS.length) % VACHANAS.length;
+    setTargetIndex(prev);
+    setFlipState('flipping-prev');
+
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + VACHANAS.length) % VACHANAS.length);
-      setIsAnimating(false);
-    }, 280);
+      setCurrentIndex(prev);
+      setFlipState('idle');
+    }, 650);
   };
 
-  const handleExploreBook = () => {
+  const handleExploreBook = (bookId) => {
     if (onNavigate) {
-      if (currentVachana.bookId) {
-        onNavigate(`/books/${currentVachana.bookId}`);
+      if (bookId) {
+        onNavigate(`/books/${bookId}`);
       } else {
         onNavigate('/books');
       }
     }
   };
+
+  // Render Kannada Page Leaf
+  const renderKannadaContent = (vachana, pageNum) => (
+    <div className="leaf-inner-frame">
+      <div className="leaf-header">
+        <div className="leaf-author-tag">
+          <Feather size={14} color="var(--color-maroon)" />
+          <span className="text-kannada">{vachana.authorKannada}</span>
+        </div>
+        <span className="leaf-folio-number text-serif">ಪತ್ರ {pageNum}</span>
+      </div>
+
+      <div className="leaf-body">
+        <h3 className="leaf-title-kannada text-kannada">
+          {vachana.titleKannada}
+        </h3>
+        <span className="leaf-title-english text-serif">
+          {vachana.title}
+        </span>
+
+        <div className="kannada-verse-block text-kannada">
+          {vachana.kannada.split('\n').map((line, idx) => (
+            <p key={idx} className="verse-line">{line}</p>
+          ))}
+        </div>
+      </div>
+
+      <div className="leaf-footer">
+        <span className="leaf-source-label">
+          {vachana.sourceBook}
+        </span>
+        <span className="leaf-sacred-seal text-kannada">
+          ❖ ಶ್ರೀ ಗುರುಬಸವಲಿಂಗಾಯ ನಮಃ
+        </span>
+      </div>
+    </div>
+  );
+
+  // Render English Translation Leaf
+  const renderEnglishContent = (vachana, folioNum) => (
+    <div className="leaf-inner-frame">
+      <div className="leaf-header">
+        <div className="leaf-author-tag">
+          <BookOpen size={14} color="var(--color-maroon)" />
+          <span>{vachana.author}</span>
+        </div>
+        <span className="leaf-folio-number text-serif">Folio {folioNum}</span>
+      </div>
+
+      <div className="leaf-body">
+        <div className="english-translation-block">
+          {vachana.translation.split('\n').map((line, idx) => (
+            <p key={idx} className="translation-line">{line}</p>
+          ))}
+        </div>
+
+        <div className="scholarly-note-box">
+          <strong className="scholarly-note-heading">
+            Critical Edition · JSS Granthamale
+          </strong>
+          <p className="scholarly-note-text">
+            {vachana.commentary}
+          </p>
+        </div>
+      </div>
+
+      <div className="leaf-footer leaf-footer-right">
+        <span className="gst-badge-inline">
+          0% GST · In Print
+        </span>
+
+        <button
+          type="button"
+          onClick={() => handleExploreBook(vachana.bookId)}
+          className="btn btn-outline btn-sm leaf-action-btn"
+        >
+          <span>View Edition in Bookstore</span>
+          <ArrowRight size={13} />
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <section className="vachana-flipper-section reveal-on-scroll" aria-label="Sacred Vachana Treasury">
@@ -117,11 +207,11 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
           </p>
 
           <p className="vachana-section-desc">
-            Authentic 12th-century verses critically edited from palm-leaf manuscripts preserved at Sri Suttur Math archives.
+            Turn the parchment leaves to explore authentic 12th-century verses critically edited from palm-leaf manuscripts.
           </p>
         </div>
 
-        {/* Mobile Tab Switcher: Kannada / English */}
+        {/* Mobile Tab Switcher */}
         <div className="vachana-mobile-tabs" role="tablist">
           <button
             type="button"
@@ -146,113 +236,84 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
           </button>
         </div>
 
-        {/* Manuscript Stage Container */}
+        {/* 3D Real Book Stage */}
         <div className="manuscript-stage">
-          <div className={`manuscript-book-frame ${isAnimating ? 'animating-page' : ''}`}>
-            {/* LEFT LEAF: Kannada Script Original */}
-            <div className={`manuscript-leaf manuscript-leaf-left ${activeMobileTab === 'kannada' ? 'mobile-show' : 'mobile-hide'}`}>
-              <div className="leaf-inner-frame">
-                {/* Header */}
-                <div className="leaf-header">
-                  <div className="leaf-author-tag">
-                    <Feather size={14} color="var(--color-maroon)" />
-                    <span className="text-kannada">{currentVachana.authorKannada}</span>
-                  </div>
-                  <span className="leaf-folio-number text-serif">ಪತ್ರ {currentIndex + 1}</span>
-                </div>
-
-                {/* Body Content */}
-                <div className="leaf-body">
-                  <h3 className="leaf-title-kannada text-kannada">
-                    {currentVachana.titleKannada}
-                  </h3>
-                  <span className="leaf-title-english text-serif">
-                    {currentVachana.title}
-                  </span>
-
-                  <div className="kannada-verse-block text-kannada">
-                    {currentVachana.kannada.split('\n').map((line, idx) => (
-                      <p key={idx} className="verse-line">{line}</p>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="leaf-footer">
-                  <span className="leaf-source-label">
-                    {currentVachana.sourceBook}
-                  </span>
-                  <span className="leaf-sacred-seal text-kannada">
-                    ❖ ಶ್ರೀ ಗುರುಬಸವಲಿಂಗಾಯ ನಮಃ
-                  </span>
-                </div>
-              </div>
+          {/* Desktop Real 3D Book Frame */}
+          <div className={`manuscript-book-frame ${flipState}`}>
+            {/* Base Left Page (Underneath) */}
+            <div className="manuscript-leaf manuscript-leaf-left base-left">
+              {renderKannadaContent(
+                flipState === 'flipping-next' ? currentVachana : targetVachana,
+                (flipState === 'flipping-next' ? currentIndex : targetIndex) + 1
+              )}
             </div>
 
-            {/* Book Spine Crease Divider (Desktop Only) */}
+            {/* Book Spine Crease Divider */}
             <div className="manuscript-center-crease" aria-hidden="true" />
 
-            {/* RIGHT LEAF: English Translation & Publishing Commentary */}
-            <div className={`manuscript-leaf manuscript-leaf-right ${activeMobileTab === 'english' ? 'mobile-show' : 'mobile-hide'}`}>
-              <div className="leaf-inner-frame">
-                {/* Header */}
-                <div className="leaf-header">
-                  <div className="leaf-author-tag">
-                    <BookOpen size={14} color="var(--color-maroon)" />
-                    <span>{currentVachana.author}</span>
-                  </div>
-                  <span className="leaf-folio-number text-serif">Folio {currentIndex + 1}</span>
+            {/* Base Right Page (Underneath) */}
+            <div className="manuscript-leaf manuscript-leaf-right base-right">
+              {renderEnglishContent(
+                flipState === 'flipping-prev' ? currentVachana : targetVachana,
+                (flipState === 'flipping-prev' ? currentIndex : targetIndex) + 1
+              )}
+            </div>
+
+            {/* 3D Flipping Leaf (NEXT Turn: Peels from Right to Left) */}
+            {flipState === 'flipping-next' && (
+              <div className="flipper-leaf flip-next-leaf">
+                {/* Front of flipping leaf (Current English page turning away) */}
+                <div className="flipper-face flipper-face-front">
+                  {renderEnglishContent(currentVachana, currentIndex + 1)}
+                  <div className="flipper-shadow flipper-shadow-front" />
                 </div>
 
-                {/* Body Content */}
-                <div className="leaf-body">
-                  <div className="english-translation-block">
-                    {currentVachana.translation.split('\n').map((line, idx) => (
-                      <p key={idx} className="translation-line">{line}</p>
-                    ))}
-                  </div>
-
-                  {/* Scholarly Commentary Box */}
-                  <div className="scholarly-note-box">
-                    <strong className="scholarly-note-heading">
-                      Critical Edition · JSS Granthamale
-                    </strong>
-                    <p className="scholarly-note-text">
-                      {currentVachana.commentary}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Footer Action */}
-                <div className="leaf-footer leaf-footer-right">
-                  <span className="gst-badge-inline">
-                    0% GST · In Print
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={handleExploreBook}
-                    className="btn btn-outline btn-sm leaf-action-btn"
-                  >
-                    <span>View Edition in Bookstore</span>
-                    <ArrowRight size={13} />
-                  </button>
+                {/* Back of flipping leaf (Next Kannada page landing on left) */}
+                <div className="flipper-face flipper-face-back">
+                  {renderKannadaContent(targetVachana, targetIndex + 1)}
+                  <div className="flipper-shadow flipper-shadow-back" />
                 </div>
               </div>
+            )}
+
+            {/* 3D Flipping Leaf (PREV Turn: Peels from Left to Right) */}
+            {flipState === 'flipping-prev' && (
+              <div className="flipper-leaf flip-prev-leaf">
+                {/* Front of flipping leaf (Current Kannada page turning away) */}
+                <div className="flipper-face flipper-face-front">
+                  {renderKannadaContent(currentVachana, currentIndex + 1)}
+                  <div className="flipper-shadow flipper-shadow-front" />
+                </div>
+
+                {/* Back of flipping leaf (Target English page landing on right) */}
+                <div className="flipper-face flipper-face-back">
+                  {renderEnglishContent(targetVachana, targetIndex + 1)}
+                  <div className="flipper-shadow flipper-shadow-back" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Single Leaf View */}
+          <div className="manuscript-mobile-card">
+            <div className={`mobile-leaf-container ${flipState !== 'idle' ? 'mobile-flipping' : ''}`}>
+              {activeMobileTab === 'kannada'
+                ? renderKannadaContent(currentVachana, currentIndex + 1)
+                : renderEnglishContent(currentVachana, currentIndex + 1)}
             </div>
           </div>
 
-          {/* Clean Interactive Controls */}
+          {/* Navigation Controls */}
           <div className="manuscript-controls-row">
             <button
               type="button"
               onClick={handlePrev}
-              disabled={isAnimating}
+              disabled={flipState !== 'idle'}
               className="btn btn-secondary btn-sm manuscript-nav-btn"
-              title="Previous Verse"
+              title="Turn to Previous Leaf"
             >
               <ArrowLeft size={15} />
-              <span>Previous Verse (ಹಿಂದಿನ ಪತ್ರ)</span>
+              <span>Previous Page (ಹಿಂದಿನ ಪತ್ರ)</span>
             </button>
 
             {/* Pagination Dots */}
@@ -265,10 +326,26 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
                   <button
                     key={v.id}
                     type="button"
-                    aria-label={`Jump to ${v.title}`}
+                    aria-label={`Go to verse ${i + 1}`}
                     className={`manuscript-dot-btn ${i === currentIndex ? 'active' : ''}`}
                     onClick={() => {
-                      if (!isAnimating) setCurrentIndex(i);
+                      if (flipState === 'idle' && i !== currentIndex) {
+                        if (i > currentIndex) {
+                          setTargetIndex(i);
+                          setFlipState('flipping-next');
+                          setTimeout(() => {
+                            setCurrentIndex(i);
+                            setFlipState('idle');
+                          }, 650);
+                        } else {
+                          setTargetIndex(i);
+                          setFlipState('flipping-prev');
+                          setTimeout(() => {
+                            setCurrentIndex(i);
+                            setFlipState('idle');
+                          }, 650);
+                        }
+                      }
                     }}
                   />
                 ))}
@@ -278,11 +355,11 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
             <button
               type="button"
               onClick={handleNext}
-              disabled={isAnimating}
+              disabled={flipState !== 'idle'}
               className="btn btn-primary btn-sm manuscript-nav-btn"
-              title="Next Verse"
+              title="Turn to Next Leaf"
             >
-              <span>Next Verse (ಮುಂದಿನ ಪತ್ರ)</span>
+              <span>Next Page (ಮುಂದಿನ ಪತ್ರ)</span>
               <ArrowRight size={15} />
             </button>
           </div>

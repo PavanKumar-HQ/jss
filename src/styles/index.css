@@ -2082,6 +2082,7 @@ html {
 .manuscript-stage {
   max-width: 960px;
   margin: 0 auto;
+  perspective: 1800px;
 }
 
 .manuscript-book-frame {
@@ -2090,18 +2091,12 @@ html {
   background-color: #FAF7F2;
   border: 1.5px solid #D9CEBE;
   border-radius: 10px;
-  box-shadow: 0 20px 48px rgba(66, 13, 24, 0.12),
-              0 4px 12px rgba(0, 0, 0, 0.04),
-              inset 0 0 30px rgba(197, 155, 39, 0.05);
+  box-shadow: 0 24px 56px rgba(66, 13, 24, 0.14),
+              0 6px 16px rgba(0, 0, 0, 0.04),
+              inset 0 0 35px rgba(197, 155, 39, 0.05);
   position: relative;
-  overflow: hidden;
-  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.manuscript-book-frame.animating-page {
-  opacity: 0.4;
-  transform: scale(0.995);
+  min-height: 400px;
+  transform-style: preserve-3d;
 }
 
 .manuscript-center-crease {
@@ -2119,7 +2114,7 @@ html {
     rgba(0, 0, 0, 0.08) 100%
   );
   pointer-events: none;
-  z-index: 4;
+  z-index: 5;
 }
 
 /* Individual Manuscript Leaves */
@@ -2283,22 +2278,125 @@ html {
   gap: 4px;
 }
 
-/* Mobile Adaptive Display */
+/* ==========================================================================
+   GENUINE 3D FLIPPING LEAF (PHYSICAL TURNING LEAF SIMULATION)
+   ========================================================================== */
+.flipper-leaf {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  transform-style: preserve-3d;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.flip-next-leaf {
+  left: 50%;
+  transform-origin: left center;
+  animation: pageTurnNext 0.65s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+}
+
+.flip-prev-leaf {
+  left: 0;
+  transform-origin: right center;
+  animation: pageTurnPrev 0.65s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+}
+
+@keyframes pageTurnNext {
+  0% {
+    transform: rotateY(0deg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    transform: rotateY(-90deg) scale(0.97);
+    box-shadow: -18px 12px 32px rgba(66, 13, 24, 0.25);
+  }
+  100% {
+    transform: rotateY(-180deg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+@keyframes pageTurnPrev {
+  0% {
+    transform: rotateY(0deg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    transform: rotateY(90deg) scale(0.97);
+    box-shadow: 18px 12px 32px rgba(66, 13, 24, 0.25);
+  }
+  100% {
+    transform: rotateY(180deg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.flipper-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background-color: #FAF7F2;
+  overflow: hidden;
+}
+
+.flipper-face-front {
+  transform: rotateY(0deg);
+  background: linear-gradient(225deg, #FAF7F2 0%, #F5EFE6 100%);
+  border-left: 1px solid #E8DFCF;
+}
+
+.flipper-face-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, #FAF7F2 0%, #F5EFE6 100%);
+  border-right: 1px solid #E8DFCF;
+}
+
+.flipper-shadow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.flipper-shadow-front {
+  background: linear-gradient(to right, rgba(66, 13, 24, 0.2) 0%, transparent 45%);
+}
+
+.flipper-shadow-back {
+  background: linear-gradient(to left, rgba(66, 13, 24, 0.2) 0%, transparent 45%);
+}
+
+/* Mobile Display Card */
+.manuscript-mobile-card {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .manuscript-book-frame {
-    grid-template-columns: 1fr;
-  }
-  .manuscript-center-crease {
     display: none;
   }
-  .manuscript-leaf.mobile-hide {
-    display: none;
+  .manuscript-mobile-card {
+    display: block;
+    background-color: #FAF7F2;
+    border: 1.5px solid #D9CEBE;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(66, 13, 24, 0.1);
+    overflow: hidden;
   }
-  .manuscript-leaf.mobile-show {
-    display: flex;
+  .mobile-leaf-container {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
   }
-  .manuscript-leaf-left {
-    border-right: none;
+  .mobile-leaf-container.mobile-flipping {
+    transform: scale(0.98) rotateY(-10deg);
+    opacity: 0.5;
   }
 }
 
