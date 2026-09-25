@@ -61,16 +61,8 @@ export function useScrollReveal(options = {}) {
       subtree: true
     });
 
-    // Fail-safe: Reveal everything after 600ms so nothing can ever get stuck invisible
-    const fallbackTimer = setTimeout(() => {
-      document.querySelectorAll('.reveal-on-scroll:not(.revealed)').forEach((el) => {
-        el.classList.add('revealed');
-      });
-      setIsRevealed(true);
-    }, 600);
-
+    // Clean observer disconnect on unmount
     return () => {
-      clearTimeout(fallbackTimer);
       observer.disconnect();
       mutationObserver.disconnect();
     };

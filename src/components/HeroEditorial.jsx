@@ -4,19 +4,6 @@ import jssLogo from '../assets/jss-logo.webp';
 
 const SHOWCASE_BOOKS = [
   {
-    id: 1,
-    slug: 'shivapada-ratnakosha',
-    title: 'Shivapada Ratnakosha',
-    titleKannada: 'ಶಿವಪದ ರತ್ನಕೋಶ',
-    author: 'HH Sri Shivarathri Deshikendra Mahaswamiji',
-    category: 'Veerashaiva Philosophy',
-    price: 1000,
-    binding: 'Deluxe Hardbound',
-    pages: 896,
-    badge: 'Monumental Work',
-    webpImage: '/shivapada-ratnakosha/cover.webp'
-  },
-  {
     id: 3,
     slug: 'patanjali-yoga-sutras',
     title: 'Patanjali Yoga Sutras',
@@ -27,7 +14,22 @@ const SHOWCASE_BOOKS = [
     binding: 'Paperback',
     pages: 412,
     badge: 'Bestseller',
+    shortDescription: 'Definitive translation and critical commentary on classical aphorisms of Yoga with word-by-word Sanskrit analysis.',
     webpImage: '/patanjali-yoga-sutras/cover.webp'
+  },
+  {
+    id: 1,
+    slug: 'shivapada-ratnakosha',
+    title: 'Shivapada Ratnakosha',
+    titleKannada: 'ಶಿವಪದ ರತ್ನಕೋಶ',
+    author: 'HH Sri Shivarathri Deshikendra Mahaswamiji',
+    category: 'Veerashaiva Philosophy',
+    price: 1000,
+    binding: 'Hardbound Deluxe',
+    pages: 896,
+    badge: 'Monumental Work',
+    shortDescription: 'Monumental encyclopedic lexicon of Veerashaiva-Lingayat religious terminologies, Shaiva Agamas, and Vachana traditions.',
+    webpImage: '/shivapada-ratnakosha/cover.webp'
   },
   {
     id: 7,
@@ -40,6 +42,7 @@ const SHOWCASE_BOOKS = [
     binding: 'Paperback',
     pages: 360,
     badge: 'Canonical Text',
+    shortDescription: 'Anthology of quintessential 12th-century Sharana verses critically edited with authentic palm-leaf readings.',
     webpImage: '/sharanara-vachanagalu/cover.webp'
   }
 ];
@@ -50,188 +53,234 @@ export default function HeroEditorial({
   onAddToCart,
   cart = []
 }) {
-  const [addingId, setAddingId] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isAdding, setIsAdding] = useState(false);
 
-  const handleAdd = (e, book) => {
+  const activeBook = SHOWCASE_BOOKS[activeIndex];
+  const isAdded = cart.some(item => item.id === activeBook.id);
+
+  const handleAdd = (e) => {
     e.stopPropagation();
-    if (addingId) return;
-    setAddingId(book.id);
-    if (onAddToCart) onAddToCart(book);
-    setTimeout(() => setAddingId(null), 600);
+    if (isAdding) return;
+    setIsAdding(true);
+    if (onAddToCart) onAddToCart(activeBook);
+    setTimeout(() => setIsAdding(false), 600);
   };
 
-  const handleOpenBook = (book) => {
+  const handleOpenProduct = () => {
     if (onNavigate) {
-      onNavigate(`/books/${book.slug || book.id}`);
+      onNavigate(`/books/${activeBook.slug || activeBook.id}`);
     }
   };
 
   return (
-    <section className="minimalist-hero" aria-label="JSS Publications Introduction">
-      {/* Subtle Gold Heritage Accent Trim */}
+    <section className="editorial-hero" aria-label="JSS Publications Introduction">
+      {/* Subtle Gold Accent Trim */}
       <div className="hero-gold-top-trim" aria-hidden="true" />
 
       <div className="container">
-        {/* TOP: Grand Institutional Masthead */}
-        <div className="hero-masthead">
-          <div className="hero-publisher-brand">
-            <img
-              src={jssLogo}
-              alt="JSS Publications Emblem"
-              className="hero-brand-logo"
-            />
-            <div className="hero-brand-details">
-              <span className="hero-brand-kicker">
-                JSS Mahavidyapeetha · Mysuru · Estd. 1954
-              </span>
-              <span className="hero-brand-title">
-                JAGADGURU SRI SHIVARATHREESHWARA GRANTHAMALE
-              </span>
+        <div className="editorial-hero-grid">
+          {/* LEFT: Institutional Authority, Headline, Actions & Trust */}
+          <div className="hero-editorial-left">
+            {/* Publisher Brand Pill */}
+            <div className="hero-publisher-brand">
+              <img
+                src={jssLogo}
+                alt="JSS Publications Emblem"
+                className="hero-brand-logo"
+              />
+              <div className="hero-brand-details">
+                <span className="hero-brand-kicker">
+                  JSS Mahavidyapeetha · Mysuru · Estd. 1954
+                </span>
+                <span className="hero-brand-title">
+                  JAGADGURU SRI SHIVARATHREESHWARA GRANTHAMALE
+                </span>
+              </div>
+            </div>
+
+            {/* Regal Editorial Headline */}
+            <h1 className="hero-grand-title text-serif">
+              Sacred Vachana Literature, Agamas & Indian Philosophy
+            </h1>
+
+            {/* Kannada Sacred Subtitle */}
+            <p className="hero-kannada-subtitle text-kannada">
+              ವಚನ ಸಾಹಿತ್ಯ, ಶೈವಾಗಮ, ಭಾರತೀಯ ತತ್ವಶಾಸ್ತ್ರ ಹಾಗೂ ಜ್ಞಾನ ಪರಂಪರೆಯ ಅಧಿಕೃತ ಉದ್ಗ್ರಂಥಗಳು
+            </p>
+
+            {/* Factual Concise Description */}
+            <p className="hero-lead-narrative">
+              Preserving centuries of sacred palm-leaf manuscripts and publishing authoritative scholarly works, translations, and commentaries at non-profit subsidized prices for readers worldwide.
+            </p>
+
+            {/* Primary Navigation Actions */}
+            <div className="hero-action-buttons">
+              <button
+                type="button"
+                onClick={() => onNavigate && onNavigate('/books')}
+                className="btn btn-primary hero-btn-main"
+              >
+                <span>Explore Full Catalogue (49)</span>
+                <ArrowRight size={15} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate && onNavigate('/categories')}
+                className="btn btn-outline hero-btn-sub"
+              >
+                <span>Browse Categories</span>
+              </button>
+            </div>
+
+            {/* Institutional Trust Highlights */}
+            <div className="hero-trust-bar">
+              <div className="hero-trust-point">
+                <Award size={15} color="var(--color-maroon)" />
+                <span>Subsidized Non-Profit Editions</span>
+              </div>
+              <span className="hero-trust-sep" aria-hidden="true">·</span>
+              <div className="hero-trust-point">
+                <ShieldCheck size={15} color="var(--color-maroon)" />
+                <span>0% GST (Govt. Exempt)</span>
+              </div>
+              <span className="hero-trust-sep" aria-hidden="true">·</span>
+              <div className="hero-trust-point">
+                <Truck size={15} color="var(--color-maroon)" />
+                <span>India Post Direct Dispatch</span>
+              </div>
             </div>
           </div>
 
-          <h1 className="hero-grand-title text-serif">
-            Sacred Vachana Literature, Agamas & Indian Philosophy
-          </h1>
+          {/* RIGHT: Featured Book Showcase (Like Earlier, with Clean Modern Styling) */}
+          <div className="hero-editorial-right">
+            <div className="hero-book-showcase-card">
+              {/* Card Header with Volume / Edition Switchers */}
+              <div className="hero-book-card-header">
+                <div className="hero-book-badge-wrap">
+                  <span className="hero-book-kicker">FEATURED PUBLICATION</span>
+                  <span className="hero-book-badge">{activeBook.badge}</span>
+                </div>
 
-          <p className="hero-kannada-subtitle text-kannada">
-            ವಚನ ಸಾಹಿತ್ಯ, ಶೈವಾಗಮ, ಭಾರತೀಯ ತತ್ವಶಾಸ್ತ್ರ ಹಾಗೂ ಜ್ಞಾನ ಪರಂಪರೆಯ ಅಧಿಕೃತ ಉದ್ಗ್ರಂಥಗಳು
-          </p>
+                <div className="hero-book-selectors" role="tablist" aria-label="Select Featured Book">
+                  {SHOWCASE_BOOKS.map((b, i) => (
+                    <button
+                      key={b.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={i === activeIndex}
+                      onClick={() => setActiveIndex(i)}
+                      className={`hero-book-tab ${i === activeIndex ? 'active' : ''}`}
+                      title={b.title}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <p className="hero-lead-narrative">
-            Preserving centuries of sacred palm-leaf manuscripts and publishing authoritative scholarly works, translations, and commentaries at non-profit subsidized prices for readers worldwide.
-          </p>
-
-          {/* Action CTAs */}
-          <div className="hero-action-buttons">
-            <button
-              type="button"
-              onClick={() => onNavigate && onNavigate('/books')}
-              className="btn btn-primary hero-btn-main"
-            >
-              <span>Explore Complete Catalogue (49 Books)</span>
-              <ArrowRight size={16} />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onNavigate && onNavigate('/categories')}
-              className="btn btn-outline hero-btn-sub"
-            >
-              <span>Browse by Subject</span>
-            </button>
-          </div>
-
-          {/* Institutional Trust Badges */}
-          <div className="hero-trust-bar">
-            <div className="hero-trust-point">
-              <Award size={15} color="var(--color-maroon)" />
-              <span>Subsidized Non-Profit Editions</span>
-            </div>
-            <span className="hero-trust-sep" aria-hidden="true">·</span>
-            <div className="hero-trust-point">
-              <ShieldCheck size={15} color="var(--color-maroon)" />
-              <span>0% GST Exempt (HSN 4901)</span>
-            </div>
-            <span className="hero-trust-sep" aria-hidden="true">·</span>
-            <div className="hero-trust-point">
-              <Truck size={15} color="var(--color-maroon)" />
-              <span>Direct India Post Dispatch from Mysuru</span>
-            </div>
-          </div>
-        </div>
-
-        {/* BOTTOM: Uncluttered 3-Book Showcase Shelf */}
-        <div className="hero-showcase-section">
-          <div className="hero-shelf-header">
-            <span className="hero-shelf-label">FEATURED CANONICAL EDITIONS</span>
-            <span className="hero-shelf-desc">Available for immediate postal dispatch across India</span>
-          </div>
-
-          <div className="hero-shelf-grid">
-            {SHOWCASE_BOOKS.map((book) => {
-              const isAdded = cart.some(item => item.id === book.id);
-              const isCurrentlyAdding = addingId === book.id;
-
-              return (
+              {/* Book Presentation: Square Cover Canvas + Meta */}
+              <div className="hero-book-body">
+                {/* Book Cover Frame (Square-Oriented) */}
                 <div
-                  key={book.id}
-                  className="hero-shelf-card"
-                  onClick={() => handleOpenBook(book)}
+                  className="hero-book-cover-frame"
+                  onClick={handleOpenProduct}
+                  title={`View details for ${activeBook.title}`}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleOpenBook(book); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleOpenProduct(); }}
                 >
-                  {/* Book Cover Stage */}
-                  <div className="hero-shelf-cover-box">
-                    <span className="hero-shelf-badge">{book.badge}</span>
-                    <img
-                      src={book.webpImage}
-                      alt={`Cover of ${book.title}`}
-                      className="hero-shelf-img"
-                      loading="eager"
-                    />
-                    <div className="hero-shelf-overlay">
-                      <BookOpen size={14} />
-                      <span>View Details</span>
-                    </div>
-                  </div>
-
-                  {/* Book Metadata & Pricing */}
-                  <div className="hero-shelf-info">
-                    <span className="hero-shelf-category">{book.category}</span>
-                    <h3 className="hero-shelf-title text-serif">{book.title}</h3>
-                    <span className="hero-shelf-kannada text-kannada">{book.titleKannada}</span>
-                    <span className="hero-shelf-author">{book.author}</span>
-
-                    <div className="hero-shelf-meta-row">
-                      <div className="hero-shelf-price-wrap">
-                        <span className="hero-shelf-price">₹{book.price}</span>
-                        <span className="hero-shelf-gst">0% GST</span>
-                      </div>
-                      <span className="hero-shelf-binding">{book.binding}</span>
-                    </div>
-
-                    {/* Action Row */}
-                    <div className="hero-shelf-actions">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onInspectBook) onInspectBook(book);
-                        }}
-                        className="btn btn-outline btn-sm hero-shelf-btn-preview"
-                        title="Read excerpt"
-                      >
-                        <BookOpen size={13} color="var(--color-maroon)" />
-                        <span>Excerpt</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={(e) => handleAdd(e, book)}
-                        className={`btn btn-sm hero-shelf-btn-add ${isAdded ? 'btn-secondary' : 'btn-primary'}`}
-                        disabled={isCurrentlyAdding}
-                      >
-                        {isCurrentlyAdding ? (
-                          <span>Adding...</span>
-                        ) : isAdded ? (
-                          <>
-                            <Check size={13} color="var(--color-green)" />
-                            <span>In Cart</span>
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingBag size={13} />
-                            <span>Add</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
+                  <img
+                    src={activeBook.webpImage}
+                    alt={`Cover of ${activeBook.title}`}
+                    loading="eager"
+                    className="hero-book-cover-img"
+                  />
+                  <div className="hero-book-hover-tag">
+                    <BookOpen size={12} />
+                    <span>View Book</span>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Book Details */}
+                <div className="hero-book-info">
+                  <span className="hero-book-category">
+                    {activeBook.category}
+                  </span>
+
+                  <h2
+                    className="hero-book-title text-serif"
+                    onClick={handleOpenProduct}
+                    title={activeBook.title}
+                  >
+                    {activeBook.title}
+                  </h2>
+
+                  <span className="hero-book-kannada text-kannada">
+                    {activeBook.titleKannada}
+                  </span>
+
+                  <p className="hero-book-author">
+                    <strong>Author:</strong> {activeBook.author}
+                  </p>
+
+                  <p className="hero-book-desc">
+                    {activeBook.shortDescription}
+                  </p>
+
+                  {/* Pricing & GST Meta */}
+                  <div className="hero-book-pricing">
+                    <span className="hero-book-price">
+                      ₹{activeBook.price}
+                    </span>
+                    <span className="hero-book-gst">
+                      0% GST (Exempt)
+                    </span>
+                    <span className="hero-book-pages">
+                      · {activeBook.binding} · {activeBook.pages} pp
+                    </span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="hero-book-actions">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onInspectBook) onInspectBook(activeBook);
+                      }}
+                      className="btn btn-outline btn-sm hero-book-btn-preview"
+                      title="Read preview and sample excerpt"
+                    >
+                      <BookOpen size={13} color="var(--color-maroon)" />
+                      <span>Preview</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleAdd}
+                      className={`btn btn-sm hero-book-btn-add ${isAdded ? 'btn-secondary' : 'btn-primary'}`}
+                      disabled={isAdding}
+                    >
+                      {isAdding ? (
+                        <span>Adding...</span>
+                      ) : isAdded ? (
+                        <>
+                          <Check size={13} color="var(--color-green)" />
+                          <span>In Cart</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag size={13} />
+                          <span>Add to Cart</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, Sparkles, Feather } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Feather } from 'lucide-react';
 
 const VACHANAS = [
   {
@@ -194,7 +194,6 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
         {/* Section Header */}
         <div className="vachana-section-header">
           <div className="vachana-eyebrow-chip">
-            <Sparkles size={14} color="#C59B27" />
             <span>Sacred Vachana Treasury · ಶರಣರ ಅಮೃತವಾಣಿ</span>
           </div>
 

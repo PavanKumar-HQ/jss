@@ -6,7 +6,6 @@ import {
   ShieldCheck,
   BookMarked,
   Library,
-  Sparkles,
   Scroll,
   Landmark,
   Flame,
@@ -138,7 +137,6 @@ export default function HomePage({
           <div className="section-header-row">
             <div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                <Sparkles size={13} color="#C59B27" />
                 <span className="section-eyebrow">
                   Bookstore Highlights · ಮೈಸೂರು ಪುಸ್ತಕ ಭಂಡಾರ
                 </span>
