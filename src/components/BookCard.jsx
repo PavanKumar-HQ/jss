@@ -134,7 +134,8 @@ function BookCard({
               title="Quick preview & excerpt"
             >
               <BookOpen size={13} color="var(--color-maroon)" />
-              <span>Preview</span>
+              <span className="btn-text-full">Preview</span>
+              <span className="btn-text-short">View</span>
             </button>
 
             <button

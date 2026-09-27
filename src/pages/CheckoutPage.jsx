@@ -263,7 +263,7 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
 
       <div className="container">
         <form onSubmit={handlePlaceOrder}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px', alignItems: 'start' }}>
+          <div className="two-col-responsive-grid">
             
             {/* Left: Postal Details & Payment Preference */}
             <div style={{ flex: '1 1 65%' }}>
@@ -274,7 +274,7 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                   backgroundColor: 'var(--color-bg-surface)',
                   border: '1px solid var(--color-border-subtle)',
                   borderRadius: 'var(--radius-md)',
-                  padding: '28px',
+                  padding: 'clamp(18px, 3vw, 28px)',
                   marginBottom: '24px'
                 }}
               >
@@ -285,7 +285,7 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                   </h2>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+                <div className="form-row-2col">
                   <div>
                     <label htmlFor="fullName" style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '6px' }}>
                       Recipient Full Name *
@@ -295,6 +295,7 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                       name="fullName"
                       type="text"
                       required
+                      autoComplete="name"
                       value={formData.fullName}
                       onChange={handleChange}
                       placeholder="e.g., S. N. Mahadevaswamy"
@@ -318,6 +319,8 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                       id="phone"
                       name="phone"
                       type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
                       required
                       value={formData.phone}
                       onChange={handleChange}
@@ -343,6 +346,8 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                     id="email"
                     name="email"
                     type="email"
+                    inputMode="email"
+                    autoComplete="email"
                     required
                     value={formData.email}
                     onChange={handleChange}
@@ -367,6 +372,7 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                     id="streetAddress"
                     name="streetAddress"
                     type="text"
+                    autoComplete="street-address"
                     required
                     value={formData.streetAddress}
                     onChange={handleChange}
@@ -383,7 +389,7 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div className="form-row-3col">
                   <div>
                     <label htmlFor="city" style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '6px' }}>
                       City / Town *
@@ -392,6 +398,7 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                       id="city"
                       name="city"
                       type="text"
+                      autoComplete="address-level2"
                       required
                       value={formData.city}
                       onChange={handleChange}
@@ -416,6 +423,7 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                       id="state"
                       name="state"
                       type="text"
+                      autoComplete="address-level1"
                       required
                       value={formData.state}
                       onChange={handleChange}
@@ -440,6 +448,8 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                       id="pincode"
                       name="pincode"
                       type="text"
+                      inputMode="numeric"
+                      autoComplete="postal-code"
                       required
                       maxLength={6}
                       value={formData.pincode}

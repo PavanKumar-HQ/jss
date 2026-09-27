@@ -57,7 +57,7 @@ export default function PeriodicalsSection({ onAddToCart, languageMode }) {
         </div>
 
         {/* Periodicals Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '26px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '26px' }}>
           {mockPeriodicals.map((p) => (
             <div
               key={p.id}

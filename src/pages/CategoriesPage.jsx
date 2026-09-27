@@ -112,7 +112,7 @@ export default function CategoriesPage({ onNavigate, onSelectCategory }) {
 
       {/* Main Category Cards */}
       <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '20px', marginBottom: '40px' }}>
           {categoryDetails.map((cat) => {
             const Icon = cat.icon;
             return (

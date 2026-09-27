@@ -89,7 +89,7 @@ export default function BulkOrdersPage({ onNavigate }) {
       </header>
 
       <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '32px', alignItems: 'start' }}>
+        <div className="two-col-responsive-grid">
           
           {/* Left: Requisition Form Card */}
           <div
@@ -242,7 +242,7 @@ export default function BulkOrdersPage({ onNavigate }) {
                 </div>
 
                 {/* Officer Name & Designation */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="form-row-2col">
                   <div className="form-group">
                     <label className="form-label" htmlFor="officerName">
                       Contact Officer *
@@ -277,7 +277,7 @@ export default function BulkOrdersPage({ onNavigate }) {
                 </div>
 
                 {/* Phone & Email */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="form-row-2col">
                   <div className="form-group">
                     <label className="form-label" htmlFor="phone">
                       Official Phone / Mobile *
@@ -285,6 +285,7 @@ export default function BulkOrdersPage({ onNavigate }) {
                     <input
                       id="phone"
                       type="tel"
+                      inputMode="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
@@ -301,6 +302,7 @@ export default function BulkOrdersPage({ onNavigate }) {
                     <input
                       id="email"
                       type="email"
+                      inputMode="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
@@ -312,7 +314,7 @@ export default function BulkOrdersPage({ onNavigate }) {
                 </div>
 
                 {/* City, State & PIN */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div className="form-row-3col">
                   <div className="form-group">
                     <label className="form-label" htmlFor="city">
                       City / Town *

@@ -70,7 +70,7 @@ export default function ContactPage({ onNavigate }) {
       </header>
 
       <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px', alignItems: 'start' }}>
+        <div className="two-col-responsive-grid">
           
           {/* Left Column: Official Contact Information */}
           <div>
@@ -254,7 +254,7 @@ export default function ContactPage({ onNavigate }) {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+                <div className="form-row-2col">
                   <div>
                     <label htmlFor="email" style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '6px' }}>
                       Email Address *
@@ -262,6 +262,7 @@ export default function ContactPage({ onNavigate }) {
                     <input
                       id="email"
                       type="email"
+                      inputMode="email"
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -285,6 +286,7 @@ export default function ContactPage({ onNavigate }) {
                     <input
                       id="phone"
                       type="tel"
+                      inputMode="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="e.g., 9845012345"

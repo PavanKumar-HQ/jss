@@ -74,10 +74,11 @@ export default function CartPage({ cart = [], onUpdateQuantity, onRemoveItem, on
           Your Cart ({itemsCount} {itemsCount === 1 ? 'publication' : 'publications'})
         </h1>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '32px', alignItems: 'start' }}>
-          {/* Left Column: Cart Items Table */}
+        <div className="cart-layout-grid">
+          {/* Left Column: Cart Items (Desktop Table + Mobile Cards) */}
           <div>
-            <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+            {/* Desktop Table View */}
+            <div className="cart-desktop-table" style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
               <table className="cart-table">
                 <thead>
                   <tr>
@@ -188,6 +189,85 @@ export default function CartPage({ cart = [], onUpdateQuantity, onRemoveItem, on
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card-Based List View (Optimized for phones <= 640px) */}
+            <div className="cart-mobile-cards">
+              {cart.map((item) => (
+                <div key={`mob-${item.id}-${item.format}`} className="cart-mobile-card">
+                  {/* Left: Thumbnail */}
+                  <div
+                    className="cart-mobile-card-cover"
+                    onClick={() => onNavigate(`/books/${item.slug || item.id}`)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <img
+                      src={item.webpImage || item.cover_image || item.imageUrl || '/shivapada-ratnakosha/cover.jpg'}
+                      alt={`Cover of ${item.title}`}
+                    />
+                  </div>
+
+                  {/* Right: Info + Stepper + Price */}
+                  <div className="cart-mobile-card-content">
+                    <div
+                      className="cart-mobile-card-title"
+                      onClick={() => onNavigate(`/books/${item.slug || item.id}`)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {item.title}
+                    </div>
+                    {item.titleKannada && (
+                      <span className="cart-mobile-card-kannada text-kannada">
+                        {item.titleKannada}
+                      </span>
+                    )}
+                    <span className="cart-mobile-card-author">
+                      {item.author} · {item.format || 'Paperback'}
+                    </span>
+
+                    <div className="cart-mobile-card-bottom">
+                      {/* Touch-Friendly Stepper */}
+                      <div className="cart-mobile-stepper">
+                        <button
+                          type="button"
+                          onClick={() => onUpdateQuantity(item.id, item.format, item.quantity - 1)}
+                          className="cart-mobile-stepper-btn"
+                          aria-label="Decrease quantity"
+                        >
+                          −
+                        </button>
+                        <span className="cart-mobile-stepper-val">
+                          {item.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => onUpdateQuantity(item.id, item.format, item.quantity + 1)}
+                          className="cart-mobile-stepper-btn"
+                          aria-label="Increase quantity"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {/* Total */}
+                      <span className="cart-mobile-price">
+                        ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Remove Button */}
+                  <button
+                    type="button"
+                    onClick={() => onRemoveItem(item.id, item.format)}
+                    className="cart-mobile-remove-btn"
+                    title="Remove item"
+                    aria-label="Remove item"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
             </div>
 
             {/* India Post Speed Post Dispatch Notice */}

@@ -155,9 +155,10 @@ export default function BookPreviewModal({ book, onClose, onAddToCart, onNavigat
         {/* Modal Body */}
         <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
           {activeTab === 'overview' ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '20px', alignItems: 'start' }}>
+            <div className="modal-overview-grid">
               {/* Left: Book Cover */}
               <div
+                className="modal-overview-cover-wrap"
                 style={{
                   aspectRatio: '3 / 4',
                   backgroundColor: 'var(--color-bg-neutral)',
@@ -205,7 +206,7 @@ export default function BookPreviewModal({ book, onClose, onAddToCart, onNavigat
                   {book.description}
                 </p>
 
-                <div style={{ display: 'flex', gap: '14px', fontSize: '0.8rem', color: 'var(--color-text-subtle)', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', gap: '14px', fontSize: '0.8rem', color: 'var(--color-text-subtle)', marginBottom: '14px', flexWrap: 'wrap' }}>
                   <span><strong>Language:</strong> {book.language}</span>
                   {book.pages && <span><strong>Length:</strong> {book.pages} pp</span>}
                   {book.isbn && <span><strong>SKU:</strong> {book.isbn}</span>}
@@ -256,14 +257,11 @@ export default function BookPreviewModal({ book, onClose, onAddToCart, onNavigat
 
         {/* Modal Footer Actions */}
         <div
+          className="modal-footer-actions"
           style={{
             padding: '12px 18px',
             backgroundColor: 'var(--color-bg-neutral)',
-            borderTop: '1px solid var(--color-border)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '10px'
+            borderTop: '1px solid var(--color-border)'
           }}
         >
           <button

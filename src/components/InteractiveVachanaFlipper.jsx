@@ -68,6 +68,7 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
   const [targetIndex, setTargetIndex] = useState(0);
   const [flipState, setFlipState] = useState('idle'); // 'idle' | 'flipping-next' | 'flipping-prev'
   const [activeMobileTab, setActiveMobileTab] = useState('kannada'); // 'kannada' | 'english'
+  const [touchStartX, setTouchStartX] = useState(null);
 
   const currentVachana = VACHANAS[currentIndex];
   const targetVachana = VACHANAS[targetIndex];
@@ -94,6 +95,22 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
       setCurrentIndex(prev);
       setFlipState('idle');
     }, 650);
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (diff > 45) {
+      handleNext();
+    } else if (diff < -45) {
+      handlePrev();
+    }
+    setTouchStartX(null);
   };
 
   const handleExploreBook = (bookId) => {
@@ -293,12 +310,19 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
             )}
           </div>
 
-          {/* Mobile Single Leaf View */}
-          <div className="manuscript-mobile-card">
+          {/* Mobile Single Leaf View with Touch Swipe */}
+          <div
+            className="manuscript-mobile-card"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <div className={`mobile-leaf-container ${flipState !== 'idle' ? 'mobile-flipping' : ''}`}>
               {activeMobileTab === 'kannada'
                 ? renderKannadaContent(currentVachana, currentIndex + 1)
                 : renderEnglishContent(currentVachana, currentIndex + 1)}
+            </div>
+            <div className="mobile-swipe-hint">
+              <span>← Swipe left/right to turn pages →</span>
             </div>
           </div>
 
@@ -312,7 +336,8 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
               title="Turn to Previous Leaf"
             >
               <ArrowLeft size={15} />
-              <span>Previous Page (ಹಿಂದಿನ ಪತ್ರ)</span>
+              <span className="desktop-only">Previous Page (ಹಿಂದಿನ ಪತ್ರ)</span>
+              <span className="mobile-only">Prev (ಹಿಂದಿನ)</span>
             </button>
 
             {/* Pagination Dots */}
@@ -358,7 +383,8 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
               className="btn btn-primary btn-sm manuscript-nav-btn"
               title="Turn to Next Leaf"
             >
-              <span>Next Page (ಮುಂದಿನ ಪತ್ರ)</span>
+              <span className="desktop-only">Next Page (ಮುಂದಿನ ಪತ್ರ)</span>
+              <span className="mobile-only">Next (ಮುಂದಿನ)</span>
               <ArrowRight size={15} />
             </button>
           </div>

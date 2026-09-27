@@ -220,7 +220,7 @@ export default function BookDetailPage({
             </div>
 
             {/* Quantity Stepper & Actions */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '28px' }}>
+            <div className="product-actions-bar" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '28px' }}>
               {/* Stepper */}
               <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-border-dark)', borderRadius: 'var(--radius-xs)', backgroundColor: '#FFFFFF' }}>
                 <button
@@ -319,7 +319,7 @@ export default function BookDetailPage({
 
         {/* SECTION: About This Book & Sample Excerpt */}
         <div style={{ marginTop: '48px', paddingTop: '36px', borderTop: '1px solid var(--color-border)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '32px' }}>
             <div>
               <h2 className="text-serif" style={{ fontSize: '1.45rem', fontWeight: 700, color: 'var(--color-text-charcoal)', marginBottom: '12px' }}>
                 About this Publication

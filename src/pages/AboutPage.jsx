@@ -143,7 +143,7 @@ export default function AboutPage({ onNavigate }) {
             boxShadow: '0 4px 20px rgba(94, 22, 36, 0.04)'
           }}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px', alignItems: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '40px', alignItems: 'center' }}>
             <div>
               <span
                 style={{

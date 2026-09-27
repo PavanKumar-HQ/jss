@@ -16,7 +16,7 @@ export default function LocationSection() {
       aria-label="JSS Book House Mysuru Physical Store"
     >
       <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '48px', alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '36px', alignItems: 'center' }}>
           {/* Left Column: Official Store Info */}
           <div>
             <div
