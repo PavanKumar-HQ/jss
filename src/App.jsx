@@ -13,6 +13,7 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import BookPreviewModal from './components/BookPreviewModal';
 import OrderTrackingModal from './components/OrderTrackingModal';
+import WishlistDrawer from './components/WishlistDrawer';
 import FlippingBookLoader from './components/FlippingBookLoader';
 import useScrollReveal from './hooks/useScrollReveal';
 import { cartService, recentlyViewedService } from './services';
@@ -57,6 +58,7 @@ export default function App() {
   // Unified Modal State (Quick Preview & Sample Excerpt Merged)
   const [selectedBook, setSelectedBook] = useState(null);
   const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
 
   // Cart State (Synchronized with cartService domain layer)
   const [cart, setCart] = useState(() => cartService.getCart());
@@ -253,6 +255,7 @@ export default function App() {
         setLanguageMode={setLanguageMode}
         onSelectBook={handleSelectBook}
         onOpenTrackingModal={handleOpenTrackingModal}
+        onOpenWishlist={() => setIsWishlistOpen(true)}
       />
 
       {/* Main Routed Page Content */}
@@ -375,6 +378,13 @@ export default function App() {
             onClose={handleCloseTrackingModal}
           />
         )}
+
+        <WishlistDrawer
+          isOpen={isWishlistOpen}
+          onClose={() => setIsWishlistOpen(false)}
+          onNavigate={navigate}
+          onAddToCart={handleAddToCart}
+        />
       </Suspense>
 
       {/* Toast Notification Alert */}

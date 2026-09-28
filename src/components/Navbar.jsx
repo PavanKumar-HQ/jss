@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ShoppingBag, Search, MapPin, Phone, Menu, X, Globe, Truck, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Search, MapPin, Phone, Menu, X, Globe, Truck, ArrowRight, Bookmark } from 'lucide-react';
 import { BOOKS } from '../data/mockData';
+import { wishlistService } from '../services';
 import jssLogo from '../assets/jss-logo.webp';
 
 const Navbar = React.memo(function Navbar({
@@ -12,12 +13,20 @@ const Navbar = React.memo(function Navbar({
   languageMode,
   setLanguageMode,
   onSelectBook,
-  onOpenTrackingModal
+  onOpenTrackingModal,
+  onOpenWishlist
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState(() => wishlistService.getWishlist().length);
   const searchContainerRef = useRef(null);
+
+  useEffect(() => {
+    return wishlistService.subscribe((list) => {
+      setWishlistCount(list.length);
+    });
+  }, []);
 
   const handleLinkClick = (route, e) => {
     if (e) e.preventDefault();
@@ -323,6 +332,40 @@ const Navbar = React.memo(function Navbar({
               <Search size={20} />
             </button>
 
+            {/* Study Reading List / Wishlist Button */}
+            <button
+              type="button"
+              onClick={() => onOpenWishlist && onOpenWishlist()}
+              className="btn btn-secondary btn-sm"
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px'
+              }}
+              aria-label={`Study Reading List with ${wishlistCount} items`}
+              title="View Study Reading List"
+            >
+              <Bookmark size={15} color="var(--color-maroon)" fill={wishlistCount > 0 ? '#DFBF5F' : 'none'} />
+              <span className="desktop-only" style={{ fontWeight: 600, fontSize: '0.84rem' }}>Study List</span>
+              {wishlistCount > 0 && (
+                <span
+                  style={{
+                    backgroundColor: '#C59B27',
+                    color: '#2A060E',
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    borderRadius: 'var(--radius-pill)',
+                    padding: '1px 6px',
+                    lineHeight: 1.2
+                  }}
+                >
+                  {wishlistCount}
+                </span>
+              )}
+            </button>
+
             {/* Cart Button */}
             <button
               type="button"
@@ -427,6 +470,27 @@ const Navbar = React.memo(function Navbar({
               );
             })}
             <li style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '10px', marginTop: '6px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (onOpenWishlist) onOpenWishlist();
+                }}
+                className="mobile-nav-btn"
+                style={{ width: '100%', cursor: 'pointer' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Bookmark size={16} color="var(--color-maroon)" fill={wishlistCount > 0 ? '#DFBF5F' : 'none'} />
+                  <span>My Study List (Saved Books)</span>
+                </div>
+                {wishlistCount > 0 && (
+                  <span className="badge badge-gold" style={{ fontSize: '0.72rem' }}>
+                    {wishlistCount}
+                  </span>
+                )}
+              </button>
+            </li>
+            <li>
               <button
                 type="button"
                 onClick={() => {

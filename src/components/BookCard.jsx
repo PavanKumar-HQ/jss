@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { ShoppingBag, Check, BookOpen, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShoppingBag, Check, BookOpen, Loader2, Bookmark } from 'lucide-react';
+import { wishlistService } from '../services';
 
 function BookCard({
   book,
@@ -10,6 +11,18 @@ function BookCard({
 }) {
   const [imgError, setImgError] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(() => wishlistService.isInWishlist(book.id));
+
+  useEffect(() => {
+    return wishlistService.subscribe(() => {
+      setIsBookmarked(wishlistService.isInWishlist(book.id));
+    });
+  }, [book.id]);
+
+  const handleBookmarkToggle = (e) => {
+    e.stopPropagation();
+    wishlistService.toggleItem(book);
+  };
 
   // Clean fallback SVG book cover with authentic institutional styling
   const fallbackCover = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400"><rect width="100%" height="100%" fill="%23FAF7F2"/><rect x="12" y="12" width="276" height="376" fill="%235E1624" rx="3"/><rect x="20" y="20" width="260" height="360" fill="none" stroke="%23E5DFD5" stroke-width="1.2"/><text x="50%" y="46%" fill="%23FFFFFF" font-size="16" font-family="serif" text-anchor="middle" font-weight="bold">${encodeURIComponent(book.title)}</text><text x="50%" y="54%" fill="%23DFBF5F" font-size="12" font-family="sans-serif" text-anchor="middle">${encodeURIComponent(book.author || 'JSS Publications')}</text></svg>`;
@@ -77,6 +90,21 @@ function BookCard({
           <BookOpen size={11} />
           <span>Quick View</span>
         </span>
+
+        {/* Study Reading List / Bookmark Button */}
+        <button
+          type="button"
+          onClick={handleBookmarkToggle}
+          className={`book-card-bookmark-btn ${isBookmarked ? 'active' : ''}`}
+          title={isBookmarked ? 'Remove from Study List' : 'Save to Study List'}
+          aria-label={isBookmarked ? `Remove ${book.title} from study list` : `Save ${book.title} to study list`}
+        >
+          <Bookmark
+            size={14}
+            fill={isBookmarked ? '#DFBF5F' : 'none'}
+            color={isBookmarked ? '#8C6708' : 'var(--color-maroon)'}
+          />
+        </button>
       </div>
 
       {/* Book Details */}

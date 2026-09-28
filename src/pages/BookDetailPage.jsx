@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { ShoppingBag, ArrowLeft, Truck, Check, BookOpen, ShieldCheck, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShoppingBag, ArrowLeft, Truck, Check, BookOpen, ShieldCheck, Loader2, Bookmark } from 'lucide-react';
 import BookCard from '../components/BookCard';
+import { wishlistService } from '../services';
 
 export default function BookDetailPage({
   book,
@@ -16,6 +17,15 @@ export default function BookDetailPage({
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(() => (book ? wishlistService.isInWishlist(book.id) : false));
+
+  useEffect(() => {
+    if (!book) return;
+    setIsBookmarked(wishlistService.isInWishlist(book.id));
+    return wishlistService.subscribe(() => {
+      setIsBookmarked(wishlistService.isInWishlist(book.id));
+    });
+  }, [book?.id]);
 
   if (!book) {
     return (
@@ -276,6 +286,23 @@ export default function BookDetailPage({
                 style={{ padding: '10px 22px' }}
               >
                 Buy Now
+              </button>
+
+              {/* Study Reading List / Bookmark Button */}
+              <button
+                type="button"
+                onClick={() => wishlistService.toggleItem(book)}
+                className="btn btn-outline"
+                style={{ padding: '10px 18px', gap: '6px' }}
+                title={isBookmarked ? 'Remove from Study List' : 'Save to Study List'}
+                aria-label={isBookmarked ? 'Remove from Study List' : 'Save to Study List'}
+              >
+                <Bookmark
+                  size={15}
+                  fill={isBookmarked ? '#DFBF5F' : 'none'}
+                  color={isBookmarked ? '#8C6708' : 'var(--color-maroon)'}
+                />
+                <span>{isBookmarked ? 'Saved in Study List ✓' : 'Save to Study List'}</span>
               </button>
             </div>
 
