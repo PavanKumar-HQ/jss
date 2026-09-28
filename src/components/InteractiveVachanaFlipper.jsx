@@ -149,13 +149,19 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
         </div>
       </div>
 
-      <div className="leaf-footer">
-        <span className="leaf-source-label">
-          {vachana.sourceBook}
-        </span>
+      <div className="leaf-footer leaf-footer-right">
         <span className="leaf-sacred-seal text-kannada">
           ❖ ಶ್ರೀ ಗುರುಬಸವಲಿಂಗಾಯ ನಮಃ
         </span>
+        <button
+          type="button"
+          onClick={() => handleExploreBook(vachana.bookId)}
+          className="btn btn-primary btn-sm leaf-action-btn"
+          title={`View ${vachana.sourceBook} in bookstore`}
+        >
+          <span>ಗ್ರಂಥ ವಿವರ (View Book)</span>
+          <ArrowRight size={13} />
+        </button>
       </div>
     </div>
   );
@@ -196,7 +202,7 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
         <button
           type="button"
           onClick={() => handleExploreBook(vachana.bookId)}
-          className="btn btn-outline btn-sm leaf-action-btn"
+          className="btn btn-primary btn-sm leaf-action-btn"
         >
           <span>View Edition in Bookstore</span>
           <ArrowRight size={13} />
@@ -384,18 +390,17 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
               <span className="mobile-only">Prev (ಹಿಂದಿನ)</span>
             </button>
 
-            {/* Pagination Dots */}
+            {/* Verse Selector Buttons */}
             <div className="manuscript-pagination-pills">
-              <span className="manuscript-count-label">
-                Verse {currentIndex + 1} of {VACHANAS.length}
-              </span>
-              <div className="manuscript-dot-track">
+              <div className="manuscript-verse-selectors" role="tablist" aria-label="Select Verse">
                 {VACHANAS.map((v, i) => (
                   <button
                     key={v.id}
                     type="button"
+                    role="tab"
+                    aria-selected={i === currentIndex}
                     aria-label={`Go to verse ${i + 1}`}
-                    className={`manuscript-dot-btn ${i === currentIndex ? 'active' : ''}`}
+                    className={`manuscript-verse-tab-btn ${i === currentIndex ? 'active' : ''}`}
                     onClick={() => {
                       if (flipState === 'idle' && i !== currentIndex) {
                         if (i > currentIndex) {
@@ -415,7 +420,9 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
                         }
                       }
                     }}
-                  />
+                  >
+                    Verse {i + 1}
+                  </button>
                 ))}
               </div>
             </div>

@@ -195,7 +195,7 @@ export default function CategoriesPage({ onNavigate, onSelectCategory }) {
                   </p>
                 </div>
 
-                <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem', color: 'var(--color-maroon)', fontWeight: 600 }}>
+                <div className="category-card-action-btn">
                   <span>Browse Category</span>
                   <ArrowRight size={14} />
                 </div>

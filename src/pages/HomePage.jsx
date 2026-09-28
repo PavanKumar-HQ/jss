@@ -318,9 +318,9 @@ export default function HomePage({
                 </p>
               </div>
 
-              <div className="subject-card-action" style={{ color: '#DFBF5F' }}>
+              <div className="subject-card-action subject-card-action-gold">
                 <span>Open Master Index</span>
-                <ArrowRight size={14} className="subject-arrow-icon" color="#DFBF5F" />
+                <ArrowRight size={14} className="subject-arrow-icon" />
               </div>
             </div>
           </div>

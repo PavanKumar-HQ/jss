@@ -84,39 +84,20 @@ const Navbar = React.memo(function Navbar({
             <button
               type="button"
               onClick={() => onOpenTrackingModal && onOpenTrackingModal()}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#DFBF5F',
-                cursor: 'pointer',
-                fontSize: '0.76rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: 0
-              }}
+              className="top-bar-btn top-bar-btn-gold"
+              title="Track consignment shipping"
             >
               <Truck size={12} />
               <span>Track Consignment</span>
             </button>
 
-            <span style={{ opacity: 0.35 }}>|</span>
-
             <button
               type="button"
               onClick={() => onNavigate('/bulk-orders')}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#F8F5EE',
-                cursor: 'pointer',
-                fontSize: '0.76rem',
-                fontWeight: 500,
-                padding: 0
-              }}
+              className="top-bar-btn"
+              title="Institutional bulk enquiries"
             >
-              Bulk Orders
+              <span>Bulk Orders</span>
             </button>
 
             <span style={{ opacity: 0.35 }}>|</span>
@@ -424,38 +405,39 @@ const Navbar = React.memo(function Navbar({
           className="mobile-only"
           style={{
             borderTop: '1px solid var(--color-border)',
-            backgroundColor: '#FFFFFF',
+            backgroundColor: '#FAF7F2',
             padding: '16px 20px',
             boxShadow: '0 8px 16px rgba(0,0,0,0.06)'
           }}
         >
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {navItems.map((item) => (
-              <li key={item.route}>
-                <a
-                  href={item.route}
-                  onClick={(e) => handleLinkClick(item.route, e)}
-                  style={{
-                    fontSize: '1rem',
-                    fontWeight: currentRoute === item.route ? 700 : 500,
-                    color: currentRoute === item.route ? 'var(--color-maroon)' : 'var(--color-text-charcoal)',
-                    display: 'block'
-                  }}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
-            <li style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '10px' }}>
+          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', padding: 0, margin: 0 }}>
+            {navItems.map((item) => {
+              const isActive = currentRoute === item.route;
+              return (
+                <li key={item.route}>
+                  <a
+                    href={item.route}
+                    onClick={(e) => handleLinkClick(item.route, e)}
+                    className={`mobile-nav-btn ${isActive ? 'active' : ''}`}
+                  >
+                    <span>{item.label}</span>
+                    <ArrowRight size={14} opacity={isActive ? 1 : 0.4} />
+                  </a>
+                </li>
+              );
+            })}
+            <li style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '10px', marginTop: '6px' }}>
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   onNavigate('/bulk-orders');
                 }}
-                style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '0.9rem', cursor: 'pointer', padding: 0 }}
+                className="btn btn-institutional-gold"
+                style={{ width: '100%', justifyContent: 'center' }}
               >
-                Bulk & Institutional Orders
+                <span>Bulk & Institutional Orders</span>
+                <ArrowRight size={14} />
               </button>
             </li>
           </ul>

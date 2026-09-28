@@ -246,7 +246,8 @@ export default function CataloguePage({
                   <button
                     type="button"
                     onClick={onResetFilters}
-                    style={{ background: 'none', border: 'none', color: 'var(--color-maroon)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                    className="btn btn-outline btn-sm"
+                    style={{ padding: '2px 9px', fontSize: '0.74rem', minHeight: '26px' }}
                   >
                     Clear All
                   </button>

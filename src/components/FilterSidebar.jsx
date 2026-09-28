@@ -45,7 +45,8 @@ const FilterSidebar = React.memo(function FilterSidebar({
         {hasActiveFilters && (
           <button
             onClick={onResetFilters}
-            style={{ background: 'none', border: 'none', color: 'var(--color-saffron)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}
+            className="btn btn-outline btn-sm"
+            style={{ padding: '2px 8px', fontSize: '0.72rem', minHeight: '26px', gap: '4px' }}
           >
             <RotateCcw size={11} />
             <span>Clear All</span>
