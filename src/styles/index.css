@@ -996,6 +996,8 @@ img {
 }
 
 .book-card {
+  container-type: inline-size;
+  container-name: bookcard;
   background-color: #FFFFFF;
   border: 1px solid #E8E2D8;
   border-radius: 8px; /* Clean, restrained modern radius */
@@ -1194,8 +1196,32 @@ img {
 
 .book-card-actions-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto 1fr;
   gap: 6px;
+  align-items: center;
+}
+
+.book-card-actions-grid .btn {
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  min-height: 32px;
+  gap: 4px;
+  justify-content: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.book-card-actions-grid .btn-action-preview {
+  padding: 6px 10px;
+  flex-shrink: 0;
+}
+
+.book-card-actions-grid .btn-action-add {
+  padding: 6px 8px;
+  min-width: 0;
+  font-weight: 600;
 }
 
 /* ==========================================================================
@@ -1293,6 +1319,11 @@ img {
   grid-template-columns: 250px 1fr;
   gap: 28px;
   align-items: start;
+}
+
+.catalogue-container-grid .books-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
 .filter-sidebar-box {
@@ -2016,6 +2047,25 @@ img {
 
 .btn-text-short {
   display: none;
+}
+
+/* Modern Container Query: Card adapts to its own actual inline rendered width */
+@container bookcard (max-width: 232px) {
+  .btn-text-full {
+    display: none !important;
+  }
+  .btn-text-short {
+    display: inline !important;
+  }
+  .book-card-actions-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 4px !important;
+  }
+  .book-card-actions-grid .btn {
+    padding: 6px 4px !important;
+    font-size: 0.76rem !important;
+    gap: 3px !important;
+  }
 }
 
 @media (max-width: 640px) {

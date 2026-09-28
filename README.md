@@ -225,10 +225,125 @@ npm run preview
 
 ---
 
-## 📜 Compliance & Legal
-- **HSN Chapter 4901**: In accordance with the Goods and Services Tax Act of India, all printed books, religious scriptures, scholarly monographs, and academic periodicals published by JSS Mahavidyapeetha are **100% exempt from GST (0% GST)**.
-- **India Post Dispatch**: Parcels are dispatched directly from the JSS Book House retail sales counter, Mysore, Karnataka 570004.
+---
+
+## 🛡️ Enterprise Security Architecture Charter
+
+Security is treated as a **core architectural requirement**, not an afterthought added to checkout.
+
+### Golden Rule: The Frontend is Never an Authority
+> **"The frontend is never an authority. Any value affecting money, inventory, eligibility, customer data, payment, order state, shipping, discounts, or permissions must be independently validated and enforced by the backend. Client-side services exist for UX/state management; they must not be treated as security boundaries."**
+
+---
+
+### The 20 Security Pillars
+
+#### 1. Zero Frontend Trust (Financial & Inventory Invariance)
+* Never trust client-side prices, discounts, inventory levels, coupon validation, submitted order totals, or shipping charges.
+* Recalculate every monetary and inventory figure on the server during checkout initiation.
+* A client tampering with local state (`price: 499` → `price: 1`) will be rejected with an authoritative calculation error upon transaction settlement.
+
+#### 2. Authentication & Authorization
+* Password hashing using **Argon2id** with high-memory parameters.
+* Short-lived access tokens and refresh-token rotation with family detection.
+* Secure, `HttpOnly`, `SameSite=Strict` cookies for browser sessions to eliminate XSS token theft.
+* Protection against session fixation and brute-force account enumeration.
+* Role-based hierarchical authorization:
+  ```text
+  Customer → Staff → Operations → Admin → Super Admin
+  ```
+  Route guards in React are purely for UX; every sensitive API endpoint strictly enforces server-side roles.
+
+#### 3. Admin Security & Role-Based Access Control (RBAC)
+* Least-privilege model across institutional workflows:
+  | Action | Customer | Staff | Admin | Super Admin |
+  | :--- | :---: | :---: | :---: | :---: |
+  | View Own Orders | ✓ | ✓ | ✓ | ✓ |
+  | View Inventory | — | ✓ | ✓ | ✓ |
+  | Modify Inventory | — | Limited | ✓ | ✓ |
+  | Create Coupon / Offer | — | — | ✓ | ✓ |
+  | Refund / Cancel Order | — | Limited | ✓ | ✓ |
+  | Change Book Pricing | — | — | ✓ | ✓ |
+  | Manage Admin Accounts | — | — | — | ✓ |
+* Every privileged action records an immutable audit log (`who`, `what`, `when`, `previous_value`, `new_value`).
+
+#### 4. Payment Security & Idempotency
+* Raw card details never touch institutional servers. Integrations use PCI-DSS Level 1 tokenized hosted checkout.
+* Server-side signature and cryptographic webhook verification for all gateway callbacks.
+* Strict idempotency keys on payment initiation and order placement to prevent duplicate charges or double orders under network retry.
+
+#### 5. Coupon Abuse Protection
+* Server-side rate limiting on coupon redemption attempts to prevent brute-forcing.
+* Authoritative verification of: activation window, expiry, customer eligibility, category exclusions, minimum subtotal, and per-user usage limits.
+* Atomic promotion locking during checkout.
+
+#### 6. Inventory Race-Condition Protection
+* Atomic reservation locks during checkout initiation to prevent overselling scarce physical titles.
+* Concrete lifecycle states:
+  ```text
+  Available → Reserved → Paid → Packed → Shipped → Returned → Damaged → Restocked
+  ```
+
+#### 7. Checkout State Machine
+* Strict server-enforced state transitions:
+  ```text
+  CART → CHECKOUT_STARTED → INVENTORY_RESERVED → PAYMENT_PENDING → PAYMENT_VERIFIED → ORDER_CONFIRMED
+  ```
+* Client cannot arbitrarily mutate status (`POST /order/status { status: "paid" }` is prohibited).
+
+#### 8. API Hardening & Injection Defense
+* Strict JSON schema validation on every endpoint.
+* Parameterized queries and ORM safeguards against SQL/NoSQL injection.
+* Object-level authorization (BOLA/IDOR protection): Order lookup verifies that requesting identity matches order owner.
+
+#### 9. Cross-Site Scripting (XSS) Defense
+* Context-aware HTML escaping; strict React output encoding.
+* Zero unescaped `dangerouslySetInnerHTML`.
+* Strict Content Security Policy (CSP) blocking unauthorized script injection.
+
+#### 10. Cross-Site Request Forgery (CSRF) Defense
+* `SameSite=Strict` cookies combined with anti-CSRF token validation for all state-changing endpoints (password change, address updates, order submissions, refunds).
+
+#### 11. Security Headers
+* Production deployment enforces:
+  - `Content-Security-Policy: default-src 'self' ...`
+  - `Strict-Transport-Security: max-age=31536000; includeSubDomains`
+  - `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy: geolocation=(), camera=(), microphone=()`
+  - Framing protection via `frame-ancestors 'none'`.
+
+#### 12. Secrets Management
+* Zero credentials, API keys, or database passwords committed to version control.
+* Environment isolation via `.env.local` and cloud secret managers, with mandatory immediate rotation upon potential exposure.
+
+#### 13. PII Protection & Data Minimization
+* Collect only strictly necessary shipping and contact details.
+* Encrypted in transit (TLS 1.3) and encrypted at rest with restricted database read permissions.
+
+#### 14. Order Privacy
+* Internal order identifiers and customer order tracking URLs use non-guessable, cryptographically random reference tokens, preventing sequential ID enumeration.
+
+#### 15. Secure Document & File Handling
+* For institutional purchase orders or proof documents: MIME-type verification, magic number inspection, file-size limits, randomized file storage names outside public webroots, and signed temporary URLs for admin access.
+
+#### 16. Audit Logging
+* Comprehensive audit logging for all authentication attempts, administrative updates, price revisions, refunds, and cancellations.
+* Zero logging of sensitive data (no passwords, card numbers, or authorization tokens).
+
+#### 17. Cryptographic Webhook Security
+* Asynchronous payment and courier webhook endpoints verify HMAC signatures, timestamp freshness, and deduplicate events via transaction event tracking.
+
+#### 18. Supply-Chain & Dependency Security
+* Regular automated vulnerability audits (`npm audit`), automated dependency version pin verification, and minimal third-party surface area.
+
+#### 19. Security Verification Protocol
+* Multi-layer security testing: Unit test edge cases, state transition fuzzing, authorization tests, and concurrency simulation before production promotion.
+
+#### 20. Architectural Covenant
+* Client-side services (`cartService`, `orderService`, `pincodeService`, `couponService`) remain clean domain drivers for local state and responsive UI; authoritative settlement belongs exclusively to backend contracts.
 
 ---
 
 *© Jagadguru Sri Shivarathreeshwara Granthamale, JSS Mahavidyapeetha, Mysuru.*
+
