@@ -310,17 +310,61 @@ export default function InteractiveVachanaFlipper({ onNavigate }) {
             )}
           </div>
 
-          {/* Mobile Single Leaf View with Touch Swipe */}
+          {/* Mobile Single Leaf View with Touch Swipe & 3D Turning Leaf Animation */}
           <div
             className="manuscript-mobile-card"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
-            <div className={`mobile-leaf-container ${flipState !== 'idle' ? 'mobile-flipping' : ''}`}>
+            {/* Base Page Underneath */}
+            <div className="mobile-base-leaf">
               {activeMobileTab === 'kannada'
-                ? renderKannadaContent(currentVachana, currentIndex + 1)
-                : renderEnglishContent(currentVachana, currentIndex + 1)}
+                ? renderKannadaContent(
+                    flipState === 'idle' ? currentVachana : targetVachana,
+                    (flipState === 'idle' ? currentIndex : targetIndex) + 1
+                  )
+                : renderEnglishContent(
+                    flipState === 'idle' ? currentVachana : targetVachana,
+                    (flipState === 'idle' ? currentIndex : targetIndex) + 1
+                  )}
             </div>
+
+            {/* 3D Flipping Leaf for Mobile (NEXT Turn: Peels from Right to Left) */}
+            {flipState === 'flipping-next' && (
+              <div className="mobile-flipper-leaf mobile-flip-next-leaf">
+                <div className="mobile-flipper-face mobile-flipper-face-front">
+                  {activeMobileTab === 'kannada'
+                    ? renderKannadaContent(currentVachana, currentIndex + 1)
+                    : renderEnglishContent(currentVachana, currentIndex + 1)}
+                  <div className="flipper-shadow flipper-shadow-front" />
+                </div>
+                <div className="mobile-flipper-face mobile-flipper-face-back">
+                  {activeMobileTab === 'kannada'
+                    ? renderKannadaContent(targetVachana, targetIndex + 1)
+                    : renderEnglishContent(targetVachana, targetIndex + 1)}
+                  <div className="flipper-shadow flipper-shadow-back" />
+                </div>
+              </div>
+            )}
+
+            {/* 3D Flipping Leaf for Mobile (PREV Turn: Peels from Left to Right) */}
+            {flipState === 'flipping-prev' && (
+              <div className="mobile-flipper-leaf mobile-flip-prev-leaf">
+                <div className="mobile-flipper-face mobile-flipper-face-front">
+                  {activeMobileTab === 'kannada'
+                    ? renderKannadaContent(currentVachana, currentIndex + 1)
+                    : renderEnglishContent(currentVachana, currentIndex + 1)}
+                  <div className="flipper-shadow flipper-shadow-front" />
+                </div>
+                <div className="mobile-flipper-face mobile-flipper-face-back">
+                  {activeMobileTab === 'kannada'
+                    ? renderKannadaContent(targetVachana, targetIndex + 1)
+                    : renderEnglishContent(targetVachana, targetIndex + 1)}
+                  <div className="flipper-shadow flipper-shadow-back" />
+                </div>
+              </div>
+            )}
+
             <div className="mobile-swipe-hint">
               <span>← Swipe left/right to turn pages →</span>
             </div>

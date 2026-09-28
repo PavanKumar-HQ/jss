@@ -28,8 +28,8 @@ export function useScrollReveal(options = {}) {
       },
       {
         root: null,
-        rootMargin: options.rootMargin || '0px 0px -30px 0px',
-        threshold: options.threshold || 0.08
+        rootMargin: options.rootMargin || '0px 0px 40px 0px',
+        threshold: options.threshold || 0.03
       }
     );
 
