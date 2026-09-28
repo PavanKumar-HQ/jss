@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, ArrowUpDown, X, BookOpen, RotateCcw } from 'lucide-react';
+import { Search, SlidersHorizontal, ArrowUpDown, X, BookOpen, RotateCcw, Sparkles } from 'lucide-react';
 import BookCard from '../components/BookCard';
 import FilterSidebar from '../components/FilterSidebar';
+import { searchService } from '../services';
 
 export default function CataloguePage({
   products = [],
@@ -26,37 +27,19 @@ export default function CataloguePage({
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(24);
 
-  // Compute filtered & sorted products
-  const filteredProducts = useMemo(() => {
-    let list = products.filter((p) => {
-      if (searchQuery && searchQuery.trim() !== '') {
-        const q = searchQuery.toLowerCase();
-        const matchTitle = p.title.toLowerCase().includes(q) || (p.titleKannada && p.titleKannada.toLowerCase().includes(q));
-        const matchAuthor = p.author && p.author.toLowerCase().includes(q);
-        const matchCat = (p.category && p.category.toLowerCase().includes(q)) || (p.rawCategory && p.rawCategory.toLowerCase().includes(q));
-        const matchSeries = p.series && p.series.toLowerCase().includes(q);
-        const matchIsbn = p.isbn && p.isbn.toLowerCase().includes(q);
-        if (!matchTitle && !matchAuthor && !matchCat && !matchSeries && !matchIsbn) return false;
-      }
-      if (activeCategory !== 'All Categories' && p.category !== activeCategory) return false;
-      if (activeSeries !== 'All Series' && p.series !== activeSeries) return false;
-      if (activeLanguage !== 'All Languages' && !p.language.includes(activeLanguage)) return false;
-      if (p.price > priceMax) return false;
-      return true;
+  // Execute domain search and faceted filtering via searchService
+  const searchResult = useMemo(() => {
+    return searchService.search({
+      query: searchQuery,
+      category: activeCategory,
+      series: activeSeries,
+      language: activeLanguage,
+      priceMax,
+      sortBy
     });
+  }, [searchQuery, activeCategory, activeSeries, activeLanguage, priceMax, sortBy]);
 
-    if (sortBy === 'title-asc') {
-      list.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === 'price-asc') {
-      list.sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'price-desc') {
-      list.sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'pages-desc') {
-      list.sort((a, b) => (b.pages || 0) - (a.pages || 0));
-    }
-
-    return list;
-  }, [products, searchQuery, activeCategory, activeSeries, activeLanguage, priceMax, sortBy]);
+  const filteredProducts = searchResult.books;
 
   const hasActiveFilters = 
     (searchQuery && searchQuery.trim() !== '') ||
@@ -260,22 +243,80 @@ export default function CataloguePage({
               <div
                 style={{
                   textAlign: 'center',
-                  padding: '48px 20px',
+                  padding: '44px 20px',
                   backgroundColor: '#FFFFFF',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--color-border)'
                 }}
               >
                 <BookOpen size={36} color="var(--color-text-subtle)" style={{ marginBottom: '10px' }} />
-                <h3 className="text-serif" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-charcoal)', marginBottom: '4px' }}>
+                <h3 className="text-serif" style={{ fontSize: '1.28rem', fontWeight: 700, color: 'var(--color-text-charcoal)', marginBottom: '4px' }}>
                   No publications match your criteria
                 </h3>
-                <p style={{ fontSize: '0.86rem', color: 'var(--color-text-muted)', maxWidth: '400px', margin: '0 auto 16px' }}>
-                  Try adjusting your search terms or clearing the selected filters to view all 49 publications.
+
+                {/* Did You Mean Suggestion */}
+                {searchResult.didYouMean && (
+                  <div style={{ margin: '14px auto', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', backgroundColor: 'var(--color-accent-gold-subtle)', border: '1px solid #DFBF5F', borderRadius: 'var(--radius-xs)', fontSize: '0.86rem' }}>
+                    <Sparkles size={14} color="var(--color-accent-gold)" />
+                    <span>Did you mean:</span>
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery(searchResult.didYouMean)}
+                      style={{ background: 'none', border: 'none', color: 'var(--color-maroon)', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
+                    >
+                      {searchResult.didYouMean}
+                    </button>
+                  </div>
+                )}
+
+                <p style={{ fontSize: '0.86rem', color: 'var(--color-text-muted)', maxWidth: '440px', margin: '0 auto 16px', lineHeight: 1.5 }}>
+                  Try exploring one of our canonical discovery pathways or reset your filters to view all 49 publications preserved under Sri Suttur Math.
                 </p>
+
+                {/* Popular Discovery Pathways */}
+                <div style={{ marginBottom: '20px' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--color-text-subtle)', display: 'block', marginBottom: '8px' }}>
+                    Popular Literary Pathways
+                  </span>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    {['Vachana', 'Patanjali', 'Basavanna', 'Shiva Sutras', 'Suttur Math'].map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => setSearchQuery(tag)}
+                        className="btn btn-outline btn-sm"
+                        style={{ padding: '4px 10px', fontSize: '0.76rem', minHeight: '26px' }}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <button type="button" onClick={onResetFilters} className="btn btn-primary btn-sm">
                   Reset All Filters
                 </button>
+
+                {/* Recommended Alternatives */}
+                {searchResult.suggestedAlternatives?.length > 0 && (
+                  <div style={{ marginTop: '36px', paddingTop: '28px', borderTop: '1px solid var(--color-border-subtle)', textAlign: 'left' }}>
+                    <h4 className="text-serif" style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--color-maroon)', marginBottom: '16px' }}>
+                      Recommended Foundational Publications:
+                    </h4>
+                    <div className="books-grid">
+                      {searchResult.suggestedAlternatives.map((altBook) => (
+                        <BookCard
+                          key={altBook.id}
+                          book={altBook}
+                          onSelectBook={onSelectBook}
+                          onAddToCart={onAddToCart}
+                          isAddedToCart={cartIdSet.has(altBook.id)}
+                          onNavigate={onNavigate}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <>

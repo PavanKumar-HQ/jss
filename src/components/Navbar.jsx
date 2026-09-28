@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ShoppingBag, Search, MapPin, Phone, Menu, X, Globe, Truck, ArrowRight, Bookmark } from 'lucide-react';
-import { BOOKS } from '../data/mockData';
-import { wishlistService } from '../services';
+import { wishlistService, searchService } from '../services';
 import jssLogo from '../assets/jss-logo.webp';
 
 const Navbar = React.memo(function Navbar({
@@ -35,17 +34,9 @@ const Navbar = React.memo(function Navbar({
     setIsMobileSearchOpen(false);
   };
 
-  // Filter matching books for live autocomplete dropdown
+  // Filter matching books for live autocomplete dropdown using searchService
   const matchingBooks = searchQuery && searchQuery.trim().length >= 2
-    ? BOOKS.filter((b) => {
-        const q = searchQuery.toLowerCase();
-        return (
-          b.title?.toLowerCase().includes(q) ||
-          b.titleKannada?.toLowerCase().includes(q) ||
-          b.author?.toLowerCase().includes(q) ||
-          b.category?.toLowerCase().includes(q)
-        );
-      }).slice(0, 5)
+    ? searchService.getQuickSuggestions(searchQuery, 6)
     : [];
 
   // Close dropdown on outside click
