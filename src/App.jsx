@@ -16,7 +16,7 @@ import OrderTrackingModal from './components/OrderTrackingModal';
 import WishlistDrawer from './components/WishlistDrawer';
 import FlippingBookLoader from './components/FlippingBookLoader';
 import useScrollReveal from './hooks/useScrollReveal';
-import { cartService, recentlyViewedService } from './services';
+import { catalogueService, cartService, recentlyViewedService } from './services';
 import { CheckCircle2 } from 'lucide-react';
 
 export default function App() {
@@ -182,9 +182,9 @@ export default function App() {
     // Book Detail Route: /books/:id or /books/:slug
     if (path.startsWith('/books/')) {
       const bookSlug = path.replace('/books/', '').trim();
-      const matchedBook = products.find(
-        (b) => String(b.id) === String(bookSlug) || (b.slug && b.slug === bookSlug)
-      );
+      const matchedBook = catalogueService.getBookBySlug(bookSlug) || 
+        catalogueService.getBookById(bookSlug) || 
+        products.find((b) => String(b.id) === String(bookSlug) || (b.slug && b.slug === bookSlug));
       return { type: 'book-detail', data: matchedBook, slug: bookSlug };
     }
 

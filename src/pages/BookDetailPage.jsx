@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, ArrowLeft, Truck, Check, BookOpen, ShieldCheck, Loader2, Bookmark } from 'lucide-react';
 import BookCard from '../components/BookCard';
-import { wishlistService } from '../services';
+import { wishlistService, catalogueService } from '../services';
 
 export default function BookDetailPage({
   book,
@@ -12,7 +12,29 @@ export default function BookDetailPage({
   cart = [],
   languageMode
 }) {
-  const [selectedVariant, setSelectedVariant] = useState('paperback');
+  const editions = book?.editions && book.editions.length > 0 ? book.editions : [
+    {
+      editionId: `${book?.id || 'book'}-pb`,
+      binding: 'Paperback',
+      formatLabel: 'Standard Paperback (ಸಾಮಾನ್ಯ ಆವೃತ್ತಿ)',
+      sellingPrice: book?.price || 150,
+      isbn: book?.isbn || 'JSS-PUB-0001',
+      pages: book?.pages || 180,
+      weightGrams: 240,
+      inStock: true
+    }
+  ];
+
+  const [selectedEditionId, setSelectedEditionId] = useState(() => editions[0]?.editionId);
+
+  useEffect(() => {
+    if (book?.editions?.length) {
+      setSelectedEditionId(book.editions[0].editionId);
+    }
+  }, [book?.id]);
+
+  const activeEdition = editions.find((e) => e.editionId === selectedEditionId) || editions[0];
+  const currentPrice = activeEdition.sellingPrice;
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
@@ -54,18 +76,17 @@ export default function BookDetailPage({
     ? (book.localImage || fallbackCover)
     : (book.webpImage || book.localImage || book.imageUrl || fallbackCover);
 
-  const currentPrice = selectedVariant === 'hardbound' && book.specialPrice
-    ? book.specialPrice
-    : book.price;
-
   const handleAdd = () => {
     if (isAdding) return;
     setIsAdding(true);
     if (onAddToCart) {
       onAddToCart({
         ...book,
-        price: currentPrice,
-        selectedVariant: selectedVariant === 'hardbound' ? 'Deluxe Hardbound' : 'Paperback',
+        price: activeEdition.sellingPrice,
+        selectedVariant: activeEdition.binding,
+        format: activeEdition.binding,
+        editionId: activeEdition.editionId,
+        isbn: activeEdition.isbn,
         quantity
       });
     }
@@ -80,17 +101,18 @@ export default function BookDetailPage({
     if (onBuyNow) {
       onBuyNow({
         ...book,
-        price: currentPrice,
-        selectedVariant: selectedVariant === 'hardbound' ? 'Deluxe Hardbound' : 'Paperback',
+        price: activeEdition.sellingPrice,
+        selectedVariant: activeEdition.binding,
+        format: activeEdition.binding,
+        editionId: activeEdition.editionId,
+        isbn: activeEdition.isbn,
         quantity
       });
     }
   };
 
-  // Find related books from the same category
-  const relatedBooks = allBooks
-    .filter((b) => b.id !== book.id && b.category === book.category)
-    .slice(0, 4);
+  // Find related books from the same category or series via catalogueService
+  const relatedBooks = catalogueService.getRelatedBooks(book.id, 4);
 
   return (
     <div className="product-page-section">
@@ -204,28 +226,26 @@ export default function BookDetailPage({
             {/* Binding Edition Selection */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 700, color: 'var(--color-text-charcoal)', marginBottom: '8px' }}>
-                Select Binding Edition:
+                Select Binding Edition / ಆವೃತ್ತಿ ಆಯ್ಕೆ:
               </label>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedVariant('paperback')}
-                  className={`btn ${selectedVariant === 'paperback' ? 'btn-primary' : 'btn-outline'}`}
-                  style={{ borderRadius: 'var(--radius-xs)', padding: '8px 16px' }}
-                >
-                  <span>Paperback Edition — ₹{book.price}</span>
-                </button>
-
-                {book.specialPrice && (
-                  <button
-                    type="button"
-                    onClick={() => setSelectedVariant('hardbound')}
-                    className={`btn ${selectedVariant === 'hardbound' ? 'btn-primary' : 'btn-outline'}`}
-                    style={{ borderRadius: 'var(--radius-xs)', padding: '8px 16px' }}
-                  >
-                    <span>Deluxe Hardbound Edition — ₹{book.specialPrice}</span>
-                  </button>
-                )}
+                {editions.map((ed) => {
+                  const isSelected = ed.editionId === activeEdition.editionId;
+                  return (
+                    <button
+                      key={ed.editionId}
+                      type="button"
+                      onClick={() => setSelectedEditionId(ed.editionId)}
+                      className={`btn ${isSelected ? 'btn-primary' : 'btn-outline'}`}
+                      style={{ borderRadius: 'var(--radius-xs)', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <span>{ed.formatLabel || `${ed.binding} Edition`}</span>
+                      <strong style={{ color: isSelected ? '#DFBF5F' : 'var(--color-maroon)' }}>
+                        — ₹{ed.sellingPrice}
+                      </strong>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -314,19 +334,25 @@ export default function BookDetailPage({
             <table className="product-specs-table">
               <tbody>
                 <tr>
+                  <th>Selected Binding</th>
+                  <td><strong>{activeEdition.formatLabel || activeEdition.binding}</strong></td>
+                </tr>
+                <tr>
                   <th>Language</th>
                   <td>{book.language || 'Kannada'}</td>
                 </tr>
-                {book.pages && (
+                <tr>
+                  <th>Length</th>
+                  <td>{activeEdition.pages || book.pages || 180} Pages</td>
+                </tr>
+                <tr>
+                  <th>Edition ISBN / SKU</th>
+                  <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{activeEdition.isbn || book.isbn}</td>
+                </tr>
+                {activeEdition.weightGrams && (
                   <tr>
-                    <th>Length</th>
-                    <td>{book.pages} Pages</td>
-                  </tr>
-                )}
-                {book.isbn && (
-                  <tr>
-                    <th>Catalogue ISBN / SKU</th>
-                    <td>{book.isbn}</td>
+                    <th>Postal Weight</th>
+                    <td>Approx. {activeEdition.weightGrams}g (India Post Dispatch)</td>
                   </tr>
                 )}
                 {book.series && (
