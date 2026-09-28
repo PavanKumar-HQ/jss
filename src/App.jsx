@@ -15,6 +15,7 @@ import BookPreviewModal from './components/BookPreviewModal';
 import OrderTrackingModal from './components/OrderTrackingModal';
 import FlippingBookLoader from './components/FlippingBookLoader';
 import useScrollReveal from './hooks/useScrollReveal';
+import { cartService, recentlyViewedService } from './services';
 import { CheckCircle2 } from 'lucide-react';
 
 export default function App() {
@@ -57,24 +58,14 @@ export default function App() {
   const [selectedBook, setSelectedBook] = useState(null);
   const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
 
-  // Cart State (Persisted in localStorage)
-  const [cart, setCart] = useState(() => {
-    try {
-      const saved = localStorage.getItem('jss_granthamale_cart');
-      const parsed = saved ? JSON.parse(saved) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  });
+  // Cart State (Synchronized with cartService domain layer)
+  const [cart, setCart] = useState(() => cartService.getCart());
 
   useEffect(() => {
-    try {
-      localStorage.setItem('jss_granthamale_cart', JSON.stringify(cart));
-    } catch (e) {
-      console.warn('Could not persist cart:', e);
-    }
-  }, [cart]);
+    return cartService.subscribe((updatedCart) => {
+      setCart(updatedCart);
+    });
+  }, []);
 
   // Filter & Search State
   const [searchQuery, setSearchQuery] = useState('');
@@ -128,69 +119,29 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // Memoized Cart Operations
+  // Domain Service Cart Operations
   const handleAddToCart = useCallback((bookToAdd) => {
     const format = bookToAdd.selectedVariant || bookToAdd.format || 'Paperback';
     const qty = bookToAdd.quantity || 1;
-    const price = bookToAdd.price;
+    const result = cartService.addItem(bookToAdd, format, qty);
 
-    setCart((prevCart) => {
-      const existingIndex = prevCart.findIndex(
-        (item) => item.id === bookToAdd.id && (item.format || 'Paperback') === format
-      );
-
-      if (existingIndex > -1) {
-        const updated = [...prevCart];
-        updated[existingIndex] = {
-          ...updated[existingIndex],
-          quantity: updated[existingIndex].quantity + qty
-        };
-        return updated;
-      }
-      return [
-        ...prevCart,
-        {
-          id: bookToAdd.id,
-          title: bookToAdd.title,
-          titleKannada: bookToAdd.titleKannada,
-          author: bookToAdd.author,
-          category: bookToAdd.category,
-          cover_image: bookToAdd.cover_image || bookToAdd.imageUrl,
-          webpImage: bookToAdd.webpImage,
-          price: price,
-          format: format,
-          quantity: qty
-        }
-      ];
-    });
-
-    showToast(`Added "${bookToAdd.title}" to cart`);
+    if (result.hitMaxLimit) {
+      showToast(`Maximum limit of 10 reached for "${bookToAdd.title}"`);
+    } else {
+      showToast(`Added "${bookToAdd.title}" to cart`);
+    }
   }, [showToast]);
 
   const handleUpdateQuantity = useCallback((id, format, newQty) => {
-    if (newQty <= 0) {
-      setCart((prev) => prev.filter((item) => !(item.id === id && (item.format || 'Paperback') === (format || 'Paperback'))));
-      return;
-    }
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.id === id && (item.format || 'Paperback') === (format || 'Paperback')
-          ? { ...item, quantity: newQty }
-          : item
-      )
-    );
+    cartService.updateQuantity(id, format, newQty);
   }, []);
 
   const handleRemoveFromCart = useCallback((id, format) => {
-    setCart((prevCart) =>
-      prevCart.filter(
-        (item) => !(item.id === id && (item.format || 'Paperback') === (format || 'Paperback'))
-      )
-    );
+    cartService.removeItem(id, format);
   }, []);
 
   const handleClearCart = useCallback(() => {
-    setCart([]);
+    cartService.clearCart();
   }, []);
 
   const handleResetFilters = useCallback(() => {
@@ -277,6 +228,10 @@ export default function App() {
         break;
       default:
         document.title = 'JSS Publications | Jagadguru Sri Shivarathreeshwara Granthamale, Mysuru';
+    }
+
+    if (routeView.type === 'book-detail' && routeView.data?.id) {
+      recentlyViewedService.recordView(routeView.data.id);
     }
   }, [routeView]);
 
