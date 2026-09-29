@@ -38,7 +38,10 @@ const KEYS = {
   SEARCH_ANALYTICS: 'jss_admin_search_analytics',
   CONTENT_REVISIONS: 'jss_admin_content_revisions',
   SCHEDULED_PRICES: 'jss_admin_scheduled_prices',
-  STOCK_HOLDS: 'jss_admin_stock_holds'
+  STOCK_HOLDS: 'jss_admin_stock_holds',
+  PROMOTIONS: 'jss_admin_promotions',
+  READING_PATHS: 'jss_admin_reading_paths',
+  BOOKS_NEW: 'jss_admin_books_new'
 };
 
 // Granular RBAC Permissions
@@ -798,6 +801,242 @@ function getSeedFraudAlerts() {
       riskScore: 'Medium',
       status: 'Under Review',
       flaggedAt: new Date(Date.now() - 1000 * 60 * 180).toISOString()
+    }
+  ];
+}
+
+function getSeedPromotions() {
+  return [
+    {
+      id: 'promo-01',
+      title: 'Sharana Sahitya Sammelana 2026',
+      kannadaTitle: 'ಶರಣ ಸಾಹಿತ್ಯ ಸಮ್ಮೇಳನ ೨೦೨೬ ವಿಶೇಷ ರಿಯಾಯಿತಿ',
+      discountNote: 'Flat 15% on All Vachana Literature Sets',
+      code: 'SHARANA15',
+      startDate: '2026-03-01',
+      endDate: '2026-04-15',
+      status: 'active',
+      audience: 'All Readers & Scholars',
+      featuredBookTitle: 'Shivapada Ratnakosha'
+    },
+    {
+      id: 'promo-02',
+      title: 'Basava Jayanti National Book Utsava',
+      kannadaTitle: 'ಬಸವ ಜಯಂತಿ ರಾಷ್ಟ್ರೀಯ ಗ್ರಂಥೋತ್ಸವ',
+      discountNote: 'Free Speed Post Shipping + Basava Darshana Souvenir',
+      code: 'BASAVA2026',
+      startDate: '2026-04-20',
+      endDate: '2026-05-10',
+      status: 'scheduled',
+      audience: 'National Postal Orders',
+      featuredBookTitle: 'Basava Darshana'
+    },
+    {
+      id: 'promo-03',
+      title: 'Annual Suttur Jathra Exhibition Special',
+      kannadaTitle: 'ವಾರ್ಷಿಕ ಸುತ್ತೂರು ಜಾತ್ರಾ ಮಹೋತ್ಸವ ಪ್ರಕಟಣೆಗಳು',
+      discountNote: '20% Endowment Grant on Philosophical Treatises',
+      code: 'SUTTURJATHRA',
+      startDate: '2026-01-15',
+      endDate: '2026-02-05',
+      status: 'expired',
+      audience: 'Pilgrims & Institutions',
+      featuredBookTitle: 'The Heritage of Sri Suttur Math'
+    }
+  ];
+}
+
+function getSeedHomepageCms() {
+  return {
+    heroQuoteKn: "ಕಾಯಕವೇ ಕೈಲಾಸ - ಕಾಯಕದಲ್ಲಿ ನಿರತನಾದರೆ ಗುರುದರ್ಶನವಾದರೂ ಮರೆಯಬೇಕು.",
+    heroQuoteEn: "Work is Heaven (Kayaka is Kailasa) — in dedicated self-less labor, even the vision of the Guru dissolves into pure duty.",
+    heroQuoteAuthor: "Basavanna (೧೨ನೇ ಶತಮಾನದ ಶರಣ ಸಾಹಿತ್ಯ)",
+    announcementBannerText: "ಶತಮಾನದ ಗ್ರಂಥ ಸಂಪತ್ತು - 12th-Century Vachana Heritage Treatises & Philosophical Lexicons Delivered Across India via India Post Speed Post.",
+    announcementBannerActive: true,
+    marqueeTickerItems: [
+      "ಶ್ರೀ ಸುತ್ತೂರು ವೀರಸಿಂಹಾಸನ ಮಠದ ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆ ಪ್ರಕಟಣೆಗಳು",
+      "Free India Post Speed Post Delivery on orders above ₹500 across India",
+      "12th Century Classical Palm-Leaf Manuscript Editions & Translations Available",
+      "Statutory GST Exemption on all Educational Books under HSN 4901",
+      "Mysuru Publication Sales Counter: Daily 9:30 AM to 6:00 PM IST"
+    ],
+    spotlightBookId: 1,
+    spotlightBadge: "Editor's Masterpiece",
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function getSeedPeriodicals() {
+  return [
+    {
+      id: 'prd-2026-01',
+      title: 'Prasada Bi-Monthly Journal (ಪ್ರಸಾದ)',
+      volume: 'Vol. 56',
+      issueNo: 'Issue 01 (Jan - Feb 2026)',
+      year: 2026,
+      chiefEditor: 'HH Jagadguru Sri Shivarathri Deshikendra Mahaswamiji',
+      coverTheme: 'The Socio-Economic Vision of Sharana Democracy (ಅನುಭವ ಮಂಟಪ)',
+      priceAnnual: 150,
+      priceLife: 2000,
+      circulatedCopies: 4500,
+      dispatchStatus: 'Dispatched via Registered Book Post',
+      pdfArchiveUrl: 'https://jssonline.org/publications/prasada/vol56-iss01.pdf',
+      status: 'active'
+    },
+    {
+      id: 'prd-2025-06',
+      title: 'Prasada Bi-Monthly Journal (ಪ್ರಸಾದ)',
+      volume: 'Vol. 55',
+      issueNo: 'Issue 06 (Nov - Dec 2025)',
+      year: 2025,
+      chiefEditor: 'HH Jagadguru Sri Shivarathri Deshikendra Mahaswamiji',
+      coverTheme: 'Shaiva Agamas & Temple Epigraphy of Mysuru and Nanjangud',
+      priceAnnual: 150,
+      priceLife: 2000,
+      circulatedCopies: 4420,
+      dispatchStatus: 'Delivered',
+      pdfArchiveUrl: 'https://jssonline.org/publications/prasada/vol55-iss06.pdf',
+      status: 'archived'
+    },
+    {
+      id: 'prd-2025-05',
+      title: 'Prasada Bi-Monthly Journal (ಪ್ರಸಾದ)',
+      volume: 'Vol. 55',
+      issueNo: 'Issue 05 (Sep - Oct 2025)',
+      year: 2025,
+      chiefEditor: 'HH Jagadguru Sri Shivarathri Deshikendra Mahaswamiji',
+      coverTheme: 'Akka Mahadevi: Mystic Rebellion & Vachana Poetics',
+      priceAnnual: 150,
+      priceLife: 2000,
+      circulatedCopies: 4380,
+      dispatchStatus: 'Delivered',
+      pdfArchiveUrl: 'https://jssonline.org/publications/prasada/vol55-iss05.pdf',
+      status: 'archived'
+    }
+  ];
+}
+
+function getSeedVachanas() {
+  return [
+    {
+      id: 'mss-01',
+      poet: 'Basavanna (ಬಸವಣ್ಣ)',
+      ankita: 'Koodalasangamadeva (ಕೂಡಲಸಂಗಮದೇವ)',
+      vachanaCount: 1420,
+      manuscriptRef: 'SUTTUR-MSS-PALM-402',
+      leafCondition: 'Preserved & Digitized (High Res 1200 DPI)',
+      scholarlyEditor: 'Prof. S. Vidyashankar',
+      transcriptionStatus: 'Published in Canonical Edition',
+      languages: 'Kannada, English, Sanskrit, Hindi'
+    },
+    {
+      id: 'mss-02',
+      poet: 'Allama Prabhu (ಅಲ್ಲಮಪ್ರಭು)',
+      ankita: 'Guheshwara (ಗುಹೇಶ್ವರ)',
+      vachanaCount: 1321,
+      manuscriptRef: 'SUTTUR-MSS-PALM-415',
+      leafCondition: 'Preserved in Suttur Shrimathada Granthalaya',
+      scholarlyEditor: 'Dr. M. Chidananda',
+      transcriptionStatus: 'Published in Canonical Edition',
+      languages: 'Kannada, English'
+    },
+    {
+      id: 'mss-03',
+      poet: 'Akka Mahadevi (ಅಕ್ಕಮಹಾದೇವಿ)',
+      ankita: 'Chennamallikarjuna (ಚೆನ್ನಮಲ್ಲಿಕಾರ್ಜುನ)',
+      vachanaCount: 430,
+      manuscriptRef: 'SUTTUR-MSS-PALM-389',
+      leafCondition: 'Digitized & Restored',
+      scholarlyEditor: 'JSS Granthamale Editorial Board',
+      transcriptionStatus: 'Published in Canonical Edition',
+      languages: 'Kannada, English'
+    },
+    {
+      id: 'mss-04',
+      poet: 'Channabasavanna (ಚೆನ್ನಬಸವಣ್ಣ)',
+      ankita: 'Koodalachennasangamadeva (ಕೂಡಲಚೆನ್ನಸಂಗಮದೇವ)',
+      vachanaCount: 1753,
+      manuscriptRef: 'SUTTUR-MSS-PALM-488',
+      leafCondition: 'Critical Commentary in Progress',
+      scholarlyEditor: 'Dr. Veeranna Rajur',
+      transcriptionStatus: 'Under Scholarly Review',
+      languages: 'Kannada'
+    }
+  ];
+}
+
+function getSeedReadingPaths() {
+  return [
+    {
+      id: 'path-01',
+      title: "Beginner's Journey to Vachana Philosophy",
+      kannadaTitle: 'ವಚನ ದರ್ಶನ ಪ್ರವೇಶಿಕಾ ಪಥ',
+      difficulty: 'Beginner',
+      estimatedHours: 8,
+      recommendedBooks: ['Bhakthibhandari Basavannanavaru', 'Sharanara Vachanagalu', 'Sadhana – Path of Liberation'],
+      description: 'A gentle, illuminating initiation into 12th-century socio-spiritual reform and core ethics of equality.',
+      status: 'active'
+    },
+    {
+      id: 'path-02',
+      title: "Shatsthala & Agamic Metaphysics",
+      kannadaTitle: 'ಷಟ್‌ಸ್ಥಲ ಸಿದ್ಧಾಂತ ಮತ್ತು ಆಗಮ ಶಾಸ್ತ್ರ',
+      difficulty: 'Advanced / Scholarly',
+      estimatedHours: 24,
+      recommendedBooks: ['Shivapada Ratnakosha', 'Shatsthala Jnana Charitamrutha', 'Shiva Sutras', 'Veerashaiva Darshana'],
+      description: 'Rigorous exploration of the six-stage spiritual evolution from Bhakta to Aikya with original Sanskrit/Kannada commentary.',
+      status: 'active'
+    },
+    {
+      id: 'path-03',
+      title: "Sri Suttur Math Heritage & Patronage",
+      kannadaTitle: 'ಶ್ರೀ ಸುತ್ತೂರು ಶ್ರೀಮಠದ ಪರಂಪರೆ ಮತ್ತು ದಾಸೋಹ ಸಂಸ್ಕೃತಿ',
+      difficulty: 'Intermediate',
+      estimatedHours: 12,
+      recommendedBooks: ['The Heritage of Sri Suttur Math', 'Sutturu Srimathada Granthalaya, Mysuru', 'Kayaka Mattu Sharanaru'],
+      description: 'Tracing a millennium of spiritual leadership, mass education, Dasoha feeding tradition, and publishing excellence.',
+      status: 'active'
+    }
+  ];
+}
+
+function getSeedSupportTickets() {
+  return [
+    {
+      id: 'TCK-2026-101',
+      senderName: 'Prof. Ramesh Narasimha',
+      email: 'prof.ramesh@unimysore.ac.in',
+      subject: 'Inquiry regarding Palm-leaf reference for Shivapada Ratnakosha Vol 2',
+      priority: 'Normal',
+      status: 'Open',
+      department: 'Editorial / Scholar Query',
+      createdAt: '2026-03-12T10:15:00Z',
+      assignedTo: 'Dr. M. Chidananda',
+      message: 'Greetings from Mysore University. We are preparing a research paper on early Kannada lexicons and require the exact accession number of the palm leaf manuscript cited in Preface page xi.'
+    },
+    {
+      id: 'TCK-2026-102',
+      senderName: 'Smt. Shailaja Patil',
+      email: 'shailaja.patil@gmail.com',
+      subject: 'Speed Post Tracking inquiry for Order #JSS-2026-88050',
+      priority: 'High',
+      status: 'In Progress',
+      department: 'Postal Dispatch Desk',
+      createdAt: '2026-03-11T14:30:00Z',
+      assignedTo: 'Savitha R.',
+      message: 'Kindly assist with the India Post Speed Post tracking number for my order dispatched to Hubli. The tracking status shows transit but consignment number not SMSed.'
+    },
+    {
+      id: 'TCK-2026-103',
+      senderName: 'Dr. Anand Kumar',
+      email: 'anand.k@bangaloreuniv.edu',
+      subject: 'Request for Institutional Library Discount invoice (Proforma)',
+      priority: 'Normal',
+      status: 'Resolved',
+      department: 'Bulk Procurement',
+      createdAt: '2026-03-09T11:00:00Z',
+      assignedTo: 'Pavan Kumar',
+      message: 'Proforma invoice received and approved by University finance committee. 40 volumes ordered.'
     }
   ];
 }
@@ -1640,6 +1879,333 @@ export const adminService = {
     this.logAction(actor, 'UPDATE_SETTINGS', 'System Store Configuration', null, 'Settings saved', 'Configuration calibration');
     notify();
     return { success: true, settings: updated };
+  },
+
+  // 21. PROMOTIONS & MARKETING CAMPAIGNS
+  getPromotions() {
+    let list = storage.get(KEYS.PROMOTIONS, null);
+    if (!list || !Array.isArray(list) || list.length === 0) {
+      const seed = getSeedPromotions();
+      storage.set(KEYS.PROMOTIONS, seed);
+      return seed;
+    }
+    return list;
+  },
+
+  createPromotion(promoData, actor = 'Pavan Kumar') {
+    if (!promoData.title || !promoData.discountNote) {
+      return { success: false, error: 'Campaign Title and Discount Details are required.' };
+    }
+    const list = this.getPromotions();
+    const newPromo = {
+      id: `promo-${Date.now().toString().slice(-4)}`,
+      title: promoData.title.trim(),
+      kannadaTitle: promoData.kannadaTitle ? promoData.kannadaTitle.trim() : '',
+      discountNote: promoData.discountNote.trim(),
+      code: (promoData.code || 'SPECIAL').trim().toUpperCase(),
+      startDate: promoData.startDate || new Date().toISOString().split('T')[0],
+      endDate: promoData.endDate || '2026-12-31',
+      status: promoData.status || 'active',
+      audience: promoData.audience || 'All Readers',
+      featuredBookTitle: promoData.featuredBookTitle || 'Shivapada Ratnakosha'
+    };
+    list.unshift(newPromo);
+    storage.set(KEYS.PROMOTIONS, list);
+    this.logAction(actor, 'CREATE_PROMOTION', newPromo.title, null, newPromo.code, 'Launched promotional campaign');
+    notify();
+    return { success: true, promotion: newPromo };
+  },
+
+  togglePromotion(id, actor = 'Pavan Kumar') {
+    const list = this.getPromotions();
+    const item = list.find(p => p.id === id);
+    if (!item) return { success: false, error: 'Promotion not found' };
+    const oldStatus = item.status;
+    item.status = item.status === 'active' ? 'paused' : 'active';
+    storage.set(KEYS.PROMOTIONS, list);
+    this.logAction(actor, 'TOGGLE_PROMOTION', item.title, oldStatus, item.status, 'Campaign status toggle');
+    notify();
+    return { success: true, promotion: item };
+  },
+
+  // 22. HOMEPAGE CMS
+  getHomepageCms() {
+    let cms = storage.get(KEYS.HOMEPAGE_CMS, null);
+    if (!cms || typeof cms !== 'object') {
+      const seed = getSeedHomepageCms();
+      storage.set(KEYS.HOMEPAGE_CMS, seed);
+      return seed;
+    }
+    return cms;
+  },
+
+  updateHomepageCms(updates, actor = 'Pavan Kumar') {
+    const current = this.getHomepageCms();
+    const updated = { ...current, ...updates, updatedAt: new Date().toISOString() };
+    storage.set(KEYS.HOMEPAGE_CMS, updated);
+    this.logAction(actor, 'UPDATE_HOMEPAGE_CMS', 'Homepage Content', null, 'CMS Updated', 'Editorial changes published');
+    notify();
+    return { success: true, cms: updated };
+  },
+
+  // 23. PERIODICALS (PRASADA BI-MONTHLY JOURNAL)
+  getPeriodicals() {
+    let list = storage.get(KEYS.PERIODICALS, null);
+    if (!list || !Array.isArray(list) || list.length === 0) {
+      const seed = getSeedPeriodicals();
+      storage.set(KEYS.PERIODICALS, seed);
+      return seed;
+    }
+    return list;
+  },
+
+  addPeriodical(data, actor = 'Pavan Kumar') {
+    if (!data.title || !data.volume || !data.issueNo) {
+      return { success: false, error: 'Title, Volume and Issue number are required.' };
+    }
+    const list = this.getPeriodicals();
+    const newPrd = {
+      id: `prd-${Date.now().toString().slice(-4)}`,
+      title: data.title.trim(),
+      volume: data.volume.trim(),
+      issueNo: data.issueNo.trim(),
+      year: Number(data.year || new Date().getFullYear()),
+      chiefEditor: data.chiefEditor || 'HH Jagadguru Sri Shivarathri Deshikendra Mahaswamiji',
+      coverTheme: data.coverTheme ? data.coverTheme.trim() : 'Classical Philosophy & Shaiva Thought',
+      priceAnnual: Number(data.priceAnnual || 150),
+      priceLife: Number(data.priceLife || 2000),
+      circulatedCopies: Number(data.circulatedCopies || 4500),
+      dispatchStatus: data.dispatchStatus || 'Dispatched via Registered Book Post',
+      pdfArchiveUrl: data.pdfArchiveUrl || 'https://jssonline.org/publications/prasada/',
+      status: 'active'
+    };
+    list.unshift(newPrd);
+    storage.set(KEYS.PERIODICALS, list);
+    this.logAction(actor, 'CREATE_PERIODICAL', `${newPrd.volume} ${newPrd.issueNo}`, null, 'Published', 'Added new periodical issue');
+    notify();
+    return { success: true, periodical: newPrd };
+  },
+
+  updatePeriodical(id, updates, actor = 'Pavan Kumar') {
+    const list = this.getPeriodicals();
+    const item = list.find(p => p.id === id);
+    if (!item) return { success: false, error: 'Periodical not found' };
+    const oldStatus = item.dispatchStatus;
+    Object.assign(item, updates);
+    storage.set(KEYS.PERIODICALS, list);
+    this.logAction(actor, 'UPDATE_PERIODICAL', item.issueNo, oldStatus, item.dispatchStatus, 'Updated periodical status');
+    notify();
+    return { success: true, periodical: item };
+  },
+
+  // 24. VACHANAS & MANUSCRIPTS DIGITIZATION CMS
+  getVachanas() {
+    let list = storage.get(KEYS.VACHANAS, null);
+    if (!list || !Array.isArray(list) || list.length === 0) {
+      const seed = getSeedVachanas();
+      storage.set(KEYS.VACHANAS, seed);
+      return seed;
+    }
+    return list;
+  },
+
+  addVachana(data, actor = 'Pavan Kumar') {
+    if (!data.poet || !data.ankita) {
+      return { success: false, error: 'Poet name and Ankita are required.' };
+    }
+    const list = this.getVachanas();
+    const newEntry = {
+      id: `mss-${Date.now().toString().slice(-4)}`,
+      poet: data.poet.trim(),
+      ankita: data.ankita.trim(),
+      vachanaCount: Number(data.vachanaCount || 100),
+      manuscriptRef: (data.manuscriptRef || `SUTTUR-MSS-${Date.now().toString().slice(-3)}`).trim(),
+      leafCondition: data.leafCondition || 'Digitized (High Res 1200 DPI)',
+      scholarlyEditor: data.scholarlyEditor || 'JSS Granthamale Editorial Board',
+      transcriptionStatus: data.transcriptionStatus || 'Under Scholarly Review',
+      languages: data.languages || 'Kannada, English'
+    };
+    list.unshift(newEntry);
+    storage.set(KEYS.VACHANAS, list);
+    this.logAction(actor, 'ADD_MANUSCRIPT_RECORD', newEntry.poet, null, newEntry.manuscriptRef, 'Catalogued manuscript in repository');
+    notify();
+    return { success: true, vachana: newEntry };
+  },
+
+  // 25. READING PATHS
+  getReadingPaths() {
+    let list = storage.get(KEYS.READING_PATHS, null);
+    if (!list || !Array.isArray(list) || list.length === 0) {
+      const seed = getSeedReadingPaths();
+      storage.set(KEYS.READING_PATHS, seed);
+      return seed;
+    }
+    return list;
+  },
+
+  addReadingPath(data, actor = 'Pavan Kumar') {
+    if (!data.title) return { success: false, error: 'Path title is required.' };
+    const list = this.getReadingPaths();
+    const newPath = {
+      id: `path-${Date.now().toString().slice(-4)}`,
+      title: data.title.trim(),
+      kannadaTitle: data.kannadaTitle ? data.kannadaTitle.trim() : '',
+      difficulty: data.difficulty || 'Beginner',
+      estimatedHours: Number(data.estimatedHours || 10),
+      recommendedBooks: Array.isArray(data.recommendedBooks) ? data.recommendedBooks : [data.recommendedBooks || 'Bhakthibhandari Basavannanavaru'],
+      description: data.description || 'Guided philosophical journey through classical treatises.',
+      status: 'active'
+    };
+    list.unshift(newPath);
+    storage.set(KEYS.READING_PATHS, list);
+    this.logAction(actor, 'CREATE_READING_PATH', newPath.title, null, newPath.difficulty, 'Curated new scholar reading journey');
+    notify();
+    return { success: true, readingPath: newPath };
+  },
+
+  toggleReadingPath(id, actor = 'Pavan Kumar') {
+    const list = this.getReadingPaths();
+    const item = list.find(p => p.id === id);
+    if (!item) return { success: false, error: 'Path not found' };
+    const oldStatus = item.status;
+    item.status = item.status === 'active' ? 'draft' : 'active';
+    storage.set(KEYS.READING_PATHS, list);
+    this.logAction(actor, 'TOGGLE_READING_PATH', item.title, oldStatus, item.status, 'Reading path visibility toggle');
+    notify();
+    return { success: true, readingPath: item };
+  },
+
+  // 26. SUPPORT TICKETS & SCHOLAR INQUIRIES
+  getSupportTickets() {
+    let list = storage.get(KEYS.SUPPORT_TICKETS, null);
+    if (!list || !Array.isArray(list) || list.length === 0) {
+      const seed = getSeedSupportTickets();
+      storage.set(KEYS.SUPPORT_TICKETS, seed);
+      return seed;
+    }
+    return list;
+  },
+
+  updateSupportTicket(id, updates, actor = 'Pavan Kumar') {
+    const list = this.getSupportTickets();
+    const item = list.find(t => t.id === id);
+    if (!item) return { success: false, error: 'Ticket not found' };
+    const oldStatus = item.status;
+    Object.assign(item, updates);
+    storage.set(KEYS.SUPPORT_TICKETS, list);
+    this.logAction(actor, 'UPDATE_SUPPORT_TICKET', id, oldStatus, item.status, updates.note || 'Support ticket state advanced');
+    notify();
+    return { success: true, ticket: item };
+  },
+
+  replySupportTicket(id, replyText, actor = 'Pavan Kumar') {
+    if (!replyText || replyText.trim().length < 4) {
+      return { success: false, error: 'A reply message of at least 4 characters is required.' };
+    }
+    return this.updateSupportTicket(id, {
+      status: 'Resolved',
+      replyMessage: replyText.trim(),
+      resolvedAt: new Date().toISOString(),
+      resolvedBy: actor
+    }, actor);
+  },
+
+  // 27. SALES & COMMERCIAL ANALYTICS
+  getSalesAnalytics() {
+    const orders = this.getOrders();
+    const validOrders = orders.filter(o => o.status !== 'cancelled');
+    const grossSales = validOrders.reduce((sum, o) => sum + (o.totals?.grandTotal || 0), 0);
+    const totalItems = validOrders.reduce((sum, o) => sum + (o.totals?.itemsCount || 0), 0);
+
+    return {
+      grossSales,
+      totalOrdersCount: validOrders.length,
+      totalItemsSold: totalItems,
+      avgOrderValue: validOrders.length ? Math.round(grossSales / validOrders.length) : 0,
+      categoryDistribution: [
+        { category: 'Vachana Literature (ವಚನ ಸಾಹಿತ್ಯ)', sharePercent: 44, revenue: Math.round(grossSales * 0.44) },
+        { category: 'Philosophy & Darshana (ತತ್ತ್ವಶಾಸ್ತ್ರ)', sharePercent: 28, revenue: Math.round(grossSales * 0.28) },
+        { category: 'Lexicons & Reference (ಕೋಶ ಸಾಹಿತ್ಯ)', sharePercent: 16, revenue: Math.round(grossSales * 0.16) },
+        { category: 'Periodicals & Journals (ಪ್ರಸಾದ ಪತ್ರಿಕೆ)', sharePercent: 8, revenue: Math.round(grossSales * 0.08) },
+        { category: 'Heritage & Math History (ಪರಂಪರೆ)', sharePercent: 4, revenue: Math.round(grossSales * 0.04) }
+      ],
+      paymentDistribution: [
+        { method: 'UPI (PhonePe, GPay, Paytm)', percent: 68 },
+        { method: 'Online Netbanking & Debit Cards', percent: 22 },
+        { method: 'Post Office VPP / Counter Cash', percent: 10 }
+      ],
+      topSellingBooks: [
+        { id: 1, title: 'Shivapada Ratnakosha', copiesSold: 124, revenue: 124000, trend: '+14% MoM' },
+        { id: 3, title: 'Patanjali Yoga Sutras', copiesSold: 98, revenue: 29400, trend: '+8% MoM' },
+        { id: 5, title: 'The Heritage of Sri Suttur Math', copiesSold: 76, revenue: 22800, trend: '+22% MoM' },
+        { id: 7, title: 'Basava Darshana', copiesSold: 64, revenue: 19200, trend: '+12% MoM' },
+        { id: 11, title: 'Bhakthibhandari Basavannanavaru', copiesSold: 52, revenue: 10400, trend: '+5% MoM' }
+      ]
+    };
+  },
+
+  // 28. STAFF RBAC MANAGEMENT
+  toggleStaffStatus(id, actor = 'Pavan Kumar') {
+    const staff = this.getStaffUsers();
+    const user = staff.find(u => u.id === id);
+    if (!user) return { success: false, error: 'Staff user not found' };
+    const oldStatus = user.status;
+    user.status = user.status === 'Active' ? 'Suspended' : 'Active';
+    storage.set(KEYS.STAFF_USERS, staff);
+    this.logAction(actor, 'TOGGLE_STAFF_STATUS', user.name, oldStatus, user.status, 'Account security toggle');
+    notify();
+    return { success: true, user };
+  },
+
+  // 29. CATALOGUE CRUD (Add & Edit Books)
+  addBook(bookData, actor = 'Pavan Kumar') {
+    if (!bookData.title || !bookData.price) {
+      return { success: false, error: 'Book Title and Price are mandatory.' };
+    }
+    const books = catalogueService.getBooksSync();
+    const newId = books.length + 1;
+    const newBook = {
+      id: newId,
+      numericId: newId,
+      title: bookData.title.trim(),
+      kannadaTitle: bookData.kannadaTitle ? bookData.kannadaTitle.trim() : bookData.title.trim(),
+      author: bookData.author ? bookData.author.trim() : 'JSS Editorial Board',
+      category: bookData.category || 'Vachana Literature',
+      series: bookData.series || 'Sri Shivarathreeshwara Granthamale',
+      price: Number(bookData.price),
+      stock: Number(bookData.stock || 25),
+      format: bookData.format || 'Paperback',
+      isbn: (bookData.isbn || `978-81-94921-${newId.toString().padStart(4, '0')}-1`).trim(),
+      language: bookData.language || 'Kannada',
+      description: bookData.description ? bookData.description.trim() : 'Published under the patronage of Sri Suttur Veerashimhasana Math.',
+      status: bookData.status || 'published',
+      publishedYear: Number(bookData.publishedYear || new Date().getFullYear()),
+      pages: Number(bookData.pages || 220),
+      weight: Number(bookData.weight || 350)
+    };
+
+    const overrides = storage.get(KEYS.CATALOGUE_OVERRIDES, {});
+    overrides[newId] = newBook;
+    storage.set(KEYS.CATALOGUE_OVERRIDES, overrides);
+
+    this.logAction(actor, 'CREATE_BOOK', newBook.title, null, `₹${newBook.price}`, 'Added new catalogue entry');
+    notify();
+    return { success: true, book: newBook };
+  },
+
+  updateBook(id, updates, actor = 'Pavan Kumar') {
+    const books = catalogueService.getBooksSync();
+    const book = books.find(b => b.id === Number(id));
+    if (!book) return { success: false, error: 'Book not found' };
+
+    const oldTitle = book.title;
+    const overrides = storage.get(KEYS.CATALOGUE_OVERRIDES, {});
+    overrides[id] = { ...(overrides[id] || {}), ...updates };
+    storage.set(KEYS.CATALOGUE_OVERRIDES, overrides);
+
+    this.logAction(actor, 'UPDATE_BOOK_DETAILS', oldTitle, null, updates.title || oldTitle, 'Catalogue metadata calibration');
+    notify();
+    return { success: true, book: { ...book, ...updates } };
   }
 };
 

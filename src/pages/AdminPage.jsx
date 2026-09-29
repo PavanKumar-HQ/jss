@@ -83,6 +83,26 @@ export default function AdminPage({ onNavigate }) {
   const [staffUsers, setStaffUsers] = useState(() => adminService.getStaffUsers());
   const [settings, setSettings] = useState(() => adminService.getSettings());
   const [books, setBooks] = useState(() => catalogueService.getBooksSync());
+  const [promotions, setPromotions] = useState(() => adminService.getPromotions());
+  const [homepageCms, setHomepageCms] = useState(() => adminService.getHomepageCms());
+  const [periodicals, setPeriodicals] = useState(() => adminService.getPeriodicals());
+  const [vachanas, setVachanas] = useState(() => adminService.getVachanas());
+  const [readingPaths, setReadingPaths] = useState(() => adminService.getReadingPaths());
+  const [supportTickets, setSupportTickets] = useState(() => adminService.getSupportTickets());
+  const [salesAnalytics, setSalesAnalytics] = useState(() => adminService.getSalesAnalytics());
+
+  // Additional Modals & Filter States
+  const [isNewBookModalOpen, setIsNewBookModalOpen] = useState(false);
+  const [editingBook, setEditingBook] = useState(null);
+  const [isNewPromoModalOpen, setIsNewPromoModalOpen] = useState(false);
+  const [isNewPeriodicalModalOpen, setIsNewPeriodicalModalOpen] = useState(false);
+  const [isNewVachanaModalOpen, setIsNewVachanaModalOpen] = useState(false);
+  const [isNewReadingPathModalOpen, setIsNewReadingPathModalOpen] = useState(false);
+  const [isNewStaffModalOpen, setIsNewStaffModalOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [ticketReplyText, setTicketReplyText] = useState('');
+  const [bookCategoryFilter, setBookCategoryFilter] = useState('All');
+  const [bookStatusFilter, setBookStatusFilter] = useState('All');
 
   // Modal & Detail States
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -139,6 +159,13 @@ export default function AdminPage({ onNavigate }) {
       setStaffUsers(adminService.getStaffUsers());
       setSettings(adminService.getSettings());
       setBooks(catalogueService.getBooksSync());
+      setPromotions(adminService.getPromotions());
+      setHomepageCms(adminService.getHomepageCms());
+      setPeriodicals(adminService.getPeriodicals());
+      setVachanas(adminService.getVachanas());
+      setReadingPaths(adminService.getReadingPaths());
+      setSupportTickets(adminService.getSupportTickets());
+      setSalesAnalytics(adminService.getSalesAnalytics());
     });
   }, []);
 
@@ -201,17 +228,17 @@ export default function AdminPage({ onNavigate }) {
       group: 'MARKETING',
       items: [
         { id: 'coupons', label: 'Coupons & Limits', icon: Ticket, badge: coupons.filter(c => c.status === 'active').length },
-        { id: 'promotions', label: 'Promotions', icon: Megaphone, badge: null }
+        { id: 'promotions', label: 'Promotions', icon: Megaphone, badge: promotions.filter(p => p.status === 'active').length || null }
       ]
     },
     {
       group: 'CONTENT',
       items: [
-        { id: 'homepage-cms', label: 'Homepage CMS', icon: Home, badge: null },
+        { id: 'homepage-cms', label: 'Homepage CMS', icon: Home, badge: 'Live' },
         { id: 'faqs-cms', label: 'FAQs & Bilingual', icon: HelpCircle, badge: faqs.length },
-        { id: 'periodicals', label: 'Periodicals', icon: Newspaper, badge: 'Prasada' },
-        { id: 'vachanas', label: 'Vachanas & MSS', icon: Scroll, badge: null },
-        { id: 'reading-paths', label: 'Reading Paths', icon: Compass, badge: null }
+        { id: 'periodicals', label: 'Periodicals', icon: Newspaper, badge: `${periodicals.length} Issues` },
+        { id: 'vachanas', label: 'Vachanas & MSS', icon: Scroll, badge: `${vachanas.length} MSS` },
+        { id: 'reading-paths', label: 'Reading Paths', icon: Compass, badge: `${readingPaths.length} Paths` }
       ]
     },
     {
@@ -219,7 +246,7 @@ export default function AdminPage({ onNavigate }) {
       items: [
         { id: 'customers', label: 'Customers', icon: UserCheck, badge: customers.length },
         { id: 'shipping', label: 'Shipping & PINs', icon: Truck, badge: 'Speed Post' },
-        { id: 'support', label: 'Support Desk', icon: Headphones, badge: null }
+        { id: 'support', label: 'Support Desk', icon: Headphones, badge: supportTickets.filter(t => t.status === 'Open').length || null, badgeColor: '#DC2626' }
       ]
     },
     {
@@ -227,7 +254,7 @@ export default function AdminPage({ onNavigate }) {
       items: [
         { id: 'operations-alerts', label: 'Alerts Radar', icon: AlertTriangle, badge: operationsAlerts.length ? `${operationsAlerts.length}` : null, badgeColor: '#DC2626' },
         { id: 'fraud-radar', label: 'Fraud & Abuse', icon: ShieldAlert, badge: fraudAlerts.filter(f => f.status === 'Under Review').length || null, badgeColor: '#D97706' },
-        { id: 'sales-analytics', label: 'Sales Analytics', icon: TrendingUp, badge: null },
+        { id: 'sales-analytics', label: 'Sales Analytics', icon: TrendingUp, badge: `₹${Math.round(salesAnalytics.grossSales / 1000)}k` },
         { id: 'search-analytics', label: 'Search Analytics', icon: Search, badge: null }
       ]
     },
@@ -1058,6 +1085,144 @@ export default function AdminPage({ onNavigate }) {
             </div>
           )}
 
+          {/* TAB: SALES ANALYTICS */}
+          {activeTab === 'sales-analytics' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Sales Performance & Commercial Intelligence
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Revenue breakdowns, top selling publications, payment channels, and seasonal order volumes.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      alert('Sales Report CSV generated and downloaded.');
+                      showToast('Sales Report CSV downloaded.');
+                    }}
+                    className="btn btn-outline btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <FileText size={14} />
+                    <span>Export CSV</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="btn btn-primary btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Printer size={14} />
+                    <span>Print Report</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 KPI Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>Gross Store Sales</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-maroon)', marginTop: '4px' }}>
+                    ₹{salesAnalytics.grossSales.toLocaleString('en-IN')}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>Orders Dispatched</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-charcoal)', marginTop: '4px' }}>
+                    {salesAnalytics.totalOrdersCount} Orders
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>Total Books Sold</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#15803D', marginTop: '4px' }}>
+                    {salesAnalytics.totalItemsSold} Copies
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>Average Order Value</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#B45309', marginTop: '4px' }}>
+                    ₹{salesAnalytics.avgOrderValue}
+                  </div>
+                </div>
+              </div>
+
+              {/* 2-Column Split: Category Sales Share & Payment Methods */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '20px' }}>
+                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '20px' }}>
+                  <h3 style={{ margin: '0 0 16px 0', fontSize: '0.94rem', fontWeight: 800, color: 'var(--color-maroon)' }}>
+                    Revenue Share by Literary Category
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {salesAnalytics.categoryDistribution.map((cat, idx) => (
+                      <div key={idx}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '4px' }}>
+                          <span style={{ fontWeight: 600 }}>{cat.category}</span>
+                          <span style={{ fontWeight: 800 }}>₹{cat.revenue.toLocaleString('en-IN')} ({cat.sharePercent}%)</span>
+                        </div>
+                        <div style={{ height: '8px', width: '100%', backgroundColor: '#FAF7F2', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${cat.sharePercent}%`, backgroundColor: 'var(--color-maroon)', borderRadius: '4px' }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '20px' }}>
+                  <h3 style={{ margin: '0 0 16px 0', fontSize: '0.94rem', fontWeight: 800, color: 'var(--color-maroon)' }}>
+                    Payment Channel Distribution
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {salesAnalytics.paymentDistribution.map((pm, idx) => (
+                      <div key={idx} style={{ padding: '12px 14px', backgroundColor: '#FAF7F2', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.84rem', fontWeight: 700 }}>{pm.method}</span>
+                          <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--color-maroon)' }}>{pm.percent}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Selling Titles Leaderboard */}
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
+                <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--color-border)' }}>
+                  <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: 'var(--color-maroon)' }}>
+                    Top Selling Publications Leaderboard
+                  </h3>
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '12px 14px' }}>Rank & Publication</th>
+                      <th style={{ padding: '12px 14px' }}>Copies Sold</th>
+                      <th style={{ padding: '12px 14px' }}>Gross Revenue</th>
+                      <th style={{ padding: '12px 14px' }}>Month-over-Month</th>
+                      <th style={{ padding: '12px 14px' }}>Inventory Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {salesAnalytics.topSellingBooks.map((b, idx) => (
+                      <tr key={b.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                        <td style={{ padding: '12px 14px', fontWeight: 700 }}>
+                          #{idx + 1} — {b.title}
+                        </td>
+                        <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontWeight: 800 }}>{b.copiesSold}</td>
+                        <td style={{ padding: '12px 14px', fontWeight: 800, color: 'var(--color-maroon)' }}>₹{b.revenue.toLocaleString('en-IN')}</td>
+                        <td style={{ padding: '12px 14px', color: '#15803D', fontWeight: 700 }}>{b.trend}</td>
+                        <td style={{ padding: '12px 14px' }}><span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#DCFCE7', color: '#15803D' }}>Healthy Stock</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* TAB: SYSTEM HEALTH & TECH DIAGNOSTICS */}
           {activeTab === 'system-health' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -1330,6 +1495,108 @@ export default function AdminPage({ onNavigate }) {
             </div>
           )}
 
+          {/* TAB: SUPPORT DESK & SCHOLAR INQUIRIES */}
+          {activeTab === 'support' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Scholar Support Desk & Reader Inquiry Console
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Handle scholar citation queries, postal tracking requests, and institutional book inquiries.
+                  </p>
+                </div>
+              </div>
+
+              {/* KPI Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+                <div style={{ backgroundColor: '#FEF2F2', padding: '14px 18px', borderRadius: '8px', border: '1px solid #FECACA' }}>
+                  <span style={{ fontSize: '0.74rem', color: '#DC2626', fontWeight: 700 }}>Open Tickets</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#DC2626', marginTop: '4px' }}>
+                    {supportTickets.filter(t => t.status === 'Open').length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FEF3C7', padding: '14px 18px', borderRadius: '8px', border: '1px solid #FCD34D' }}>
+                  <span style={{ fontSize: '0.74rem', color: '#B45309', fontWeight: 700 }}>In Progress</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#B45309', marginTop: '4px' }}>
+                    {supportTickets.filter(t => t.status === 'In Progress').length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#DCFCE7', padding: '14px 18px', borderRadius: '8px', border: '1px solid #86EFAC' }}>
+                  <span style={{ fontSize: '0.74rem', color: '#15803D', fontWeight: 700 }}>Resolved</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#15803D', marginTop: '4px' }}>
+                    {supportTickets.filter(t => t.status === 'Resolved').length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>Avg Response Time</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-charcoal)', marginTop: '4px' }}>1.8 Hours</div>
+                </div>
+              </div>
+
+              {/* Tickets Table */}
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '12px 14px' }}>Ticket ID</th>
+                      <th style={{ padding: '12px 14px' }}>Reader / Scholar</th>
+                      <th style={{ padding: '12px 14px' }}>Department</th>
+                      <th style={{ padding: '12px 14px' }}>Subject</th>
+                      <th style={{ padding: '12px 14px' }}>Priority</th>
+                      <th style={{ padding: '12px 14px' }}>Status</th>
+                      <th style={{ padding: '12px 14px' }}>Assigned To</th>
+                      <th style={{ padding: '12px 14px' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {supportTickets.map((t) => (
+                      <tr key={t.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                        <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontWeight: 700 }}>{t.id}</td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 700 }}>{t.senderName}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>{t.email}</div>
+                        </td>
+                        <td style={{ padding: '12px 14px', fontSize: '0.78rem' }}>{t.department}</td>
+                        <td style={{ padding: '12px 14px', maxWidth: '280px' }}>
+                          <div style={{ fontWeight: 600 }}>{t.subject}</div>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {t.message}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '2px 6px', borderRadius: '3px', backgroundColor: t.priority === 'High' ? '#FEF2F2' : '#F3F4F6', color: t.priority === 'High' ? '#DC2626' : '#4B5563' }}>
+                            {t.priority}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: t.status === 'Open' ? '#FEF2F2' : t.status === 'In Progress' ? '#FEF3C7' : '#DCFCE7', color: t.status === 'Open' ? '#DC2626' : t.status === 'In Progress' ? '#B45309' : '#15803D' }}>
+                            {t.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px', fontSize: '0.78rem' }}>{t.assignedTo}</td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedTicket(t);
+                              setTicketReplyText('');
+                            }}
+                            className="btn btn-primary btn-sm"
+                            style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                          >
+                            {t.status === 'Resolved' ? 'View' : 'Reply'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* TAB 2: ORDERS MANAGEMENT WITH TIMELINE & NON-LINEAR STATE MACHINE */}
           {activeTab === 'orders' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -1438,6 +1705,56 @@ export default function AdminPage({ onNavigate }) {
                     Invariant: Draft → Published → Unlisted → Archived lifecycle instead of destructive deletion. ISBN normalization and multi-edition support.
                   </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewBookModalOpen(true)}
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Plus size={15} />
+                  <span>Add Publication</span>
+                </button>
+              </div>
+
+              {/* Filtering Bar */}
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', backgroundColor: '#FFFFFF', padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Filter size={14} color="var(--color-maroon)" />
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Filters:</span>
+                </div>
+                <select
+                  value={bookCategoryFilter}
+                  onChange={(e) => setBookCategoryFilter(e.target.value)}
+                  style={{ padding: '6px 10px', borderRadius: '5px', border: '1px solid var(--color-border)', fontSize: '0.8rem' }}
+                >
+                  <option value="All">All Categories</option>
+                  <option value="Vachana Literature">Vachana Literature</option>
+                  <option value="Philosophy">Philosophy</option>
+                  <option value="Lexicon">Lexicon</option>
+                  <option value="Epics & Poetry">Epics & Poetry</option>
+                  <option value="Children Literature">Children Literature</option>
+                </select>
+
+                <select
+                  value={bookStatusFilter}
+                  onChange={(e) => setBookStatusFilter(e.target.value)}
+                  style={{ padding: '6px 10px', borderRadius: '5px', border: '1px solid var(--color-border)', fontSize: '0.8rem' }}
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                  <option value="unlisted">Unlisted</option>
+                  <option value="archived">Archived</option>
+                </select>
+
+                <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginLeft: 'auto' }}>
+                  Showing {books.filter(b => {
+                    const matchSearch = !searchFilter || b.title.toLowerCase().includes(searchFilter.toLowerCase()) || (b.kannadaTitle && b.kannadaTitle.includes(searchFilter));
+                    const matchCat = bookCategoryFilter === 'All' || b.category === bookCategoryFilter;
+                    const matchStat = bookStatusFilter === 'All' || (b.status || 'published') === bookStatusFilter;
+                    return matchSearch && matchCat && matchStat;
+                  }).length} of {books.length} publications
+                </span>
               </div>
 
               {/* Books Grid / Table */}
@@ -1457,7 +1774,12 @@ export default function AdminPage({ onNavigate }) {
                   </thead>
                   <tbody>
                     {books
-                      .filter(b => !searchFilter || b.title.toLowerCase().includes(searchFilter.toLowerCase()))
+                      .filter(b => {
+                        const matchSearch = !searchFilter || b.title.toLowerCase().includes(searchFilter.toLowerCase()) || (b.kannadaTitle && b.kannadaTitle.includes(searchFilter));
+                        const matchCat = bookCategoryFilter === 'All' || b.category === bookCategoryFilter;
+                        const matchStat = bookStatusFilter === 'All' || (b.status || 'published') === bookStatusFilter;
+                        return matchSearch && matchCat && matchStat;
+                      })
                       .map((book) => {
                         const stock = book.stock || 25;
                         const status = book.status || 'published';
@@ -1481,22 +1803,39 @@ export default function AdminPage({ onNavigate }) {
                               {stock}
                             </td>
                             <td style={{ padding: '12px 14px' }}>
-                              <span
+                              <select
+                                value={status}
+                                onChange={(e) => {
+                                  const newStat = e.target.value;
+                                  adminService.updateBookStatus(book.id, newStat, `Status changed by admin to ${newStat}`);
+                                  showToast(`Status updated to ${newStat}`);
+                                }}
                                 style={{
-                                  fontSize: '0.72rem',
+                                  fontSize: '0.74rem',
                                   fontWeight: 700,
-                                  padding: '2px 8px',
+                                  padding: '3px 6px',
                                   borderRadius: '4px',
-                                  textTransform: 'capitalize',
+                                  border: '1px solid var(--color-border)',
                                   backgroundColor: status === 'published' ? '#DCFCE7' : status === 'archived' ? '#F3F4F6' : '#FEF3C7',
                                   color: status === 'published' ? '#15803D' : status === 'archived' ? '#6B7280' : '#B45309'
                                 }}
                               >
-                                {status}
-                              </span>
+                                <option value="published">Published</option>
+                                <option value="draft">Draft</option>
+                                <option value="unlisted">Unlisted</option>
+                                <option value="archived">Archived</option>
+                              </select>
                             </td>
                             <td style={{ padding: '12px 14px' }}>
                               <div style={{ display: 'flex', gap: '6px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingBook({ ...book })}
+                                  className="btn btn-secondary btn-sm"
+                                  style={{ padding: '3px 7px', fontSize: '0.72rem' }}
+                                >
+                                  Edit
+                                </button>
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -1509,7 +1848,7 @@ export default function AdminPage({ onNavigate }) {
                                 >
                                   Price
                                 </button>
-                                {status !== 'archived' && (
+                                {status !== 'archived' ? (
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -1528,12 +1867,134 @@ export default function AdminPage({ onNavigate }) {
                                   >
                                     Archive
                                   </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      adminService.updateBookStatus(book.id, 'published', 'Restored from archive');
+                                      showToast(`"${book.title}" republished.`);
+                                    }}
+                                    className="btn btn-outline btn-sm"
+                                    style={{ padding: '3px 7px', fontSize: '0.72rem', color: '#15803D' }}
+                                  >
+                                    Publish
+                                  </button>
                                 )}
                               </div>
                             </td>
                           </tr>
                         );
                       })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: EDITIONS & FORMATS */}
+          {activeTab === 'editions' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Editions, Formats & Print Specifications
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Manage physical binding editions (Paperback, Hardbound, Deluxe Leatherbound, Pocket Vachana), paper GSM, and India Post weight tiers.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewBookModalOpen(true)}
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Plus size={14} />
+                  <span>Add Format Variant</span>
+                </button>
+              </div>
+
+              {/* KPI Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>Total Formats Catalogued</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-charcoal)', marginTop: '4px' }}>
+                    {books.length + 8} Variants
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>Clothbound Hardbound</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-maroon)', marginTop: '4px' }}>
+                    {books.filter(b => b.price >= 300).length} Editions
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>Average Parcel Weight</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-charcoal)', marginTop: '4px' }}>
+                    385g (Speed Post Tier 1)
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>Printing Press Facility</span>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#C59B27', marginTop: '6px' }}>
+                    Mysuru Suttur Press Desk
+                  </div>
+                </div>
+              </div>
+
+              {/* Editions Table */}
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '12px 14px' }}>Publication Title</th>
+                      <th style={{ padding: '12px 14px' }}>Format & Binding</th>
+                      <th style={{ padding: '12px 14px' }}>Paper & Spec</th>
+                      <th style={{ padding: '12px 14px' }}>Weight (g)</th>
+                      <th style={{ padding: '12px 14px' }}>Pages</th>
+                      <th style={{ padding: '12px 14px' }}>Selling MRP</th>
+                      <th style={{ padding: '12px 14px' }}>Available Stock</th>
+                      <th style={{ padding: '12px 14px' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {books.map((b) => (
+                      <tr key={b.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                        <td style={{ padding: '12px 14px', fontWeight: 700 }}>
+                          <div>{b.title}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>
+                            {b.isbn || `JSS-ISBN-00${b.id}`}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontSize: '0.74rem', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', backgroundColor: b.price >= 400 ? '#FEF3C7' : '#EFF6FF', color: b.price >= 400 ? '#B45309' : '#1D4ED8' }}>
+                            {b.format || (b.price >= 400 ? 'Hardbound Deluxe' : 'Standard Paperback')}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px', fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                          {b.price >= 400 ? '80 GSM Natural Shade, Gold Foil Spine' : '70 GSM Maplitho Paper, 300 GSM Art Card'}
+                        </td>
+                        <td style={{ padding: '12px 14px', fontFamily: 'monospace' }}>{b.weight || (b.price >= 400 ? 580 : 340)}g</td>
+                        <td style={{ padding: '12px 14px', fontFamily: 'monospace' }}>{b.pages || 240}</td>
+                        <td style={{ padding: '12px 14px', fontWeight: 800, color: 'var(--color-maroon)' }}>₹{b.price}</td>
+                        <td style={{ padding: '12px 14px', fontWeight: 700, color: (b.stock || 25) < 10 ? '#DC2626' : '#15803D' }}>
+                          {b.stock || 25} copies
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedStockBook(b);
+                              setIsStockModalOpen(true);
+                            }}
+                            className="btn btn-secondary btn-sm"
+                            style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                          >
+                            Update Stock
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -1611,6 +2072,129 @@ export default function AdminPage({ onNavigate }) {
             </div>
           )}
 
+          {/* TAB: PRICING & TIERS */}
+          {activeTab === 'pricing' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Statutory Pricing, Volume Tiers & Tax Rules
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Educational book subsidies, institutional library volume grants, and statutory tax exemption compliance.
+                  </p>
+                </div>
+              </div>
+
+              {/* Statutory Exemption Banner */}
+              <div style={{ backgroundColor: '#26060C', border: '1px solid rgba(197, 155, 39, 0.4)', borderRadius: '8px', padding: '18px 24px', color: '#EDE7DC' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                  <ShieldCheck size={20} color="#DFBF5F" />
+                  <span style={{ fontSize: '0.94rem', fontWeight: 800, color: '#DFBF5F' }}>
+                    Statutory GST Exemption: HSN Code 4901 (0% CGST / 0% SGST)
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: 'rgba(237, 231, 220, 0.85)', lineHeight: 1.4 }}>
+                  In accordance with the Ministry of Finance, Government of India notification on printed books and educational publications, all JSS Publications orders are 100% exempt from Goods and Services Tax (GST). All issued invoices and proforma documents automatically declare HSN 4901.
+                </p>
+              </div>
+
+              {/* 4 Pricing Tiers Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '18px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--color-maroon)' }}>1. Retail Counter MRP</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#EFF6FF', color: '#1D4ED8' }}>Baseline</span>
+                  </div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-text-charcoal)', marginBottom: '4px' }}>100% Price</div>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                    Standard publisher list price applied for retail walk-in and online individual customers.
+                  </p>
+                </div>
+
+                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '18px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--color-maroon)' }}>2. Student & Scholar Subsidy</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#DCFCE7', color: '#15803D' }}>15% Grant</span>
+                  </div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#15803D', marginBottom: '4px' }}>15% Subsidized</div>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                    Applicable to university students and research scholars upon institutional ID card verification.
+                  </p>
+                </div>
+
+                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '18px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--color-maroon)' }}>3. Library & College Bulk</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#FEF3C7', color: '#B45309' }}>20% Volume</span>
+                  </div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#B45309', marginBottom: '4px' }}>20% Volume Tier</div>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                    Automatically applied on institutional purchase orders with minimum order threshold of 10 or more titles.
+                  </p>
+                </div>
+
+                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '18px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--color-maroon)' }}>4. Mutt Endowment Distribution</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#F3E8FF', color: '#7E22CE' }}>25% Patronage</span>
+                  </div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#7E22CE', marginBottom: '4px' }}>25% Endowment</div>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                    Special endowment patronage tier authorized for religious branch institutions and Dasoha mass distributions.
+                  </p>
+                </div>
+              </div>
+
+              {/* Price Rules Table */}
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
+                <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--color-border)' }}>
+                  <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: 'var(--color-maroon)' }}>
+                    Active Institutional Pricing Rules & Schedule
+                  </h3>
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '12px 14px' }}>Pricing Rule</th>
+                      <th style={{ padding: '12px 14px' }}>Target Segment</th>
+                      <th style={{ padding: '12px 14px' }}>Discount Slab</th>
+                      <th style={{ padding: '12px 14px' }}>Min Quantity</th>
+                      <th style={{ padding: '12px 14px' }}>Verification Check</th>
+                      <th style={{ padding: '12px 14px' }}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                      <td style={{ padding: '12px 14px', fontWeight: 700 }}>Scholar Subsidy Rule</td>
+                      <td style={{ padding: '12px 14px' }}>Recognized Research Scholars & Students</td>
+                      <td style={{ padding: '12px 14px', fontWeight: 800, color: '#15803D' }}>15% Flat</td>
+                      <td style={{ padding: '12px 14px' }}>1 Copy</td>
+                      <td style={{ padding: '12px 14px' }}>Valid Student / University ID Card</td>
+                      <td style={{ padding: '12px 14px' }}><span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#DCFCE7', color: '#15803D' }}>Active</span></td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                      <td style={{ padding: '12px 14px', fontWeight: 700 }}>University Library Grant Slabs</td>
+                      <td style={{ padding: '12px 14px' }}>Degree Colleges & University Libraries</td>
+                      <td style={{ padding: '12px 14px', fontWeight: 800, color: '#B45309' }}>20% Volume</td>
+                      <td style={{ padding: '12px 14px' }}>10 Copies</td>
+                      <td style={{ padding: '12px 14px' }}>Institutional Letterhead / Purchase Order</td>
+                      <td style={{ padding: '12px 14px' }}><span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#DCFCE7', color: '#15803D' }}>Active</span></td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                      <td style={{ padding: '12px 14px', fontWeight: 700 }}>Sri Suttur Math Branch Endowment</td>
+                      <td style={{ padding: '12px 14px' }}>Suttur Math Branches & Affiliated Trusts</td>
+                      <td style={{ padding: '12px 14px', fontWeight: 800, color: '#7E22CE' }}>25% Endowment</td>
+                      <td style={{ padding: '12px 14px' }}>25 Copies</td>
+                      <td style={{ padding: '12px 14px' }}>Mutt Secretarial Sanction Reference</td>
+                      <td style={{ padding: '12px 14px' }}><span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#DCFCE7', color: '#15803D' }}>Active</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* TAB 5: BULK & INSTITUTIONAL ORDERS */}
           {activeTab === 'bulk-orders' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -1677,6 +2261,253 @@ export default function AdminPage({ onNavigate }) {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* TAB: RETURNS & REFUNDS (India Post Speed Post Transit Claims) */}
+          {activeTab === 'returns' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Returns, Replacements & Transit Damage Claims
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    India Post Speed Post transit damage inspection, book return verification, and replacement dispatch desk.
+                  </p>
+                </div>
+              </div>
+
+              {/* KPI Summary Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>Total Claims Filed</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-charcoal)', marginTop: '4px' }}>{returns.length}</div>
+                </div>
+                <div style={{ backgroundColor: '#FEF3C7', padding: '14px 18px', borderRadius: '8px', border: '1px solid #FCD34D' }}>
+                  <span style={{ fontSize: '0.74rem', color: '#B45309', fontWeight: 700 }}>Pending Review</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#B45309', marginTop: '4px' }}>
+                    {returns.filter(r => r.status === 'Pending Review').length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#DCFCE7', padding: '14px 18px', borderRadius: '8px', border: '1px solid #86EFAC' }}>
+                  <span style={{ fontSize: '0.74rem', color: '#15803D', fontWeight: 700 }}>Replacements Dispatched</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#15803D', marginTop: '4px' }}>
+                    {returns.filter(r => r.status.includes('Replacement')).length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#EFF6FF', padding: '14px 18px', borderRadius: '8px', border: '1px solid #BFDBFE' }}>
+                  <span style={{ fontSize: '0.74rem', color: '#1D4ED8', fontWeight: 700 }}>Refunds Processed</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1D4ED8', marginTop: '4px' }}>
+                    {returns.filter(r => r.status.includes('Refund')).length}
+                  </div>
+                </div>
+              </div>
+
+              {/* Returns Table */}
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '12px 14px' }}>Return ID</th>
+                      <th style={{ padding: '12px 14px' }}>Order Ref</th>
+                      <th style={{ padding: '12px 14px' }}>Customer</th>
+                      <th style={{ padding: '12px 14px' }}>Book Title & Format</th>
+                      <th style={{ padding: '12px 14px' }}>Reason & Evidence</th>
+                      <th style={{ padding: '12px 14px' }}>Requested Action</th>
+                      <th style={{ padding: '12px 14px' }}>Status</th>
+                      <th style={{ padding: '12px 14px' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {returns.map((ret) => (
+                      <tr key={ret.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                        <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontWeight: 700 }}>{ret.id}</td>
+                        <td style={{ padding: '12px 14px', fontFamily: 'monospace', color: 'var(--color-maroon)' }}>{ret.orderId}</td>
+                        <td style={{ padding: '12px 14px', fontWeight: 600 }}>{ret.customerName}</td>
+                        <td style={{ padding: '12px 14px' }}>{ret.bookTitle}</td>
+                        <td style={{ padding: '12px 14px', maxWidth: '240px' }}>
+                          <div style={{ fontSize: '0.8rem', color: '#B45309', fontWeight: 600 }}>{ret.reason}</div>
+                          <span style={{ fontSize: '0.72rem', color: ret.photosProvided ? '#15803D' : '#6B7280' }}>
+                            {ret.photosProvided ? '✓ Photos Verified' : 'No photos attached'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px', fontWeight: 600 }}>{ret.actionRequested}</td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              padding: '3px 8px',
+                              borderRadius: '4px',
+                              backgroundColor: ret.status === 'Pending Review' ? '#FEF3C7' : '#DCFCE7',
+                              color: ret.status === 'Pending Review' ? '#B45309' : '#15803D'
+                            }}
+                          >
+                            {ret.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            {ret.status === 'Pending Review' && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    openSafetyModal({
+                                      title: `Approve Replacement for ${ret.id}`,
+                                      consequence: `A replacement copy of "${ret.bookTitle}" will be allocated from inventory and scheduled for India Post dispatch.`,
+                                      confirmLabel: 'Approve & Dispatch',
+                                      onConfirm: (reason) => {
+                                        adminService.updateReturn(ret.id, { status: 'Approved - Replacement Dispatched' }, reason);
+                                        showToast('Replacement approved and dispatched.');
+                                      }
+                                    });
+                                  }}
+                                  className="btn btn-primary btn-sm"
+                                  style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    openSafetyModal({
+                                      title: `Issue Refund for ${ret.id}`,
+                                      consequence: `Order ${ret.orderId} will be processed for financial refund to the original payment method.`,
+                                      confirmLabel: 'Process Refund',
+                                      onConfirm: (reason) => {
+                                        adminService.updateReturn(ret.id, { status: 'Refund Processed', refundAmount: 300 }, reason);
+                                        showToast('Refund processed.');
+                                      }
+                                    });
+                                  }}
+                                  className="btn btn-outline btn-sm"
+                                  style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                                >
+                                  Refund
+                                </button>
+                              </>
+                            )}
+                            {ret.status !== 'Pending Review' && (
+                              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Closed</span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: HOMEPAGE CMS */}
+          {activeTab === 'homepage-cms' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Homepage Editorial & Hero Showcase CMS
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Configure the digital storefront hero announcement, Sri Suttur Math blessings notice, and curated shelf highlights.
+                  </p>
+                </div>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const fd = new FormData(e.target);
+                  adminService.updateHomepageCms({
+                    heroHeadline: fd.get('heroHeadline'),
+                    heroHeadlineKn: fd.get('heroHeadlineKn'),
+                    heroSubtitle: fd.get('heroSubtitle'),
+                    heroBadge: fd.get('heroBadge'),
+                    blessingMessage: fd.get('blessingMessage'),
+                    curatedShelfTitle: fd.get('curatedShelfTitle'),
+                    scholarSpotlightName: fd.get('scholarSpotlightName'),
+                    announcementActive: fd.get('announcementActive') === 'on'
+                  });
+                  showToast('Homepage editorial configuration saved.');
+                }}
+                style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+              >
+                {/* Hero Showcase Card */}
+                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '24px' }}>
+                  <h3 style={{ margin: '0 0 16px 0', fontSize: '1.05rem', color: 'var(--color-maroon)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Home size={18} />
+                    <span>Hero Section & Editorial Header</span>
+                  </h3>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '6px' }}>Hero Headline (English)</label>
+                      <input name="heroHeadline" type="text" defaultValue={homepageCms.heroHeadline} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.84rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '6px' }}>Hero Headline (ಕನ್ನಡ)</label>
+                      <input name="heroHeadlineKn" type="text" defaultValue={homepageCms.heroHeadlineKn} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.84rem' }} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '14px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '6px' }}>Editorial Subtitle / Monograph Tagline</label>
+                      <input name="heroSubtitle" type="text" defaultValue={homepageCms.heroSubtitle} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.84rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '6px' }}>Commemorative Tag Badge</label>
+                      <input name="heroBadge" type="text" defaultValue={homepageCms.heroBadge} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.84rem' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Suttur Math Blessing & Shelf Card */}
+                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '24px' }}>
+                  <h3 style={{ margin: '0 0 16px 0', fontSize: '1.05rem', color: 'var(--color-maroon)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Sparkles size={18} />
+                    <span>Sri Suttur Math Patronage Blessing & Curated Shelves</span>
+                  </h3>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '6px' }}>Sri Math Blessings Invocation (Asheervachana)</label>
+                    <textarea name="blessingMessage" rows={3} defaultValue={homepageCms.blessingMessage} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.84rem' }} />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '6px' }}>Curated Shelf Showcase Title</label>
+                      <input name="curatedShelfTitle" type="text" defaultValue={homepageCms.curatedShelfTitle} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.84rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: '0.82rem', marginBottom: '6px' }}>Featured Scholar of the Month</label>
+                      <input name="scholarSpotlightName" type="text" defaultValue={homepageCms.scholarSpotlightName} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.84rem' }} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input
+                      name="announcementActive"
+                      type="checkbox"
+                      id="announcementActiveCheck"
+                      defaultChecked={homepageCms.announcementActive}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <label htmlFor="announcementActiveCheck" style={{ fontSize: '0.86rem', fontWeight: 600, cursor: 'pointer' }}>
+                      Publish sitewide institutional blessing banner at the top of the storefront
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Save size={16} />
+                    <span>Publish Homepage CMS Changes</span>
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 
@@ -1791,6 +2622,333 @@ export default function AdminPage({ onNavigate }) {
             </div>
           )}
 
+          {/* TAB: PERIODICALS */}
+          {activeTab === 'periodicals' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Suttur Vani & Math Periodicals Archive
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Manage monthly spiritual publications, Sharana Sandesha issues, subscription renewals, and archival editions.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewPeriodicalModalOpen(true)}
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Plus size={15} />
+                  <span>Publish New Issue</span>
+                </button>
+              </div>
+
+              {/* Metric Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Archived Issues</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-maroon)', marginTop: '4px' }}>
+                    {periodicals.length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Total Print Run</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#15803D', marginTop: '4px' }}>
+                    {periodicals.reduce((acc, p) => acc + (p.circulationCount || 0), 0).toLocaleString('en-IN')} copies
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Annual Subscriptions</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#B45309', marginTop: '4px' }}>
+                    ₹350 / year
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Postal Dispatch</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-charcoal)', marginTop: '4px' }}>
+                    Book Post Registered
+                  </div>
+                </div>
+              </div>
+
+              {/* Periodicals Table */}
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '12px 14px' }}>Periodical Title</th>
+                      <th style={{ padding: '12px 14px' }}>Volume & Issue</th>
+                      <th style={{ padding: '12px 14px' }}>Month & Year</th>
+                      <th style={{ padding: '12px 14px' }}>Editor</th>
+                      <th style={{ padding: '12px 14px' }}>Circulation</th>
+                      <th style={{ padding: '12px 14px' }}>Subscription</th>
+                      <th style={{ padding: '12px 14px' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {periodicals.map((p) => (
+                      <tr key={p.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 700, color: 'var(--color-maroon)' }}>{p.title}</div>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)' }}>{p.titleKn}</div>
+                        </td>
+                        <td style={{ padding: '12px 14px', fontWeight: 600 }}>
+                          Vol. {p.volume}, Issue {p.issue}
+                        </td>
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
+                          {p.month} {p.year}
+                        </td>
+                        <td style={{ padding: '12px 14px', fontSize: '0.78rem' }}>
+                          {p.editor}
+                        </td>
+                        <td style={{ padding: '12px 14px', fontWeight: 700, color: '#15803D' }}>
+                          {(p.circulationCount || 1000).toLocaleString('en-IN')} copies
+                        </td>
+                        <td style={{ padding: '12px 14px', fontWeight: 700 }}>
+                          ₹{p.price || 30} / issue
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => showToast(`Archival PDF opened for ${p.title}.`)}
+                              className="btn btn-outline btn-sm"
+                              style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                            >
+                              Download PDF
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: VACHANAS & MANUSCRIPTS */}
+          {activeTab === 'vachanas' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Palm-Leaf Manuscripts & Vachana Digitization Archive
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Preservation registry for ancient palm-leaf codices (ತಾಳೆಗರಿ), poet ankitas, folio conditions, and Granthamale critical apparatus.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewVachanaModalOpen(true)}
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Plus size={15} />
+                  <span>Catalogue Manuscript</span>
+                </button>
+              </div>
+
+              {/* Metric Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Archived Codices</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-maroon)', marginTop: '4px' }}>
+                    {vachanas.length} Manuscripts
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Preserved Folios</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#15803D', marginTop: '4px' }}>
+                    {vachanas.reduce((acc, v) => acc + (v.vachanaCount || 0), 0).toLocaleString('en-IN')} Vachanas
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Preservation Lab</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#B45309', marginTop: '4px' }}>
+                    Suttur Palm-Leaf Vault
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Digitization Resolution</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-charcoal)', marginTop: '4px' }}>
+                    600 DPI Master
+                  </div>
+                </div>
+              </div>
+
+              {/* Manuscripts Table */}
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '12px 14px' }}>Manuscript ID</th>
+                      <th style={{ padding: '12px 14px' }}>Sharana Poet</th>
+                      <th style={{ padding: '12px 14px' }}>Ankita (Signature)</th>
+                      <th style={{ padding: '12px 14px' }}>Folios & Counts</th>
+                      <th style={{ padding: '12px 14px' }}>Condition & Treatment</th>
+                      <th style={{ padding: '12px 14px' }}>Preservation Status</th>
+                      <th style={{ padding: '12px 14px' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {vachanas.map((v) => (
+                      <tr key={v.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--color-maroon)' }}>
+                            {v.manuscriptRef}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 700 }}>{v.poet}</div>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)' }}>{v.era}</div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontStyle: 'italic', fontWeight: 600, color: 'var(--color-maroon)' }}>
+                            {v.ankita}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px', fontWeight: 700 }}>
+                          {v.vachanaCount} Vachanas ({v.folios || 120} leaves)
+                        </td>
+                        <td style={{ padding: '12px 14px', fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                          {v.condition}
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            backgroundColor: v.status === 'Digitized' ? '#DCFCE7' : '#FEF3C7',
+                            color: v.status === 'Digitized' ? '#15803D' : '#B45309'
+                          }}>
+                            {v.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <button
+                            type="button"
+                            onClick={() => showToast(`Scholarly critical apparatus loaded for ${v.poet}.`)}
+                            className="btn btn-outline btn-sm"
+                            style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                          >
+                            Examine Folio
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: READING PATHS */}
+          {activeTab === 'reading-paths' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Curated Reading Paths & Scholarly Curricula
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Guided literary curricula for students, researchers, and university libraries studying Veerashaivism and Kannada literature.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewReadingPathModalOpen(true)}
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Plus size={15} />
+                  <span>Create Reading Path</span>
+                </button>
+              </div>
+
+              {/* Grid of Reading Paths */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+                {readingPaths.map((rp) => (
+                  <div
+                    key={rp.id}
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '8px',
+                      padding: '20px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-maroon)' }}>
+                          {rp.difficulty} Level · {rp.estimatedHours} Hours
+                        </span>
+                        <span style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          backgroundColor: rp.status === 'active' ? '#DCFCE7' : '#F3F4F6',
+                          color: rp.status === 'active' ? '#15803D' : '#6B7280'
+                        }}>
+                          {rp.status === 'active' ? 'Active Path' : 'Draft'}
+                        </span>
+                      </div>
+
+                      <h3 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', color: 'var(--color-text-charcoal)', fontWeight: 800 }}>
+                        {rp.title}
+                      </h3>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--color-maroon)', marginBottom: '10px' }}>
+                        {rp.titleKn}
+                      </div>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', lineHeight: 1.4, margin: '0 0 16px 0' }}>
+                        {rp.description}
+                      </p>
+
+                      <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '12px', marginBottom: '16px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-text-muted)', display: 'block', marginBottom: '8px' }}>
+                          Curated Publications ({rp.books?.length || 0} Titles)
+                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {(rp.books || []).map((bTitle, idx) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem' }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#FAF7F2', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800, color: 'var(--color-maroon)' }}>
+                                {idx + 1}
+                              </span>
+                              <span style={{ fontWeight: 600 }}>{bTitle}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '12px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          adminService.toggleReadingPath(rp.id);
+                          showToast(`Reading path status updated.`);
+                        }}
+                        className="btn btn-outline btn-sm"
+                        style={{ fontSize: '0.74rem' }}
+                      >
+                        {rp.status === 'active' ? 'Disable Path' : 'Activate Path'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* TAB 7: COUPONS & ABUSE RADAR */}
           {activeTab === 'coupons' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -1861,6 +3019,127 @@ export default function AdminPage({ onNavigate }) {
             </div>
           )}
 
+          {/* TAB: PROMOTIONS */}
+          {activeTab === 'promotions' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Institutional Promotions & Seasonal Campaigns
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Manage festive discounts, Suttur Jathra pilgrimage book subsidies, student endowments, and seasonal banner campaigns.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewPromoModalOpen(true)}
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Plus size={15} />
+                  <span>Create Campaign</span>
+                </button>
+              </div>
+
+              {/* Metric Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Active Campaigns</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#15803D', marginTop: '4px' }}>
+                    {promotions.filter(p => p.status === 'active').length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Total Campaigns</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-maroon)', marginTop: '4px' }}>
+                    {promotions.length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Average Subsidy</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#B45309', marginTop: '4px' }}>
+                    {Math.round(promotions.reduce((acc, p) => acc + (p.discountPercent || 0), 0) / (promotions.length || 1))}%
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Target Beneficiaries</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-charcoal)', marginTop: '4px' }}>
+                    Scholars & Mutts
+                  </div>
+                </div>
+              </div>
+
+              {/* Promotions Table */}
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '12px 14px' }}>Campaign Name</th>
+                      <th style={{ padding: '12px 14px' }}>Promo Code</th>
+                      <th style={{ padding: '12px 14px' }}>Discount</th>
+                      <th style={{ padding: '12px 14px' }}>Target Audience</th>
+                      <th style={{ padding: '12px 14px' }}>Validity Window</th>
+                      <th style={{ padding: '12px 14px' }}>Status</th>
+                      <th style={{ padding: '12px 14px' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {promotions.map((p) => (
+                      <tr key={p.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 700, color: 'var(--color-maroon)' }}>{p.name}</div>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)' }}>{p.description}</div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontFamily: 'monospace', fontWeight: 800, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#FAF7F2', border: '1px dashed var(--color-border)' }}>
+                            {p.code}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px', fontWeight: 800, color: 'var(--color-maroon)' }}>
+                          {p.discountPercent}% OFF
+                        </td>
+                        <td style={{ padding: '12px 14px', fontSize: '0.78rem' }}>
+                          {p.targetAudience}
+                        </td>
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap', fontSize: '0.76rem', color: 'var(--color-text-muted)' }}>
+                          {p.startDate} → {p.endDate}
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            backgroundColor: p.status === 'active' ? '#DCFCE7' : '#F3F4F6',
+                            color: p.status === 'active' ? '#15803D' : '#6B7280'
+                          }}>
+                            {p.status === 'active' ? 'Active' : 'Paused'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                adminService.togglePromotion(p.id);
+                                showToast(`Campaign status updated.`);
+                              }}
+                              className="btn btn-outline btn-sm"
+                              style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                            >
+                              {p.status === 'active' ? 'Pause' : 'Activate'}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* TAB 8: AUDIT LOG (First-Class Operational Ledger) */}
           {activeTab === 'audit-log' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -1901,6 +3180,134 @@ export default function AdminPage({ onNavigate }) {
                         <td style={{ padding: '12px 14px', color: 'var(--color-text-charcoal)' }}>{log.details}</td>
                         <td style={{ padding: '12px 14px', fontStyle: 'italic', color: 'var(--color-text-muted)' }}>
                           {log.reason || 'Standard operational transition'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: ADMIN USERS */}
+          {activeTab === 'admin-users' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-maroon)', margin: '0 0 4px 0' }}>
+                    Granthamale Admin Users & Operations Staff
+                  </h1>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Manage institutional personnel accounts, sales counter operators, and dispatch staff with granular access levels.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewStaffModalOpen(true)}
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Plus size={15} />
+                  <span>Add Staff User</span>
+                </button>
+              </div>
+
+              {/* Metric Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Total Staff Users</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-maroon)', marginTop: '4px' }}>
+                    {staffUsers.length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Active Personnel</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#15803D', marginTop: '4px' }}>
+                    {staffUsers.filter(u => u.status === 'Active').length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Super Administrators</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#B45309', marginTop: '4px' }}>
+                    {staffUsers.filter(u => u.role === 'Super Admin').length}
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>2FA Enforcement</span>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-charcoal)', marginTop: '4px' }}>
+                    100% Mandatory
+                  </div>
+                </div>
+              </div>
+
+              {/* Staff Table */}
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '12px 14px' }}>Staff Name</th>
+                      <th style={{ padding: '12px 14px' }}>Institutional Email</th>
+                      <th style={{ padding: '12px 14px' }}>Assigned Role</th>
+                      <th style={{ padding: '12px 14px' }}>Status</th>
+                      <th style={{ padding: '12px 14px' }}>Last Activity</th>
+                      <th style={{ padding: '12px 14px' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {staffUsers.map((u) => (
+                      <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                        <td style={{ padding: '12px 14px', fontWeight: 700 }}>
+                          {u.name}
+                        </td>
+                        <td style={{ padding: '12px 14px', color: 'var(--color-text-charcoal)' }}>
+                          {u.email}
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#FAF7F2', border: '1px solid var(--color-border)', color: 'var(--color-maroon)' }}>
+                            {u.role}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            backgroundColor: u.status === 'Active' ? '#DCFCE7' : '#F3F4F6',
+                            color: u.status === 'Active' ? '#15803D' : '#6B7280'
+                          }}>
+                            {u.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 14px', color: 'var(--color-text-muted)', fontSize: '0.76rem' }}>
+                          {u.lastLogin}
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const res = adminService.toggleStaffStatus(u.id);
+                                if (res.success) {
+                                  showToast(`User ${u.name} status updated.`);
+                                } else {
+                                  alert(res.error);
+                                }
+                              }}
+                              className="btn btn-outline btn-sm"
+                              style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                            >
+                              {u.status === 'Active' ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => showToast(`Password reset link dispatched to ${u.email}`)}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                            >
+                              Reset 2FA
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -2507,6 +3914,642 @@ export default function AdminPage({ onNavigate }) {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD PUBLICATION */}
+      {isNewBookModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ width: '640px', maxWidth: '92vw', maxHeight: '90vh', overflowY: 'auto', backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', boxShadow: '0 12px 36px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--color-border)', paddingBottom: '12px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--color-maroon)', fontWeight: 800 }}>
+                Add New Granthamale Publication
+              </h3>
+              <button type="button" onClick={() => setIsNewBookModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const res = adminService.addBook({
+                  title: fd.get('title'),
+                  kannadaTitle: fd.get('kannadaTitle'),
+                  author: fd.get('author'),
+                  category: fd.get('category'),
+                  series: fd.get('series'),
+                  format: fd.get('format'),
+                  price: fd.get('price'),
+                  stock: fd.get('stock'),
+                  isbn: fd.get('isbn'),
+                  pages: fd.get('pages'),
+                  weight: fd.get('weight'),
+                  description: fd.get('description'),
+                  status: 'published'
+                });
+                if (res.success) {
+                  showToast(`Publication "${res.book.title}" added to catalogue.`);
+                  setIsNewBookModalOpen(false);
+                } else {
+                  alert(res.error);
+                }
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '0.84rem' }}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Title (English) *</label>
+                  <input name="title" required type="text" placeholder="e.g. Vachana Dharmasara" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Title (ಕನ್ನಡ)</label>
+                  <input name="kannadaTitle" type="text" placeholder="ವಚನ ಧರ್ಮಸಾರ" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Author / Editor</label>
+                  <input name="author" type="text" defaultValue="JSS Editorial Board" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Category</label>
+                  <select name="category" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                    <option value="Vachana Literature">Vachana Literature</option>
+                    <option value="Veerashaivism">Veerashaivism</option>
+                    <option value="Historical Studies">Historical Studies</option>
+                    <option value="Philosophy">Philosophy</option>
+                    <option value="Children Literature">Children Literature</option>
+                    <option value="Spiritual Discourses">Spiritual Discourses</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Binding Format</label>
+                  <select name="format" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                    <option value="Paperback">Paperback</option>
+                    <option value="Hardbound">Hardbound</option>
+                    <option value="Deluxe Edition">Deluxe Edition</option>
+                    <option value="Pocket Edition">Pocket Edition</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Price (₹) *</label>
+                  <input name="price" required type="number" defaultValue="250" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Initial Stock</label>
+                  <input name="stock" type="number" defaultValue="50" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>ISBN</label>
+                  <input name="isbn" type="text" placeholder="978-81-94921-xx-x" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Pages</label>
+                  <input name="pages" type="number" defaultValue="240" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Weight (g)</label>
+                  <input name="weight" type="number" defaultValue="350" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Editorial Monograph Description</label>
+                <textarea name="description" rows={3} defaultValue="Published under the patronage of Sri Suttur Veerashimhasana Math." style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '8px', borderTop: '1px solid var(--color-border)', paddingTop: '14px' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Publish to Catalogue</button>
+                <button type="button" onClick={() => setIsNewBookModalOpen(false)} className="btn btn-outline">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT PUBLICATION DETAILS */}
+      {editingBook && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ width: '640px', maxWidth: '92vw', maxHeight: '90vh', overflowY: 'auto', backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', boxShadow: '0 12px 36px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--color-border)', paddingBottom: '12px' }}>
+              <div>
+                <span style={{ fontSize: '0.74rem', color: 'var(--color-maroon)', fontWeight: 800 }}>EDIT PUBLICATION #{editingBook.id}</span>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--color-text-charcoal)', fontWeight: 800 }}>
+                  {editingBook.title}
+                </h3>
+              </div>
+              <button type="button" onClick={() => setEditingBook(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const res = adminService.updateBook(editingBook.id, {
+                  title: fd.get('title'),
+                  kannadaTitle: fd.get('kannadaTitle'),
+                  author: fd.get('author'),
+                  category: fd.get('category'),
+                  price: Number(fd.get('price')),
+                  stock: Number(fd.get('stock')),
+                  isbn: fd.get('isbn'),
+                  description: fd.get('description')
+                });
+                if (res.success) {
+                  showToast('Publication details updated.');
+                  setEditingBook(null);
+                } else {
+                  alert(res.error);
+                }
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '0.84rem' }}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Title (English) *</label>
+                  <input name="title" required type="text" defaultValue={editingBook.title} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Title (ಕನ್ನಡ)</label>
+                  <input name="kannadaTitle" type="text" defaultValue={editingBook.kannadaTitle || editingBook.title} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Author / Editor</label>
+                  <input name="author" type="text" defaultValue={editingBook.author} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Category</label>
+                  <input name="category" type="text" defaultValue={editingBook.category} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Price (₹)</label>
+                  <input name="price" type="number" defaultValue={editingBook.price} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Stock Copies</label>
+                  <input name="stock" type="number" defaultValue={editingBook.stock || 25} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>ISBN</label>
+                  <input name="isbn" type="text" defaultValue={editingBook.isbn} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Description</label>
+                <textarea name="description" rows={3} defaultValue={editingBook.description} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '8px', borderTop: '1px solid var(--color-border)', paddingTop: '14px' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save Publication Changes</button>
+                <button type="button" onClick={() => setEditingBook(null)} className="btn btn-outline">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CREATE PROMOTION CAMPAIGN */}
+      {isNewPromoModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ width: '480px', maxWidth: '90vw', backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', boxShadow: '0 12px 36px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', color: 'var(--color-maroon)' }}>
+              Create Promotion Campaign
+            </h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const res = adminService.createPromotion({
+                  name: fd.get('name'),
+                  code: fd.get('code'),
+                  discountPercent: fd.get('discountPercent'),
+                  targetAudience: fd.get('targetAudience'),
+                  startDate: fd.get('startDate'),
+                  endDate: fd.get('endDate'),
+                  description: fd.get('description')
+                });
+                if (res.success) {
+                  showToast('Promotion campaign created.');
+                  setIsNewPromoModalOpen(false);
+                } else {
+                  alert(res.error);
+                }
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.84rem' }}
+            >
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Campaign Name *</label>
+                <input name="name" required type="text" placeholder="e.g. Suttur Jathra Pilgrim Book Fair" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Promo Code *</label>
+                  <input name="code" required type="text" placeholder="JATHRA25" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)', textTransform: 'uppercase' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Discount (%) *</label>
+                  <input name="discountPercent" required type="number" defaultValue="20" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Target Beneficiaries</label>
+                <select name="targetAudience" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                  <option value="Pilgrims & General Public">Pilgrims & General Public</option>
+                  <option value="University & College Libraries">University & College Libraries</option>
+                  <option value="Viraktamath & Religious Ashrams">Viraktamath & Religious Ashrams</option>
+                  <option value="Registered Students & Scholars">Registered Students & Scholars</option>
+                </select>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Start Date</label>
+                  <input name="startDate" type="date" defaultValue={new Date().toISOString().slice(0, 10)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>End Date</label>
+                  <input name="endDate" type="date" defaultValue="2026-12-31" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Description</label>
+                <input name="description" type="text" placeholder="Subsidy purpose" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save Campaign</button>
+                <button type="button" onClick={() => setIsNewPromoModalOpen(false)} className="btn btn-outline">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: PUBLISH NEW PERIODICAL ISSUE */}
+      {isNewPeriodicalModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ width: '480px', maxWidth: '90vw', backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', boxShadow: '0 12px 36px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', color: 'var(--color-maroon)' }}>
+              Publish New Periodical Issue
+            </h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const res = adminService.addPeriodical({
+                  title: fd.get('title'),
+                  titleKn: fd.get('titleKn'),
+                  volume: fd.get('volume'),
+                  issue: fd.get('issue'),
+                  month: fd.get('month'),
+                  year: fd.get('year'),
+                  editor: fd.get('editor'),
+                  price: fd.get('price'),
+                  circulationCount: fd.get('circulationCount')
+                });
+                if (res.success) {
+                  showToast('Periodical issue registered.');
+                  setIsNewPeriodicalModalOpen(false);
+                } else {
+                  alert(res.error);
+                }
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.84rem' }}
+            >
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Periodical Name *</label>
+                <input name="title" required type="text" defaultValue="Sharana Sandesha" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Name (ಕನ್ನಡ)</label>
+                <input name="titleKn" type="text" defaultValue="ಶರಣ ಸಂದೇಶ" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Volume</label>
+                  <input name="volume" type="number" defaultValue="42" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Issue No</label>
+                  <input name="issue" type="number" defaultValue="10" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Month</label>
+                  <input name="month" type="text" defaultValue="October" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Year</label>
+                  <input name="year" type="number" defaultValue="2026" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Chief Editor</label>
+                <input name="editor" type="text" defaultValue="Dr. H. P. Nagaraj" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Single Issue Price (₹)</label>
+                  <input name="price" type="number" defaultValue="30" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Circulation (Copies)</label>
+                  <input name="circulationCount" type="number" defaultValue="1500" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Register Issue</button>
+                <button type="button" onClick={() => setIsNewPeriodicalModalOpen(false)} className="btn btn-outline">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CATALOGUE MANUSCRIPT */}
+      {isNewVachanaModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ width: '500px', maxWidth: '90vw', backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', boxShadow: '0 12px 36px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', color: 'var(--color-maroon)' }}>
+              Catalogue Palm-Leaf Manuscript (ತಾಳೆಗರಿ)
+            </h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const res = adminService.addVachana({
+                  manuscriptRef: fd.get('manuscriptRef'),
+                  poet: fd.get('poet'),
+                  ankita: fd.get('ankita'),
+                  vachanaCount: fd.get('vachanaCount'),
+                  folios: fd.get('folios'),
+                  condition: fd.get('condition'),
+                  era: fd.get('era'),
+                  status: 'Preservation Lab'
+                });
+                if (res.success) {
+                  showToast('Palm-leaf codex registered in archival repository.');
+                  setIsNewVachanaModalOpen(false);
+                } else {
+                  alert(res.error);
+                }
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.84rem' }}
+            >
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Manuscript Ref ID *</label>
+                <input name="manuscriptRef" required type="text" placeholder="e.g. MSS-SUTTUR-109" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)', textTransform: 'uppercase' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Sharana Poet *</label>
+                  <input name="poet" required type="text" placeholder="e.g. Siddharama" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Ankita (Mudra) *</label>
+                  <input name="ankita" required type="text" placeholder="e.g. Kapilasiddha Mallikarjuna" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Vachana Count</label>
+                  <input name="vachanaCount" type="number" defaultValue="250" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Leaves / Folios</label>
+                  <input name="folios" type="number" defaultValue="85" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Physical Folio Condition</label>
+                <input name="condition" type="text" defaultValue="Intact palm leaves treated with citronella and sesame oil" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Historical Period / Century</label>
+                <input name="era" type="text" defaultValue="12th Century CE" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save Codex Entry</button>
+                <button type="button" onClick={() => setIsNewVachanaModalOpen(false)} className="btn btn-outline">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CREATE READING PATH */}
+      {isNewReadingPathModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ width: '520px', maxWidth: '90vw', backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', boxShadow: '0 12px 36px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', color: 'var(--color-maroon)' }}>
+              Create Curated Reading Path
+            </h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const booksRaw = fd.get('books') || '';
+                const booksList = booksRaw.split(',').map(s => s.trim()).filter(Boolean);
+                const res = adminService.addReadingPath({
+                  title: fd.get('title'),
+                  titleKn: fd.get('titleKn'),
+                  difficulty: fd.get('difficulty'),
+                  estimatedHours: fd.get('estimatedHours'),
+                  description: fd.get('description'),
+                  books: booksList.length ? booksList : ['Sri Basaveshwara Vachana Sangraha', 'Allama Prabhu Shatsthala Vachana']
+                });
+                if (res.success) {
+                  showToast('Reading path published.');
+                  setIsNewReadingPathModalOpen(false);
+                } else {
+                  alert(res.error);
+                }
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.84rem' }}
+            >
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Path Title (English) *</label>
+                <input name="title" required type="text" placeholder="e.g. Masterclass in Vachana Philosophy" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Path Title (ಕನ್ನಡ)</label>
+                <input name="titleKn" type="text" placeholder="ವಚನ ತತ್ವಚಿಂತನೆ ಪ್ರವೇಶ" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Reader Level</label>
+                  <select name="difficulty" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced Scholar">Advanced Scholar</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Estimated Study Hours</label>
+                  <input name="estimatedHours" type="number" defaultValue="15" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Curriculum Overview</label>
+                <textarea name="description" rows={2} placeholder="Explain what the reader will master..." style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Recommended Books (Comma separated titles)</label>
+                <input name="books" type="text" placeholder="Vachana Dharmasara, Akka Mahadevi Vachana Deepike" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save Reading Path</button>
+                <button type="button" onClick={() => setIsNewReadingPathModalOpen(false)} className="btn btn-outline">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: SUPPORT TICKET DETAILS & REPLY */}
+      {selectedTicket && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ width: '600px', maxWidth: '92vw', maxHeight: '90vh', overflowY: 'auto', backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', boxShadow: '0 12px 36px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid var(--color-border)', paddingBottom: '12px' }}>
+              <div>
+                <span style={{ fontSize: '0.74rem', color: 'var(--color-maroon)', fontWeight: 800 }}>SUPPORT TICKET {selectedTicket.id}</span>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--color-text-charcoal)', fontWeight: 800 }}>
+                  {selectedTicket.subject}
+                </h3>
+              </div>
+              <button type="button" onClick={() => setSelectedTicket(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ backgroundColor: '#FAF7F2', padding: '14px', borderRadius: '6px', marginBottom: '16px', fontSize: '0.84rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                <div><strong>Scholar / Customer:</strong> {selectedTicket.customerName}</div>
+                <div><strong>Email:</strong> {selectedTicket.customerEmail}</div>
+                <div><strong>Department:</strong> {selectedTicket.department}</div>
+                <div><strong>Order Ref:</strong> {selectedTicket.orderRef || 'N/A'}</div>
+              </div>
+              <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '10px', marginTop: '10px' }}>
+                <strong>Message:</strong>
+                <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-charcoal)', lineHeight: 1.4 }}>
+                  {selectedTicket.message}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-maroon)', marginBottom: '6px' }}>
+                Official Granthamale Response
+              </label>
+              <textarea
+                rows={4}
+                placeholder="Type response to scholar..."
+                value={ticketReplyText}
+                onChange={(e) => setTicketReplyText(e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.84rem' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--color-border)', paddingTop: '14px' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    adminService.replySupportTicket(selectedTicket.id, ticketReplyText, 'Resolved');
+                    showToast('Ticket marked Resolved with reply dispatched.');
+                    setSelectedTicket(null);
+                  }}
+                  className="btn btn-primary btn-sm"
+                  style={{ backgroundColor: '#15803D', borderColor: '#15803D' }}
+                >
+                  Reply & Resolve
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    adminService.replySupportTicket(selectedTicket.id, ticketReplyText, 'In Progress');
+                    showToast('Reply dispatched; ticket kept In Progress.');
+                    setSelectedTicket(null);
+                  }}
+                  className="btn btn-secondary btn-sm"
+                >
+                  Reply & Keep Open
+                </button>
+              </div>
+              <button type="button" onClick={() => setSelectedTicket(null)} className="btn btn-outline btn-sm">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD STAFF USER */}
+      {isNewStaffModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ width: '460px', maxWidth: '90vw', backgroundColor: '#FFFFFF', borderRadius: '8px', padding: '24px', boxShadow: '0 12px 36px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', color: 'var(--color-maroon)' }}>
+              Add Institutional Staff Account
+            </h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const res = adminService.addStaffUser({
+                  name: fd.get('name'),
+                  email: fd.get('email'),
+                  role: fd.get('role')
+                });
+                if (res.success) {
+                  showToast(`Staff account created for ${res.user.name}.`);
+                  setIsNewStaffModalOpen(false);
+                } else {
+                  alert(res.error);
+                }
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.84rem' }}
+            >
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Staff Full Name *</label>
+                <input name="name" required type="text" placeholder="e.g. Mahadevaiah B." style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Email Address *</label>
+                <input name="email" required type="email" placeholder="staff@jssonline.org" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '4px' }}>Assigned Operational Role</label>
+                <select name="role" style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+                  <option value="Order/Support Staff">Order/Support Staff</option>
+                  <option value="Operations Staff">Operations Staff</option>
+                  <option value="Catalogue Manager">Catalogue Manager</option>
+                  <option value="Finance Auditor">Finance Auditor</option>
+                  <option value="Super Admin">Super Admin</option>
+                </select>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Create Account</button>
+                <button type="button" onClick={() => setIsNewStaffModalOpen(false)} className="btn btn-outline">Cancel</button>
+              </div>
+            </form>
           </div>
         </div>
       )}
