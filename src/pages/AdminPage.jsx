@@ -232,7 +232,9 @@ export default function AdminPage({ onNavigate }) {
   // Filtered Bulk Enquiries
   const filteredBulkEnquiries = useMemo(() => {
     return bulkEnquiries.filter(b => {
-      return bulkStatusFilter === 'All' || b.status === bulkStatusFilter;
+      if (bulkStatusFilter === 'All') return true;
+      if (bulkStatusFilter === 'Quoted') return b.status === 'Quoted' || b.status === 'Quotation Generated' || b.status === 'Quotation Sent';
+      return b.status === bulkStatusFilter;
     });
   }, [bulkEnquiries, bulkStatusFilter]);
 
@@ -953,55 +955,92 @@ export default function AdminPage({ onNavigate }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredBulkEnquiries.map((b) => (
-                      <tr key={b.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                        <td style={{ padding: '12px 14px' }}>
-                          <span style={{ fontWeight: 800, color: 'var(--color-text-charcoal)', display: 'block' }}>{b.orgName}</span>
-                          <span style={{ fontSize: '0.74rem', color: 'var(--color-maroon)', fontWeight: 600 }}>{b.category}</span>
-                        </td>
-                        <td style={{ padding: '12px 14px' }}>
-                          <span style={{ fontWeight: 600, display: 'block' }}>{b.contactName}</span>
-                          <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)' }}>{b.phone}</span>
-                        </td>
-                        <td style={{ padding: '12px 14px', maxWidth: '280px' }}>
-                          <span style={{ fontWeight: 700 }}>{b.requestedVolumes}</span>
-                          <div style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)' }}>{b.notes}</div>
-                        </td>
-                        <td style={{ padding: '12px 14px', fontWeight: 800, color: 'var(--color-maroon)' }}>
-                          ₹{b.quotedAmount?.toLocaleString('en-IN') || 'Quote Pending'}
-                        </td>
-                        <td style={{ padding: '12px 14px' }}>
-                          <span
-                            style={{
-                              fontSize: '0.72rem',
-                              fontWeight: 700,
-                              padding: '2px 8px',
-                              borderRadius: '4px',
-                              backgroundColor: b.status === 'Dispatched' ? '#DCFCE7' : b.status === 'New Enquiry' ? '#FEF3C7' : '#EFF6FF',
-                              color: b.status === 'Dispatched' ? '#15803D' : b.status === 'New Enquiry' ? '#B45309' : '#1D4ED8'
-                            }}
-                          >
-                            {b.status}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 14px' }}>
-                          <select
-                            value={b.status}
-                            onChange={(e) => {
-                              adminService.updateBulkStatus(b.id, e.target.value);
-                              showToast(`Bulk inquiry status updated to ${e.target.value}`);
-                            }}
-                            style={{ fontSize: '0.74rem', padding: '3px 6px', borderRadius: '4px', border: '1px solid var(--color-border)' }}
-                          >
-                            <option value="New Enquiry">New Enquiry</option>
-                            <option value="Quotation Sent">Quotation Sent</option>
-                            <option value="Payment Received">Payment Received</option>
-                            <option value="Dispatched">Dispatched</option>
-                            <option value="Closed">Closed</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
+                    {filteredBulkEnquiries.map((b) => {
+                      const orgName = b.organizationName || b.institution_name || b.institutionName || b.orgName || 'Unnamed Institution';
+                      const orgType = b.orgType || b.institutionType || b.category || 'Institutional Indent';
+                      const contact = b.contactPerson || b.contact_person || b.contactName || b.officerName || 'Staff In-charge';
+                      const phone = b.phone || '';
+                      const email = b.email || '';
+                      const volumes = b.requestedTitles?.length
+                        ? `${b.estimatedBooksCount || b.requestedTitles.length} copies (${b.requestedTitles.length} titles)`
+                        : (b.estimatedCopies ? `${b.estimatedCopies} copies` : (b.requestedVolumes || 'Bulk Consignment'));
+                      const notes = b.notes || b.requirement_details || b.requirementDetails || '';
+                      const quoted = b.quotedAmount
+                        ? `₹${Number(b.quotedAmount).toLocaleString('en-IN')}`
+                        : (b.estimatedValue ? `₹${Number(b.estimatedValue).toLocaleString('en-IN')}` : 'Quote Pending');
+
+                      return (
+                        <tr key={b.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                          <td style={{ padding: '12px 14px' }}>
+                            <span style={{ fontWeight: 800, color: 'var(--color-text-charcoal)', display: 'block', fontSize: '0.9rem' }}>
+                              {orgName}
+                            </span>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--color-maroon)', fontWeight: 600 }}>
+                              {orgType}
+                            </span>
+                            {b.city && (
+                              <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', display: 'block' }}>
+                                {b.city}{b.state ? `, ${b.state}` : ''}
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px 14px' }}>
+                            <span style={{ fontWeight: 700, color: 'var(--color-text-charcoal)', display: 'block' }}>
+                              {contact}
+                            </span>
+                            {phone && (
+                              <span style={{ fontSize: '0.76rem', color: 'var(--color-text-muted)', display: 'block' }}>
+                                {phone}
+                              </span>
+                            )}
+                            {email && (
+                              <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', display: 'block' }}>
+                                {email}
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px 14px', maxWidth: '280px' }}>
+                            <span style={{ fontWeight: 700, color: 'var(--color-text-charcoal)' }}>{volumes}</span>
+                            {notes && <div style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>{notes}</div>}
+                          </td>
+                          <td style={{ padding: '12px 14px', fontWeight: 800, color: quoted === 'Quote Pending' ? 'var(--color-text-muted)' : 'var(--color-maroon)' }}>
+                            {quoted}
+                          </td>
+                          <td style={{ padding: '12px 14px' }}>
+                            <span
+                              style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                backgroundColor: b.status === 'Dispatched' ? '#DCFCE7' : b.status === 'New Enquiry' ? '#FEF3C7' : b.status === 'Quotation Generated' || b.status === 'Quotation Sent' ? '#EFF6FF' : '#F3F4F6',
+                                color: b.status === 'Dispatched' ? '#15803D' : b.status === 'New Enquiry' ? '#B45309' : b.status === 'Quotation Generated' || b.status === 'Quotation Sent' ? '#1D4ED8' : '#374151'
+                              }}
+                            >
+                              {b.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 14px' }}>
+                            <select
+                              value={b.status}
+                              onChange={(e) => {
+                                const newStatus = e.target.value;
+                                adminService.updateBulkStatus(b.id, newStatus);
+                                showToast(`Bulk inquiry status updated to ${newStatus}`);
+                              }}
+                              style={{ fontSize: '0.74rem', padding: '3px 6px', borderRadius: '4px', border: '1px solid var(--color-border)' }}
+                            >
+                              <option value="New Enquiry">New Enquiry</option>
+                              <option value="Quotation Generated">Quotation Generated</option>
+                              <option value="Quotation Sent">Quotation Sent</option>
+                              <option value="Payment Received">Payment Received</option>
+                              <option value="Dispatched">Dispatched</option>
+                              <option value="Closed">Closed</option>
+                            </select>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

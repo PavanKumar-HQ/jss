@@ -1518,13 +1518,35 @@ export const adminService = {
     return { success: true, enquiry: item };
   },
 
-  createBulkQuotation(id, quotedAmount, note = '', actor = 'Pavan Kumar') {
-    return this.updateBulkEnquiry(id, {
-      stage: 'Quotation',
-      status: 'Quotation Generated',
-      quotedAmount: Number(quotedAmount),
-      notes: (note ? note + ' ' : '') + `[Quoted ₹${quotedAmount} on ${new Date().toLocaleDateString('en-IN')}]`
-    }, actor);
+  updateBulkStatus(id, newStatus, actor = 'Pavan Kumar') {
+    return this.updateBulkEnquiry(id, { status: newStatus }, actor);
+  },
+
+  createBulkEnquiry(data, actor = 'Customer Portal') {
+    const list = this.getBulkEnquiries();
+    const newEnquiry = {
+      id: `BLK-${Date.now().toString().slice(-4)}`,
+      organizationName: data.institutionName || data.organizationName || '',
+      orgType: data.institutionType || data.orgType || 'College / University',
+      contactPerson: data.contactPerson || data.officerName || '',
+      email: data.email || '',
+      phone: data.phone || '',
+      city: data.city || '',
+      state: data.state || 'Karnataka',
+      pincode: data.pincode || '',
+      status: 'New Enquiry',
+      stage: 'Requirement Captured',
+      requestedTitles: [],
+      estimatedBooksCount: data.estimatedCopies || 50,
+      notes: data.notes || data.requirementDetails || '',
+      quotedAmount: null,
+      createdAt: new Date().toISOString()
+    };
+    list.unshift(newEnquiry);
+    storage.set(KEYS.BULK_ENQUIRIES, list);
+    this.logAction(actor, 'CREATE_BULK_ENQUIRY', newEnquiry.id, null, newEnquiry.organizationName, 'New institutional inquiry submitted');
+    notify();
+    return { success: true, enquiry: newEnquiry };
   },
 
   // 10. RETURNS & REFUNDS WORKFLOW

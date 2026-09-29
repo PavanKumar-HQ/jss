@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Building2, Mail, Phone, MapPin, CheckCircle2, FileText, Truck, Calculator, Download, Printer, ArrowRight } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { adminService } from '../services';
+import { apiClient } from '../services/apiClient.js';
 
 export default function BulkOrdersPage({ onNavigate }) {
   useScrollReveal();
@@ -37,6 +39,39 @@ export default function BulkOrdersPage({ onNavigate }) {
     e.preventDefault();
     const randomRef = `JSS-ENQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     setEnquiryRef(randomRef);
+
+    const payload = {
+      institutionName: formData.institutionName,
+      institutionType: formData.institutionType,
+      contactPerson: formData.officerName ? (formData.designation ? `${formData.officerName} (${formData.designation})` : formData.officerName) : '',
+      officerName: formData.officerName,
+      designation: formData.designation,
+      email: formData.email,
+      phone: formData.phone,
+      city: formData.city,
+      state: formData.state,
+      pincode: formData.pincode,
+      estimatedCopies: formData.estimatedCopies,
+      notes: `${formData.seriesInterest ? `Interest: ${formData.seriesInterest}. ` : ''}${formData.notes || ''}`
+    };
+
+    try {
+      adminService.createBulkEnquiry(payload);
+      apiClient.createBulkEnquiry({
+        institutionName: payload.institutionName,
+        contactPerson: payload.contactPerson,
+        designation: payload.designation,
+        email: payload.email,
+        phone: payload.phone,
+        city: payload.city,
+        state: payload.state,
+        pincode: payload.pincode,
+        requirementDetails: payload.notes
+      }).catch(() => {});
+    } catch (err) {
+      console.warn('Error saving bulk enquiry:', err);
+    }
+
     setSubmitted(true);
   };
 
