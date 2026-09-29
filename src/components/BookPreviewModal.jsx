@@ -26,11 +26,43 @@ export default function BookPreviewModal({ book, onClose, onAddToCart, onNavigat
 
   if (!book) return null;
 
+  const editions = book?.editions && book.editions.length > 0 ? book.editions : [
+    {
+      editionId: `${book?.id || 'book'}-pb`,
+      binding: 'Paperback',
+      formatLabel: 'Standard Paperback',
+      sellingPrice: book?.price || 150,
+      mrp: book?.price || 150,
+      isbn: book?.isbn || 'JSS-PUB-0001',
+      pages: book?.pages || 180,
+      inStock: true
+    }
+  ];
+
+  const [selectedEditionId, setSelectedEditionId] = useState(() => editions[0]?.editionId);
+
+  useEffect(() => {
+    if (book?.editions?.length) {
+      setSelectedEditionId(book.editions[0].editionId);
+    }
+  }, [book?.id]);
+
+  const activeEdition = editions.find((e) => e.editionId === selectedEditionId) || editions[0];
+  const currentPrice = activeEdition.sellingPrice;
+
   const handleAdd = () => {
     if (isAdding) return;
     setIsAdding(true);
     if (onAddToCart) {
-      onAddToCart(book);
+      onAddToCart({
+        ...book,
+        price: currentPrice,
+        selectedVariant: activeEdition.binding,
+        format: activeEdition.binding,
+        editionId: activeEdition.editionId,
+        isbn: activeEdition.isbn,
+        quantity: 1
+      });
     }
     setTimeout(() => {
       setIsAdding(false);
@@ -206,16 +238,46 @@ export default function BookPreviewModal({ book, onClose, onAddToCart, onNavigat
                   {book.description}
                 </p>
 
+                {/* Binding Edition Toggle */}
+                {editions.length > 1 && (
+                  <div style={{ marginBottom: '14px' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--color-text-charcoal)', display: 'block', marginBottom: '6px' }}>
+                      Select Edition / ಆವೃತ್ತಿ:
+                    </span>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {editions.map((ed) => {
+                        const isSelected = ed.editionId === activeEdition.editionId;
+                        return (
+                          <button
+                            key={ed.editionId}
+                            type="button"
+                            onClick={() => setSelectedEditionId(ed.editionId)}
+                            className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline'}`}
+                            style={{ padding: '4px 10px', fontSize: '0.76rem', minHeight: '26px' }}
+                          >
+                            <span>{ed.binding} — ₹{ed.sellingPrice}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', gap: '14px', fontSize: '0.8rem', color: 'var(--color-text-subtle)', marginBottom: '14px', flexWrap: 'wrap' }}>
                   <span><strong>Language:</strong> {book.language}</span>
-                  {book.pages && <span><strong>Length:</strong> {book.pages} pp</span>}
-                  {book.isbn && <span><strong>SKU:</strong> {book.isbn}</span>}
+                  <span><strong>Length:</strong> {activeEdition.pages || book.pages || 180} pp</span>
+                  <span><strong>ISBN:</strong> {activeEdition.isbn || book.isbn}</span>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-                  <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--color-maroon)' }}>
-                    ₹{book.price}
+                  <span style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--color-maroon)' }}>
+                    ₹{currentPrice}
                   </span>
+                  {activeEdition.mrp > currentPrice && (
+                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-subtle)', textDecoration: 'line-through' }}>
+                      ₹{activeEdition.mrp}
+                    </span>
+                  )}
                   <span style={{ fontSize: '0.74rem', color: 'var(--color-green)', fontWeight: 600 }}>
                     0% GST · In Stock
                   </span>

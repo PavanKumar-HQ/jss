@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, ArrowLeft, Truck, Check, BookOpen, ShieldCheck, Loader2, Bookmark } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, Truck, Check, BookOpen, ShieldCheck, Loader2, Bookmark, Clock } from 'lucide-react';
 import BookCard from '../components/BookCard';
-import { wishlistService, catalogueService } from '../services';
+import { wishlistService, catalogueService, recentlyViewedService } from '../services';
 
 export default function BookDetailPage({
   book,
@@ -41,12 +41,26 @@ export default function BookDetailPage({
   const [imgError, setImgError] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(() => (book ? wishlistService.isInWishlist(book.id) : false));
 
+  const [recentBooks, setRecentBooks] = useState(() => (book ? recentlyViewedService.getRecentBooks(4, book.id) : []));
+
   useEffect(() => {
     if (!book) return;
     setIsBookmarked(wishlistService.isInWishlist(book.id));
-    return wishlistService.subscribe(() => {
+    recentlyViewedService.recordView(book.id);
+    setRecentBooks(recentlyViewedService.getRecentBooks(4, book.id));
+
+    const unsubWishlist = wishlistService.subscribe(() => {
       setIsBookmarked(wishlistService.isInWishlist(book.id));
     });
+
+    const unsubRecent = recentlyViewedService.subscribe(() => {
+      setRecentBooks(recentlyViewedService.getRecentBooks(4, book.id));
+    });
+
+    return () => {
+      unsubWishlist();
+      unsubRecent();
+    };
   }, [book?.id]);
 
   if (!book) {
@@ -207,14 +221,26 @@ export default function BookDetailPage({
               {book.translator && <span> · Translated by {book.translator}</span>}
             </p>
 
-            {/* Price & GST */}
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '16px', borderBottom: '1px solid var(--color-border)', paddingBottom: '14px' }}>
+            {/* Price, MRP, Discount, and Stock Status */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '16px', borderBottom: '1px solid var(--color-border)', paddingBottom: '14px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '1.85rem', fontWeight: 700, color: 'var(--color-maroon)', fontFamily: 'var(--font-sans)' }}>
                 ₹{currentPrice.toLocaleString('en-IN')}
               </span>
-              <span className="badge badge-green">In Stock</span>
+              {activeEdition.mrp > currentPrice && (
+                <>
+                  <span style={{ fontSize: '1.1rem', color: 'var(--color-text-subtle)', textDecoration: 'line-through' }}>
+                    ₹{activeEdition.mrp.toLocaleString('en-IN')}
+                  </span>
+                  <span className="badge badge-gold" style={{ fontSize: '0.74rem' }}>
+                    Save {activeEdition.discountPercent}%
+                  </span>
+                </>
+              )}
+              <span className={`badge ${activeEdition.inStock ? 'badge-green' : 'badge-maroon'}`}>
+                {activeEdition.inStock ? (activeEdition.stockQuantity <= 15 ? `Low Stock (${activeEdition.stockQuantity} Left)` : 'In Stock') : 'Out of Stock'}
+              </span>
               <span style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)' }}>
-                0% GST (Printed Books)
+                0% GST (Printed Books) · India Post Registered Dispatch
               </span>
             </div>
 
@@ -235,7 +261,10 @@ export default function BookDetailPage({
                     <button
                       key={ed.editionId}
                       type="button"
-                      onClick={() => setSelectedEditionId(ed.editionId)}
+                      onClick={() => {
+                        setSelectedEditionId(ed.editionId);
+                        setQuantity(1);
+                      }}
                       className={`btn ${isSelected ? 'btn-primary' : 'btn-outline'}`}
                       style={{ borderRadius: 'var(--radius-xs)', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
@@ -251,7 +280,7 @@ export default function BookDetailPage({
 
             {/* Quantity Stepper & Actions */}
             <div className="product-actions-bar" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '28px' }}>
-              {/* Stepper */}
+              {/* Stepper with maxOrderLimit */}
               <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-border-dark)', borderRadius: 'var(--radius-xs)', backgroundColor: '#FFFFFF' }}>
                 <button
                   type="button"
@@ -264,9 +293,10 @@ export default function BookDetailPage({
                 <span style={{ padding: '0 10px', fontSize: '0.94rem', fontWeight: 600 }}>{quantity}</span>
                 <button
                   type="button"
-                  onClick={() => setQuantity(quantity + 1)}
+                  onClick={() => setQuantity(Math.min(activeEdition.maxOrderLimit || 10, quantity + 1))}
                   style={{ background: 'none', border: 'none', padding: '8px 12px', cursor: 'pointer', fontWeight: 700, fontSize: '1rem' }}
                   aria-label="Increase quantity"
+                  disabled={quantity >= (activeEdition.maxOrderLimit || 10)}
                 >
                   +
                 </button>
@@ -428,6 +458,48 @@ export default function BookDetailPage({
                   }}
                   onAddToCart={onAddToCart}
                   isAddedToCart={cart.some((item) => item.id === relBook.id)}
+                  onNavigate={onNavigate}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SECTION: Recently Consulted Publications */}
+        {recentBooks.length > 0 && (
+          <div style={{ marginTop: '54px', paddingTop: '36px', borderTop: '1px solid var(--color-border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '20px' }}>
+              <div>
+                <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--color-maroon)', textTransform: 'uppercase', letterSpacing: '0.6px', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '2px' }}>
+                  <Clock size={12} color="var(--color-maroon)" />
+                  Reading History · ಓದುಗರ ಇತಿಹಾಸ
+                </span>
+                <h2 className="text-serif" style={{ fontSize: '1.45rem', fontWeight: 700, color: 'var(--color-text-charcoal)' }}>
+                  Recently Consulted Publications
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => recentlyViewedService.clearHistory()}
+                className="btn btn-outline btn-sm"
+                style={{ fontSize: '0.76rem' }}
+              >
+                Clear History
+              </button>
+            </div>
+
+            <div className="books-grid">
+              {recentBooks.map((recBook) => (
+                <BookCard
+                  key={recBook.id}
+                  book={recBook}
+                  onSelectBook={(b) => {
+                    onNavigate(`/books/${b.slug || b.id}`);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  onAddToCart={onAddToCart}
+                  isAddedToCart={cart.some((item) => item.id === recBook.id)}
+                  onNavigate={onNavigate}
                 />
               ))}
             </div>

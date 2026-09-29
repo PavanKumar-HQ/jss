@@ -4,7 +4,7 @@
  * duplicate prevention, and one-click transition to cart.
  */
 
-import storage from '../utils/storage';
+import storage from '../utils/storage.js';
 
 const WISHLIST_STORAGE_KEY = 'jss_granthamale_wishlist';
 const listeners = new Set();

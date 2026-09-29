@@ -4,7 +4,8 @@
  * and persists locally.
  */
 
-import storage from '../utils/storage';
+import storage from '../utils/storage.js';
+import { catalogueService } from './catalogueService.js';
 
 const RECENTLY_VIEWED_KEY = 'jss_granthamale_recently_viewed';
 const MAX_HISTORY_LIMIT = 10;
@@ -42,13 +43,11 @@ export const recentlyViewedService = {
    */
   recordView(productId) {
     if (!productId) return;
-    const cleanId = typeof productId === 'string' && /^\d+$/.test(productId)
-      ? parseInt(productId, 10)
-      : productId;
+    const cleanId = String(productId).trim();
 
     const currentList = loadHistory();
     // Remove if already present (to move it to top)
-    const filtered = currentList.filter((id) => String(id) !== String(cleanId));
+    const filtered = currentList.filter((id) => String(id) !== cleanId);
     filtered.unshift(cleanId);
 
     // Limit to max history limit
@@ -64,13 +63,38 @@ export const recentlyViewedService = {
   },
 
   /**
+   * Return array of resolved Book objects for the recently viewed items
+   * @param {number} limit
+   * @param {string|number} excludeId
+   * @returns {Book[]}
+   */
+  getRecentBooks(limit = 4, excludeId = null) {
+    const historyIds = loadHistory();
+    const result = [];
+
+    for (const id of historyIds) {
+      if (excludeId !== null && (String(id) === String(excludeId) || (typeof excludeId === 'object' && excludeId?.id && String(id) === String(excludeId.id)))) {
+        continue;
+      }
+      const book = catalogueService.getBookById(id) || catalogueService.getBookBySlug(id);
+      if (book && !result.some((b) => b.id === book.id)) {
+        result.push(book);
+      }
+      if (result.length >= limit) break;
+    }
+    return result;
+  },
+
+  /**
    * Resolves recently viewed product IDs against a product list
    * @param {Array} allProducts - Full catalogue array
    * @param {number|string} excludeId - Optionally exclude currently opened product
    * @returns {Array} List of matched product objects in chronological view order
    */
   getRecentlyViewedProducts(allProducts = [], excludeId = null) {
-    if (!Array.isArray(allProducts) || !allProducts.length) return [];
+    if (!Array.isArray(allProducts) || !allProducts.length) {
+      return this.getRecentBooks(MAX_HISTORY_LIMIT, excludeId);
+    }
     const historyIds = loadHistory();
 
     const result = [];
@@ -81,7 +105,7 @@ export const recentlyViewedService = {
       const match = allProducts.find(
         (p) => String(p.id) === String(id) || (p.slug && p.slug === String(id))
       );
-      if (match) {
+      if (match && !result.some((b) => b.id === match.id)) {
         result.push(match);
       }
     });
