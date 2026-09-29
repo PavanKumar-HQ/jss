@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, ArrowLeft, Truck, Check, BookOpen, ShieldCheck, Loader2, Bookmark, Clock } from 'lucide-react';
 import BookCard from '../components/BookCard';
-import { wishlistService, catalogueService, recentlyViewedService } from '../services';
+import { wishlistService, catalogueService, recentlyViewedService, inventoryService } from '../services';
 
 export default function BookDetailPage({
   book,
@@ -222,27 +222,34 @@ export default function BookDetailPage({
             </p>
 
             {/* Price, MRP, Discount, and Stock Status */}
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '16px', borderBottom: '1px solid var(--color-border)', paddingBottom: '14px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '1.85rem', fontWeight: 700, color: 'var(--color-maroon)', fontFamily: 'var(--font-sans)' }}>
-                ₹{currentPrice.toLocaleString('en-IN')}
-              </span>
-              {activeEdition.mrp > currentPrice && (
-                <>
-                  <span style={{ fontSize: '1.1rem', color: 'var(--color-text-subtle)', textDecoration: 'line-through' }}>
-                    ₹{activeEdition.mrp.toLocaleString('en-IN')}
+            {(() => {
+              const liveStock = inventoryService.getStock(book.id, activeEdition.binding);
+              const inStock = liveStock.inStock;
+              const isLowStock = liveStock.isLowStock;
+              return (
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '16px', borderBottom: '1px solid var(--color-border)', paddingBottom: '14px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '1.85rem', fontWeight: 700, color: 'var(--color-maroon)', fontFamily: 'var(--font-sans)' }}>
+                    ₹{currentPrice.toLocaleString('en-IN')}
                   </span>
-                  <span className="badge badge-gold" style={{ fontSize: '0.74rem' }}>
-                    Save {activeEdition.discountPercent}%
+                  {activeEdition.mrp > currentPrice && (
+                    <>
+                      <span style={{ fontSize: '1.1rem', color: 'var(--color-text-subtle)', textDecoration: 'line-through' }}>
+                        ₹{activeEdition.mrp.toLocaleString('en-IN')}
+                      </span>
+                      <span className="badge badge-gold" style={{ fontSize: '0.74rem' }}>
+                        Save {activeEdition.discountPercent}%
+                      </span>
+                    </>
+                  )}
+                  <span className={`badge ${inStock ? (isLowStock ? 'badge-gold' : 'badge-green') : 'badge-maroon'}`}>
+                    {inStock ? (isLowStock ? `Low Stock (${liveStock.available} Available)` : 'In Stock') : 'Out of Stock'}
                   </span>
-                </>
-              )}
-              <span className={`badge ${activeEdition.inStock ? 'badge-green' : 'badge-maroon'}`}>
-                {activeEdition.inStock ? (activeEdition.stockQuantity <= 15 ? `Low Stock (${activeEdition.stockQuantity} Left)` : 'In Stock') : 'Out of Stock'}
-              </span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)' }}>
-                0% GST (Printed Books) · India Post Registered Dispatch
-              </span>
-            </div>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)' }}>
+                    0% GST (Printed Books) · India Post Registered Dispatch
+                  </span>
+                </div>
+              );
+            })()}
 
             {/* Short Description */}
             <p style={{ fontSize: '0.94rem', color: 'var(--color-text-body)', lineHeight: 1.65, marginBottom: '22px' }}>
