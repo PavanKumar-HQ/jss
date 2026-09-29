@@ -127,6 +127,39 @@ export default function App() {
     }
   }, [navigate]);
 
+  // Domain Service Cart Operations
+  const handleAddToCart = useCallback((bookToAdd) => {
+    const format = bookToAdd.selectedVariant || bookToAdd.format || 'Paperback';
+    const qty = bookToAdd.quantity || 1;
+    const result = cartService.addItem(bookToAdd, format, qty);
+
+    if (result.hitMaxLimit) {
+      showToast(`Maximum limit of 10 reached for "${bookToAdd.title}"`);
+    } else {
+      showToast(`Added "${bookToAdd.title}" to cart`);
+    }
+  }, [showToast]);
+
+  const handleUpdateQuantity = useCallback((id, format, newQty) => {
+    cartService.updateQuantity(id, format, newQty);
+  }, []);
+
+  const handleRemoveFromCart = useCallback((id, format) => {
+    cartService.removeItem(id, format);
+  }, []);
+
+  const handleClearCart = useCallback(() => {
+    cartService.clearCart();
+  }, []);
+
+  const handleResetFilters = useCallback(() => {
+    setSearchQuery('');
+    setActiveCategory('All Categories');
+    setActiveSeries('All Series');
+    setActiveLanguage('All Languages');
+    setPriceMax(2000);
+  }, []);
+
   // Modal Handlers with Mobile History Layer Integration
   const handleSelectBook = useCallback((book) => {
     try {
