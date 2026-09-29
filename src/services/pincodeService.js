@@ -7,7 +7,7 @@
  * This service provides an abstracted interface for client UI estimation.
  */
 
-import validation from '../utils/validation';
+import validation from '../utils/validation.js';
 
 /**
  * Approximate postal circle inference from the first 2 digits of Indian PIN codes.

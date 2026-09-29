@@ -7,5 +7,6 @@ export { pincodeService } from './pincodeService';
 export { orderService } from './orderService';
 export { inventoryService } from './inventoryService';
 export { pricingService } from './pricingService';
+export { shippingService } from './shippingService';
 export { recentlyViewedService } from './recentlyViewedService';
 
