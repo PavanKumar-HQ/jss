@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ArrowRight,
   BookOpen,
@@ -10,13 +10,19 @@ import {
   Landmark,
   Flame,
   Crown,
-  GraduationCap
+  GraduationCap,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  Phone,
+  Mail
 } from 'lucide-react';
 import HeroEditorial from '../components/HeroEditorial';
 import BookCard from '../components/BookCard';
 import InteractiveVachanaFlipper from '../components/InteractiveVachanaFlipper';
 import jssLogo from '../assets/jss-logo.webp';
 import useScrollReveal from '../hooks/useScrollReveal';
+import { adminService } from '../services';
 
 export default function HomePage({
   products = [],
@@ -36,6 +42,16 @@ export default function HomePage({
 
   // Active filter tab for Featured Publications section
   const [featuredTab, setFeaturedTab] = useState('All');
+
+  // Published FAQs for Homepage
+  const [homeFaqs, setHomeFaqs] = useState(() => adminService.getPublishedFaqs().slice(0, 6));
+  const [expandedHomeFaqId, setExpandedHomeFaqId] = useState('faq-01');
+
+  useEffect(() => {
+    return adminService.subscribe(() => {
+      setHomeFaqs(adminService.getPublishedFaqs().slice(0, 6));
+    });
+  }, []);
 
   // Curated canonical books for Featured Publications based on active tab
   const featuredPublications = useMemo(() => {
@@ -441,7 +457,160 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* 7. BULK & INSTITUTIONAL ORDERS CALLOUT (REGAL MAROON & GOLD BANNER) */}
+      {/* 7. FREQUENTLY ASKED QUESTIONS (BILINGUAL FAQ ACCORDION) */}
+      <section className="homepage-section reveal-on-scroll" aria-label="Frequently Asked Questions" style={{ backgroundColor: '#FAF7F2', padding: '64px 0' }}>
+        <div className="container" style={{ maxWidth: '920px' }}>
+          {/* Section Header */}
+          <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <HelpCircle size={18} color="var(--color-maroon)" />
+              <span style={{ fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--color-maroon)' }}>
+                Reader Assistance & Queries · ಪ್ರಶ್ನೋತ್ತರಗಳು
+              </span>
+            </div>
+
+            <h2 className="text-serif" style={{ fontSize: 'clamp(1.75rem, 2.8vw, 2.25rem)', fontWeight: 700, color: 'var(--color-text-charcoal)', marginBottom: '10px' }}>
+              FREQUENTLY ASKED QUESTIONS
+            </h2>
+
+            <p style={{ fontSize: '0.92rem', color: 'var(--color-text-muted)', lineHeight: 1.6, maxWidth: '640px', margin: '0 auto' }}>
+              Everything you need to know about purchasing authentic publications, India Post Speed Post delivery across India, statutory 0% GST exemptions, and bulk library procurement.
+            </p>
+          </div>
+
+          {/* Accordion List */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+            {homeFaqs.map((faq) => {
+              const isExpanded = expandedHomeFaqId === faq.id;
+              return (
+                <div
+                  key={faq.id}
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    border: isExpanded ? '1.5px solid var(--color-maroon)' : '1px solid var(--color-border)',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    boxShadow: isExpanded ? '0 6px 18px rgba(94, 22, 36, 0.08)' : '0 1px 3px rgba(0,0,0,0.02)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setExpandedHomeFaqId(prev => (prev === faq.id ? null : faq.id))}
+                    aria-expanded={isExpanded}
+                    style={{
+                      width: '100%',
+                      padding: '16px 20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      textAlign: 'left',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      gap: '14px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 800,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.6px',
+                          color: 'var(--color-maroon)'
+                        }}
+                      >
+                        {faq.category}
+                      </span>
+                      <h3
+                        className="text-serif"
+                        style={{
+                          fontSize: '1.05rem',
+                          fontWeight: 700,
+                          color: isExpanded ? 'var(--color-maroon)' : 'var(--color-text-charcoal)',
+                          lineHeight: 1.35,
+                          margin: 0
+                        }}
+                      >
+                        {faq.question}
+                      </h3>
+                      {faq.questionKn && (
+                        <div style={{ fontSize: '0.84rem', color: 'var(--color-maroon)', marginTop: '2px' }}>
+                          {faq.questionKn}
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        backgroundColor: isExpanded ? 'var(--color-maroon)' : '#FAF7F2',
+                        color: isExpanded ? '#FFFFFF' : 'var(--color-maroon)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </div>
+                  </button>
+
+                  {isExpanded && (
+                    <div
+                      style={{
+                        padding: '0 20px 18px',
+                        borderTop: '1px solid var(--color-border-subtle)',
+                        backgroundColor: '#FCFAF7',
+                        paddingTop: '14px'
+                      }}
+                    >
+                      <p style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'var(--color-text-charcoal)', lineHeight: 1.65 }}>
+                        {faq.answer}
+                      </p>
+                      {faq.answerKn && (
+                        <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--color-text-muted)', lineHeight: 1.6, fontStyle: 'italic' }}>
+                          {faq.answerKn}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Bottom Actions Row */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+            <button
+              type="button"
+              onClick={() => onNavigate('/faqs')}
+              className="btn btn-secondary"
+              style={{ gap: '8px', padding: '10px 24px', fontSize: '0.88rem' }}
+            >
+              <span>View All Frequently Asked Questions</span>
+              <ArrowRight size={14} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Phone size={13} color="var(--color-maroon)" />
+                <span>Sales Counter: <strong>+91 821 2548212</strong></span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Mail size={13} color="var(--color-maroon)" />
+                <span>Email: <strong>publications@jssonline.org</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. BULK & INSTITUTIONAL ORDERS CALLOUT (REGAL MAROON & GOLD BANNER) */}
       <section className="homepage-section reveal-on-scroll" aria-label="Bulk Orders Callout">
         <div className="container">
           <div className="bulk-callout-banner">
