@@ -53,12 +53,13 @@ export default function BulkOrdersPage({ onNavigate }) {
       >
         <div className="container">
           <nav aria-label="Breadcrumb" style={{ marginBottom: '12px', fontSize: '0.84rem', color: 'var(--color-text-muted)' }}>
-            <span
-              onClick={() => onNavigate && onNavigate('/home')}
-              style={{ cursor: 'pointer', color: 'var(--color-maroon)' }}
+            <a
+              href="/"
+              onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('/'); }}
+              style={{ color: 'var(--color-maroon)', fontWeight: 600, textDecoration: 'none' }}
             >
               Home
-            </span>
+            </a>
             <span style={{ margin: '0 8px' }}>/</span>
             <span style={{ color: 'var(--color-text-charcoal)', fontWeight: 600 }}>Institutional Procurement Desk</span>
           </nav>

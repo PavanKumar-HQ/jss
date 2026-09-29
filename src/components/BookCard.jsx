@@ -80,8 +80,10 @@ function BookCard({
           <img
             src={imageSource}
             onError={() => setImgError(true)}
-            alt={`Cover of ${book.title}`}
+            alt={`Cover of ${book.title}${book.author ? ' by ' + book.author : ''} - JSS Publications`}
             className="book-card-cover-img"
+            width="240"
+            height="320"
             loading="lazy"
             decoding="async"
           />

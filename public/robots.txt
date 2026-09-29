@@ -1,6 +1,97 @@
+# ========================================================
+# JSS Publications — Production Robots Configuration
+# Entity: Jagadguru Sri Shivarathreeshwara Granthamale, Mysuru
+# Canonical Host: https://publications.jssonline.org
+# ========================================================
+
+# Default directives for all standard crawlers
 User-agent: *
 Allow: /
-Disallow: /checkout
+Allow: /books
+Allow: /books/*
+Allow: /categories
+Allow: /bulk-orders
+Allow: /about
+Allow: /contact
+Allow: /assets/*
+Allow: /*.webp$
+Allow: /*.jpg$
+Allow: /*.png$
+Allow: /*.svg$
+Allow: /*.css$
+Allow: /*.js$
 Disallow: /cart
+Disallow: /checkout
+Disallow: /admin
+Disallow: /*?*search=
+Disallow: /*?*priceMax=
+Disallow: /*?*utm_*=
 
+# Googlebot (Search & Discovery)
+User-agent: Googlebot
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+# Google-Extended (Google AI Overviews & Gemini)
+User-agent: Google-Extended
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+# Microsoft Bing & Copilot
+User-agent: Bingbot
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+# OpenAI ChatGPT Search & Model Retrieval
+User-agent: GPTBot
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+# Perplexity AI Search
+User-agent: PerplexityBot
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+# Anthropic Claude Search & Retrieval
+User-agent: ClaudeBot
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+# Applebot & Apple Intelligence
+User-agent: Applebot
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+# Meta AI Search
+User-agent: Meta-ExternalAgent
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+# Cohere AI
+User-agent: cohere-ai
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+
+# XML Sitemap declaration
 Sitemap: https://publications.jssonline.org/sitemap.xml
+Host: publications.jssonline.org

@@ -175,8 +175,11 @@ export default function BookDetailPage({
                 <img
                   src={imageSource}
                   onError={() => setImgError(true)}
-                  alt={`Cover of ${book.title}`}
+                  alt={`Full cover of ${book.title}${book.author ? ' by ' + book.author : ''} - JSS Publications`}
                   className="product-cover-img"
+                  width="360"
+                  height="500"
+                  fetchPriority="high"
                   decoding="async"
                 />
               </picture>

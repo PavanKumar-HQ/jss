@@ -17,6 +17,7 @@ import WishlistDrawer from './components/WishlistDrawer';
 import FlippingBookLoader from './components/FlippingBookLoader';
 import useScrollReveal from './hooks/useScrollReveal';
 import { catalogueService, cartService, recentlyViewedService } from './services';
+import { updateSEO } from './utils/seo';
 import { CheckCircle2 } from 'lucide-react';
 
 export default function App() {
@@ -177,7 +178,12 @@ export default function App() {
 
   // Parse Route and Determine Active View
   const routeView = useMemo(() => {
-    const path = currentRoute.split('?')[0];
+    const path = (currentRoute || '/').split('?')[0].trim();
+
+    // Root / Home
+    if (path === '/' || path === '' || path === '/home') {
+      return { type: 'home' };
+    }
 
     // Book Detail Route: /books/:id or /books/:slug
     if (path.startsWith('/books/')) {
@@ -196,46 +202,24 @@ export default function App() {
     if (path === '/cart') return { type: 'cart' };
     if (path === '/checkout') return { type: 'checkout' };
 
-    return { type: 'home' };
+    // Unknown or unmapped route -> dedicated 404 view
+    return { type: 'not-found', path };
   }, [currentRoute, products]);
 
-  // Set Page Title for Institutional SEO
+  // Execute Dynamic SEO, AEO, and Schema.org Structured Data Updates
   useEffect(() => {
-    switch (routeView.type) {
-      case 'books':
-        document.title = 'Catalogue of Publications | JSS Granthamale, Mysuru';
-        break;
-      case 'book-detail':
-        document.title = routeView.data
-          ? `${routeView.data.title} | JSS Publications`
-          : 'Book Details | JSS Publications';
-        break;
-      case 'categories':
-        document.title = 'Publishing Folios & Series | JSS Granthamale';
-        break;
-      case 'bulk-orders':
-        document.title = 'Institutional & Library Procurement | JSS Publications';
-        break;
-      case 'about':
-        document.title = 'Heritage & History | JSS Granthamale, Mysuru';
-        break;
-      case 'contact':
-        document.title = 'Contact & Retail Counter | JSS Book House';
-        break;
-      case 'cart':
-        document.title = 'Shopping Cart | JSS Publications';
-        break;
-      case 'checkout':
-        document.title = 'Postal Dispatch & Checkout | JSS Publications';
-        break;
-      default:
-        document.title = 'JSS Publications | Jagadguru Sri Shivarathreeshwara Granthamale, Mysuru';
-    }
+    updateSEO({
+      route: currentRoute,
+      routeType: routeView.type,
+      book: routeView.data,
+      category: activeCategory,
+      searchQuery
+    });
 
     if (routeView.type === 'book-detail' && routeView.data?.id) {
       recentlyViewedService.recordView(routeView.data.id);
     }
-  }, [routeView]);
+  }, [routeView, currentRoute, activeCategory, searchQuery]);
 
   const totalCartCount = useMemo(() => {
     return cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -350,6 +334,69 @@ export default function App() {
               onClearCart={handleClearCart}
               onNavigate={navigate}
             />
+          )}
+
+          {routeView.type === 'not-found' && (
+            <section
+              className="container"
+              style={{
+                padding: '90px 20px',
+                textAlign: 'center',
+                maxWidth: '680px',
+                minHeight: '60vh',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}
+              aria-label="Page Not Found"
+            >
+              <span
+                className="badge badge-maroon"
+                style={{ marginBottom: '16px', letterSpacing: '0.8px', textTransform: 'uppercase' }}
+              >
+                404 · Archival Reference Missing
+              </span>
+              <h1
+                className="text-serif"
+                style={{
+                  fontSize: 'clamp(2rem, 3.5vw, 2.6rem)',
+                  color: 'var(--color-maroon)',
+                  marginBottom: '14px',
+                  fontWeight: 700
+                }}
+              >
+                Publication or Folio Not Located
+              </h1>
+              <p
+                style={{
+                  color: 'var(--color-text-muted)',
+                  fontSize: '1.02rem',
+                  lineHeight: 1.65,
+                  marginBottom: '32px'
+                }}
+              >
+                The page or publication you requested at <code>{routeView.path || currentRoute}</code> could not be located in the JSS Granthamale archives. It may have been catalogued under an updated series reference.
+              </p>
+              <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => navigate('/books')}
+                  className="btn btn-primary"
+                  style={{ padding: '12px 24px' }}
+                >
+                  Browse Complete Catalogue (49 Books)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/')}
+                  className="btn btn-outline"
+                  style={{ padding: '12px 24px' }}
+                >
+                  Return to Home
+                </button>
+              </div>
+            </section>
           )}
       </main>
 

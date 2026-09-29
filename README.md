@@ -370,5 +370,40 @@ Security is treated as a **core architectural requirement**, not an afterthought
 
 ---
 
+## 11. Technical SEO, AEO, AI Search & Web Performance Engine
+
+A complete, production-grade optimization engine built directly into the Vite/React SPA architecture:
+
+### 1. Traditional & Generative Search Optimization (SEO / GEO)
+* **Centralized Metadata Manager (`src/utils/seo.js`)**: Dynamic DOM head controller maintaining synchronized `document.title`, `<meta name="description">`, `<meta name="keywords">`, and `<link rel="canonical">`.
+* **Canonical URL Hygiene**: Deterministic stripping of query tokens, tracking fragments, and referral tracking (`utm_source=chatgpt.com`, `utm_medium=ai`, etc.) ensuring duplicate indexed URLs cannot form.
+* **Open Graph & Twitter Cards**: Complete social graph parity with high-resolution image cards, localized alternate tags (`kn_IN`, `en_IN`), and entity publishers.
+* **Institutional 404 Routing**: Clean archival fallback view with search recommendations and explicit `robots: noindex, nofollow` headers to eliminate soft 404 indexing.
+
+### 2. Answer Engine Optimization (AEO)
+* **Direct Factual Answers**: Embedded high-density factual question-and-answer pairs answering core questions (Entity identity, Vachana literature scope, Mysuru bookstore location, 0% GST HSN 4901 exemption, postal Speed Post dispatch, and library procurement guidelines).
+* **Schema.org FAQPage**: Dynamic structured FAQ graph enabling instant citations on Google AI Overviews, Gemini, Bing Copilot, and Perplexity.
+
+### 3. AI Discoverability & Model Training Manifests (`/llms.txt`)
+* **Standard `public/llms.txt`**: Concise markdown specification for LLM agents detailing institutional identity, canonical collections, series, and ordering procedures.
+* **Full Manifest `public/llms-full.txt`**: Complete 49-publication textual manifest detailing titles, Kannada scripts, ISBNs, authors, pricing, page counts, and authentic excerpts for non-JavaScript LLM scrapers.
+* **Direct Robot Directives (`public/robots.txt`)**: Explicit permissions for `GPTBot`, `ChatGPT-User`, `PerplexityBot`, `ClaudeBot`, `anthropic-ai`, `Google-Extended`, and `Applebot-Extended`, while strictly shielding private transactional paths (`/cart`, `/checkout`, `/admin`).
+
+### 4. Rich Schema.org Linked Data Graphs
+* **`Organization`**: Authoritative entity representation of *JSS Mahavidyapeetha - Publications Division / Jagadguru Sri Shivarathreeshwara Granthamale* with `@id`, contact points, and verified social links.
+* **`BookStore` / `LocalBusiness`**: Complete physical retail counter definition (*JSS Book House, Mysuru*) with geo coordinates (`12.3051, 76.6552`), INR price range, payment types, and operating hours.
+* **`Book` & `Product` Dual Graph**: Injected per book route with ISBN, author, Kannada alternate title, page count, binding format, inLanguage, and Offer details linked to the physical bookstore counter.
+* **`BreadcrumbList`**: Full 4-tier navigation breadcrumb schema reflecting live hierarchy.
+* **`CollectionPage` & `ItemList`**: Category and catalogue search indexes for search engine crawler spiders.
+
+### 5. Web Performance & Accessibility (WCAG 2.1 AA)
+* **CLS Elimination**: Explicit `width` and `height` dimensions on all catalogue cover cards (`BookCard`), hero showcases, and product details.
+* **LCP Acceleration**: Preconnected Google Fonts, `loading="eager"` and `fetchPriority="high"` on primary hero and product covers.
+* **Asynchronous Off-Screen Loading**: `loading="lazy"` and `decoding="async"` applied across all secondary book cards.
+* **Semantic Anchor Breadcrumbs**: Upgraded all breadcrumbs from non-standard `<span>` tags to semantic `<nav aria-label="Breadcrumb">` and accessible `<a href="...">` links.
+* **Unit Test Coverage**: Automated test suite (`scripts/test-seo.mjs`) verifying canonicalization, sitemap URL count (55 URLs), robots directives, and structured data schemas.
+
+---
+
 *© Jagadguru Sri Shivarathreeshwara Granthamale, JSS Mahavidyapeetha, Mysuru.*
 

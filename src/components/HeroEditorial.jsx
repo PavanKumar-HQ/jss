@@ -86,8 +86,11 @@ export default function HeroEditorial({
             <div className="hero-publisher-brand">
               <img
                 src={jssLogo}
-                alt="JSS Publications Emblem"
+                alt="Jagadguru Sri Shivarathreeshwara Granthamale Emblem"
                 className="hero-brand-logo"
+                width="44"
+                height="44"
+                loading="eager"
               />
               <div className="hero-brand-details">
                 <span className="hero-brand-kicker">
@@ -193,8 +196,11 @@ export default function HeroEditorial({
                 >
                   <img
                     src={activeBook.webpImage}
-                    alt={`Cover of ${activeBook.title}`}
+                    alt={`Showcase edition cover of ${activeBook.title} - ${activeBook.category}`}
                     loading="eager"
+                    fetchPriority="high"
+                    width="240"
+                    height="340"
                     className="hero-book-cover-img"
                   />
                   <div className="hero-book-hover-tag">

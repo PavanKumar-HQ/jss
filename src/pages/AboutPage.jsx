@@ -75,12 +75,13 @@ export default function AboutPage({ onNavigate }) {
 
         <div className="container">
           <nav aria-label="Breadcrumb" style={{ marginBottom: '14px', fontSize: '0.84rem', color: 'var(--color-text-muted)' }}>
-            <span
-              onClick={() => onNavigate && onNavigate('home')}
-              style={{ cursor: 'pointer', color: 'var(--color-accent-maroon)', fontWeight: 600 }}
+            <a
+              href="/"
+              onClick={(e) => { e.preventDefault(); onNavigate && onNavigate('/'); }}
+              style={{ color: 'var(--color-accent-maroon)', fontWeight: 600, textDecoration: 'none' }}
             >
               Home
-            </span>
+            </a>
             <span style={{ margin: '0 8px' }}>/</span>
             <span style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}>Heritage & History</span>
           </nav>
