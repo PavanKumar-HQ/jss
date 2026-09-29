@@ -6,5 +6,6 @@ export { couponService } from './couponService';
 export { pincodeService } from './pincodeService';
 export { orderService } from './orderService';
 export { inventoryService } from './inventoryService';
+export { pricingService } from './pricingService';
 export { recentlyViewedService } from './recentlyViewedService';
 
