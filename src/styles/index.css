@@ -45,8 +45,8 @@
 
   /* Typography */
   --font-serif-heading: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-  --font-serif-display: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
-  --font-serif-classical: 'Cormorant Garamond', Georgia, serif;
+  --font-serif-display: var(--font-serif-heading);
+  --font-serif-classical: var(--font-serif-heading);
   --font-serif-brand: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-kannada: 'Noto Serif Kannada', 'Noto Sans Kannada', serif;
@@ -121,17 +121,10 @@ img {
 
 /* Typography Utility Classes */
 .text-serif,
-.text-serif-heading {
-  font-family: var(--font-serif-heading);
-}
-
-.text-serif-display {
-  font-family: var(--font-serif-display);
-  letter-spacing: -0.015em;
-}
-
+.text-serif-heading,
+.text-serif-display,
 .text-serif-classical {
-  font-family: var(--font-serif-classical);
+  font-family: var(--font-serif-heading);
 }
 
 .text-brand {
@@ -454,7 +447,6 @@ img {
 }
 
 .hero-grand-title {
-  font-family: var(--font-serif-display), var(--font-serif);
   font-size: clamp(2.1rem, 3.2vw, 2.85rem);
   font-weight: 700;
   color: #1F1918;
@@ -742,7 +734,6 @@ img {
 }
 
 .hero-book-title {
-  font-family: var(--font-serif-display), var(--font-serif);
   font-size: 1.24rem;
   font-weight: 700;
   color: #1F1918;
@@ -864,7 +855,6 @@ img {
 }
 
 .section-title {
-  font-family: var(--font-serif-display), var(--font-serif);
   font-size: 1.68rem;
   font-weight: 700;
   color: #1C1917;
@@ -1244,7 +1234,7 @@ img {
 }
 
 .book-card-title {
-  font-family: var(--font-serif-display), var(--font-serif);
+  font-family: var(--font-serif-heading);
   font-size: 1.14rem;
   font-weight: 700;
   color: #1C1917;
@@ -3083,7 +3073,6 @@ html {
 }
 
 .subject-folio-title {
-  font-family: var(--font-serif-display), var(--font-serif);
   font-size: 1.22rem;
   font-weight: 700;
   color: #1C1917;

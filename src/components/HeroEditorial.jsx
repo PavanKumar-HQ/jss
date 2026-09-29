@@ -103,7 +103,7 @@ export default function HeroEditorial({
             </div>
 
             {/* Regal Editorial Headline */}
-            <h1 className="hero-grand-title text-serif-display">
+            <h1 className="hero-grand-title text-serif">
               Sacred Vachana Literature, Agamas & Indian Philosophy
             </h1>
 
@@ -222,7 +222,7 @@ export default function HeroEditorial({
                   </span>
 
                   <h2
-                    className="hero-book-title text-serif-display"
+                    className="hero-book-title text-serif"
                     onClick={handleOpenProduct}
                     title={activeBook.title}
                   >
