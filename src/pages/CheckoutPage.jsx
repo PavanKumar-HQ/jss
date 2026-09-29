@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Truck, CheckCircle2, ShieldCheck, MapPin, Phone, Mail, ArrowLeft, ArrowRight, Building, PackageCheck, Scale } from 'lucide-react';
 import { cartService } from '../services/cartService.js';
+import { orderService } from '../services/orderService.js';
+import ids from '../utils/ids.js';
 
 export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
   const [formData, setFormData] = useState({
@@ -36,12 +38,40 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
 
   const handlePlaceOrder = (e) => {
     e.preventDefault();
-    const generatedOrderRef = `JSS-ORD-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    const consignmentNo = `EK${Math.floor(10000000 + Math.random() * 90000000)}IN`;
-    
-    const newOrder = {
+    const generatedOrderRef = ids.generateOrderId();
+
+    const orderResult = orderService.createOrder({
+      customer: {
+        fullName: formData.fullName,
+        phone: formData.phone,
+        email: formData.email
+      },
+      shippingAddress: {
+        addressLine: formData.streetAddress,
+        landmark: formData.landmark,
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.pincode
+      },
+      items: [...cart],
+      totals: {
+        itemsCount: cart.reduce((acc, i) => acc + i.quantity, 0),
+        subtotal: subtotal,
+        discount: 0,
+        shippingFee: shipping,
+        grandTotal: total
+      },
+      paymentMethod: formData.paymentPreference === 'vpp'
+        ? 'Value Payable Post (V.P.P. - Pay at delivery)'
+        : formData.paymentPreference === 'bank-transfer'
+        ? 'Direct Bank Transfer / NEFT to JSS Mahavidyapeetha'
+        : 'Counter Collection at JSS Book House Counter, Mysuru',
+      notes: formData.specialInstructions
+    });
+
+    const newOrder = orderResult.success ? orderResult.order : {
       orderReference: generatedOrderRef,
-      consignmentNo: consignmentNo,
+      orderId: generatedOrderRef,
       date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
       fullName: formData.fullName,
       phone: formData.phone,
@@ -57,18 +87,8 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
       subtotal: subtotal,
       shipping: shipping,
       total: total,
-      status: 'Order Booked at JSS Publications',
-      statusStep: 2
+      status: 'Order Recorded at JSS Publications Counter'
     };
-
-    try {
-      const existing = localStorage.getItem('jss_orders');
-      const list = existing ? JSON.parse(existing) : [];
-      list.push(newOrder);
-      localStorage.setItem('jss_orders', JSON.stringify(list));
-    } catch (err) {
-      console.warn('Could not persist order:', err);
-    }
 
     setPlacedOrderData(newOrder);
     setOrderReference(generatedOrderRef);
@@ -167,7 +187,7 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                 <strong>Payment Mode:</strong> {formData.paymentPreference === 'vpp' ? 'Value Payable Post (V.P.P. - Pay at delivery)' : formData.paymentPreference === 'bank-transfer' ? 'Direct Bank Transfer / NEFT to JSS Mahavidyapeetha' : 'Counter Collection at JSS Book House'}
               </p>
               <p style={{ color: 'var(--color-text-secondary)' }}>
-                <strong>India Post Consignment:</strong> Your tracking consignment number is <strong>{placedOrderData?.consignmentNo || 'EK748291048IN'}</strong>. Dispatches are packed in weather-proof cartons and transferred to India Post Saraswathipuram SO.
+                <strong>Postal Consignment Status:</strong> Dispatches are packed in weather-proof cartons at JSS Book House Counter, Mysuru and handed over to India Post Saraswathipuram Sub-Post Office. Your official Speed Post consignment tracking number will be issued via SMS/email upon physical post office booking.
               </p>
             </div>
 

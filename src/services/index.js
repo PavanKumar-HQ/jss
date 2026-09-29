@@ -8,5 +8,6 @@ export { orderService } from './orderService';
 export { inventoryService } from './inventoryService';
 export { pricingService } from './pricingService';
 export { shippingService } from './shippingService';
+export { checkoutStateMachine } from './checkoutStateMachine';
 export { recentlyViewedService } from './recentlyViewedService';
 

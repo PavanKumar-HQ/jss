@@ -135,14 +135,14 @@ The platform is systematically constructed following rigorous domain boundaries.
 | **Phase 2** | Search & Discovery | `searchService.js`, `Navbar.jsx`, `CataloguePage.jsx` | `scripts/test-search.mjs` (9 tests) | ✅ Verified & Pushed |
 | **Phase 3** | Product / Edition Domain | `BookDetailPage.jsx`, `BookPreviewModal.jsx`, `recentlyViewedService.js` | `scripts/test-product-edition.mjs` (6 tests) | ✅ Verified & Pushed |
 | **Phase 4** | Cart Domain Service | `cartService.js`, `CartPage.jsx`, `CheckoutPage.jsx` | `scripts/test-cart.mjs` (8 tests) | ✅ Verified & Pushed |
-| **Phase 5** | Wishlist / Reading List | `wishlistService.js`, `WishlistDrawer.jsx` | `scripts/test-wishlist.mjs` (8 tests) | ✅ Verified |
-| **Phase 6** | Inventory Service | Available, Reserved, Sold, Returned, Damaged, Restocked | Pending Execution | ⏳ Next Domain |
-| **Phase 7** | Pricing & Tax Service | HSN 4901 0% GST, Institutional discounts | Pending Execution | ⏳ Scheduled |
-| **Phase 8** | Promotions & Coupons | Subsidies, Endowment vouchers | Pending Execution | ⏳ Scheduled |
-| **Phase 9** | Shipping Service | India Post Speed Post, Weight tiers, Pin lookup | Pending Execution | ⏳ Scheduled |
-| **Phase 10** | Checkout State Machine | Strict server-aligned state transitions | Pending Execution | ⏳ Scheduled |
+| **Phase 5** | Wishlist / Reading List | `wishlistService.js`, `WishlistDrawer.jsx` | `scripts/test-wishlist.mjs` (8 tests) | ✅ Verified & Pushed |
+| **Phase 6** | Inventory Domain Service | `inventoryService.js`, `BookDetailPage.jsx` | `scripts/test-inventory.mjs` (8 tests) | ✅ Verified & Pushed |
+| **Phase 7** | Pricing & Tax Service | `pricingService.js`, HSN 4901 0% GST, Institutional Tiers | `scripts/test-pricing.mjs` (8 tests) | ✅ Verified & Pushed |
+| **Phase 8** | Promotions & Coupons | `couponService.js`, Category Eligibility & Vouchers | `scripts/test-coupon.mjs` (8 tests) | ✅ Verified & Pushed |
+| **Phase 9** | Shipping & Dispatch | `shippingService.js`, `pincodeService.js`, Weight Tiers | `scripts/test-shipping.mjs` (8 tests) | ✅ Verified & Pushed |
+| **Phase 10** | Checkout State Machine | `checkoutStateMachine.js`, `orderService.js`, Proforma Invoice | `scripts/test-order-checkout.mjs` (8 tests) | ✅ Verified |
 
-**Total Automated Domain Tests Passing**: **42/42** tests across 5 implemented domains with 0 regressions.
+**Total Automated Domain Tests Passing**: **74/74** tests across all 10 implemented domains with 0 regressions.
 
 ---
 

@@ -8,8 +8,8 @@
  * is booked at the post office by the dispatch counter.
  */
 
-import storage from '../utils/storage';
-import ids from '../utils/ids';
+import storage from '../utils/storage.js';
+import ids from '../utils/ids.js';
 
 const ORDERS_STORAGE_KEY = 'jss_granthamale_orders';
 
