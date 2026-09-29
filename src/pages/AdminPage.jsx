@@ -33,6 +33,7 @@ import {
 import { adminService, catalogueService } from '../services';
 import { apiClient } from '../services/apiClient.js';
 import { realtimeClient } from '../services/realtimeClient.js';
+import jssLogo from '../assets/jss-logo.webp';
 
 export default function AdminPage({ onNavigate }) {
   // Navigation State
@@ -328,24 +329,32 @@ export default function AdminPage({ onNavigate }) {
         }}
       >
         {/* Brand Header */}
-        <div style={{ padding: '20px 16px', borderBottom: '1px solid rgba(223, 191, 95, 0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ padding: '16px', borderBottom: '1px solid rgba(223, 191, 95, 0.2)' }}>
+          <div
+            onClick={() => onNavigate && onNavigate('/')}
+            title="Return to Public Storefront"
+            style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+          >
             <div
               style={{
-                width: '36px',
-                height: '36px',
+                width: '42px',
+                height: '42px',
                 borderRadius: '8px',
-                backgroundColor: '#C59B27',
+                backgroundColor: '#FFFFFF',
+                border: '1.5px solid rgba(223, 191, 95, 0.6)',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#1E0408',
-                fontWeight: 900,
-                fontSize: '1.05rem',
+                padding: '3px',
                 flexShrink: 0
               }}
             >
-              JSS
+              <img
+                src={jssLogo}
+                alt="JSS Publications Emblem Logo"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
             </div>
             <div>
               <span style={{ fontSize: '0.96rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.6px', display: 'block', lineHeight: 1.1 }}>
@@ -485,7 +494,31 @@ export default function AdminPage({ onNavigate }) {
             flexShrink: 0
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.86rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.86rem' }}>
+            <div
+              onClick={() => onNavigate && onNavigate('/')}
+              title="Return to Public Storefront"
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '6px',
+                backgroundColor: '#FFFFFF',
+                border: '1.5px solid rgba(197, 155, 39, 0.4)',
+                boxShadow: '0 1px 4px rgba(94, 22, 36, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2px',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+            >
+              <img
+                src={jssLogo}
+                alt="JSS Publications Emblem Logo"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            </div>
             <span style={{ color: 'var(--color-text-muted)' }}>JSS Operations</span>
             <span style={{ color: 'var(--color-border)' }}>/</span>
             <span style={{ fontWeight: 800, color: 'var(--color-maroon)' }}>
