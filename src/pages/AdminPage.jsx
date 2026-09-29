@@ -245,7 +245,19 @@ export default function AdminPage({ onNavigate }) {
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F8F6F2', color: '#1C1917', fontFamily: 'var(--font-sans)' }}>
+    <div
+      className="admin-layout-root"
+      style={{
+        display: 'flex',
+        height: '100vh',
+        maxHeight: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
+        backgroundColor: '#F8F6F2',
+        color: '#1C1917',
+        fontFamily: 'var(--font-sans)'
+      }}
+    >
       {/* Toast Notification */}
       {toastMessage && (
         <div
@@ -272,17 +284,21 @@ export default function AdminPage({ onNavigate }) {
         </div>
       )}
 
-      {/* LEFT SIDEBAR */}
+      {/* LEFT SIDEBAR - Independent Navigation Scroll */}
       <aside
+        className="admin-sidebar"
         style={{
           width: '260px',
+          height: '100vh',
+          maxHeight: '100vh',
           backgroundColor: '#26060C',
           color: '#EDE7DC',
           display: 'flex',
           flexDirection: 'column',
           flexShrink: 0,
           borderRight: '1px solid rgba(197, 155, 39, 0.25)',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          overflowX: 'hidden'
         }}
       >
         {/* Brand Header */}
@@ -450,10 +466,23 @@ export default function AdminPage({ onNavigate }) {
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-        {/* Top Control Bar */}
+      {/* MAIN CONTENT AREA - Independent Scrollable Content & Tables Column */}
+      <main
+        className="admin-main-content"
+        style={{
+          flex: 1,
+          height: '100vh',
+          maxHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          minWidth: 0,
+          overflowY: 'auto',
+          overflowX: 'hidden'
+        }}
+      >
+        {/* Top Control Bar - Sticky pinned to top of main content */}
         <header
+          className="admin-header-sticky"
           style={{
             height: '56px',
             backgroundColor: '#FFFFFF',
@@ -462,7 +491,11 @@ export default function AdminPage({ onNavigate }) {
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0 24px',
-            flexShrink: 0
+            flexShrink: 0,
+            position: 'sticky',
+            top: 0,
+            zIndex: 30,
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -731,7 +764,7 @@ export default function AdminPage({ onNavigate }) {
               </div>
 
               {/* Reconciliation Table */}
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
@@ -890,7 +923,7 @@ export default function AdminPage({ onNavigate }) {
                 </p>
               </div>
 
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
@@ -958,7 +991,7 @@ export default function AdminPage({ onNavigate }) {
                 </p>
               </div>
 
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
@@ -1172,7 +1205,7 @@ export default function AdminPage({ onNavigate }) {
                 </p>
               </div>
 
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
@@ -1312,7 +1345,7 @@ export default function AdminPage({ onNavigate }) {
               </div>
 
               {/* Orders Table */}
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
@@ -1408,7 +1441,7 @@ export default function AdminPage({ onNavigate }) {
               </div>
 
               {/* Books Grid / Table */}
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
@@ -1521,7 +1554,7 @@ export default function AdminPage({ onNavigate }) {
                 </div>
               </div>
 
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
@@ -1840,7 +1873,7 @@ export default function AdminPage({ onNavigate }) {
                 </p>
               </div>
 
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>

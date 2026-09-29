@@ -3783,5 +3783,102 @@ html {
   box-shadow: 0 0 0 3px rgba(94, 22, 36, 0.12);
 }
 
+/* ==========================================================================
+   Admin Suite Dual Independent Scroll Layout
+   ========================================================================== */
+.admin-layout-root {
+  display: flex;
+  height: 100vh;
+  max-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  overflow: hidden;
+  background-color: #F8F6F2;
+  color: #1C1917;
+  font-family: var(--font-sans);
+}
 
+/* Left Sidebar - Independent Navigation Scroll */
+.admin-sidebar {
+  width: 260px;
+  height: 100vh;
+  max-height: 100vh;
+  background-color: #26060C;
+  color: #EDE7DC;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(197, 155, 39, 0.25);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(197, 155, 39, 0.35) rgba(30, 4, 8, 0.5);
+  -webkit-overflow-scrolling: touch;
+}
 
+.admin-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  background: rgba(30, 4, 8, 0.5);
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(197, 155, 39, 0.35);
+  border-radius: 4px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(197, 155, 39, 0.6);
+}
+
+/* Main Dashboard & Content - Independent Table & KPI Scroll */
+.admin-main-content {
+  flex: 1;
+  height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(94, 22, 36, 0.25) #F1EDE4;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-main-content::-webkit-scrollbar-track {
+  background: #F1EDE4;
+}
+
+.admin-main-content::-webkit-scrollbar-thumb {
+  background: rgba(94, 22, 36, 0.25);
+  border-radius: 4px;
+}
+
+.admin-main-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-maroon);
+}
+
+/* Sticky Header Bar within Main Content */
+.admin-header-sticky {
+  height: 56px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
