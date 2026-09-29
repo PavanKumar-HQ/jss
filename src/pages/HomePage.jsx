@@ -43,14 +43,92 @@ export default function HomePage({
   // Active filter tab for Featured Publications section
   const [featuredTab, setFeaturedTab] = useState('All');
 
-  // Published FAQs for Homepage
-  const [homeFaqs, setHomeFaqs] = useState(() => adminService.getPublishedFaqs().slice(0, 6));
+// Canonical default FAQs to guarantee accordion is always populated
+const CANONICAL_HOME_FAQS = [
+  {
+    id: 'faq-01',
+    category: 'JSS Publications',
+    question: 'What is Jagadguru Sri Shivarathreeshwara Granthamale (JSS Publications)?',
+    questionKn: 'ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆ ಎಂದರೇನು?',
+    answer: 'Jagadguru Sri Shivarathreeshwara Granthamale is the premier publications and research wing of JSS Mahavidyapeetha, Mysuru. Founded under the spiritual auspices of Sri Suttur Veerashimhasana Math, it has been publishing authentic editions of 12th-century Vachana literature, Shaiva Agamas, Indian philosophy, and classical Kannada treatises since the mid-20th century.',
+    answerKn: 'ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆಯು ಜೆಎಸ್ಎಸ್ ಮಹಾವಿದ್ಯಾಪೀಠದ ಪ್ರಮುಖ ಪ್ರಕಾಶನ ಮತ್ತು ಸಂಶೋಧನಾ ವಿಭಾಗವಾಗಿದೆ. ಶ್ರೀ ಸುತ್ತೂರು ಮಠದ ಪರಂಪರೆಯಲ್ಲಿ 12ನೇ ಶತಮಾನದ ವಚನ ಸಾಹಿತ್ಯ, ಶೈವಾಗಮಗಳು ಮತ್ತು ದಾರ್ಶನಿಕ ಗ್ರಂಥಗಳನ್ನು ಇದು ಪ್ರಕಟಿಸುತ್ತದೆ.',
+    status: 'published'
+  },
+  {
+    id: 'faq-02',
+    category: 'JSS Publications',
+    question: 'Where is the physical JSS Book House located in Mysuru?',
+    questionKn: 'ಮೈಸೂರಿನಲ್ಲಿ ಜೆಎಸ್ಎಸ್ ಪುಸ್ತಕ ಭವನ ಎಲ್ಲಿದೆ?',
+    answer: 'The physical JSS Book House retail counter is situated at JSS Mahavidyapeetha, Dr. Shivarathri Rajendra Circle, Mysuru, Karnataka 570004. It is open Monday to Saturday from 9:30 AM to 6:00 PM IST.',
+    answerKn: 'ಜೆಎಸ್ಎಸ್ ಪುಸ್ತಕ ಭವನದ ಮಳಿಗೆಯು ಮೈಸೂರಿನ ಡಾ. ಶಿವರಾತ್ರಿ ರಾಜೇಂದ್ರ ವೃತ್ತದ ಜೆಎಸ್ಎಸ್ ಮಹಾವಿದ್ಯಾಪೀಠದ ಆವರಣದಲ್ಲಿದೆ.',
+    status: 'published'
+  },
+  {
+    id: 'faq-03',
+    category: 'Shipping',
+    question: 'How are books shipped to individual readers across India?',
+    questionKn: 'ಭಾರತದಾದ್ಯಂತ ಓದುಗರಿಗೆ ಪುಸ್ತಕಗಳನ್ನು ಹೇಗೆ ರವಾನಿಸಲಾಗುತ್ತದೆ?',
+    answer: 'All orders are dispatched directly from the Mysuru publication press and retail counter via India Post (Speed Post and Registered Book Parcel). Orders above ₹500 qualify for free postal delivery anywhere in India.',
+    answerKn: 'ಎಲ್ಲಾ ಆದೇಶಗಳನ್ನು ಮೈಸೂರಿನಿಂದ ಭಾರತೀಯ ಅಂಚೆ (ಸ್ಪೀಡ್ ಪೋಸ್ಟ್/ನೋಂದಾಯಿತ ಪಾರ್ಸೆಲ್) ಮೂಲಕ ಕಳುಹಿಸಲಾಗುತ್ತದೆ. ₹500 ಮೇಲಿನ ಆದೇಶಗಳಿಗೆ ಉಚಿತ ಸಾಗಾಟವಿರುತ್ತದೆ.',
+    status: 'published'
+  },
+  {
+    id: 'faq-04',
+    category: 'Payments & GST',
+    question: 'Are GST charges applicable on JSS publications?',
+    questionKn: 'ಜೆಎಸ್ಎಸ್ ಪ್ರಕಟಣೆಗಳ ಮೇಲೆ ಜಿಎಸ್ಟಿ ತೆರಿಗೆ ಅನ್ವಯಿಸುತ್ತದೆಯೇ?',
+    answer: 'Under statutory GST regulations for the Government of India (HSN Chapter 4901), printed books, journals, sacred scriptures, and classical publications are completely exempt from GST (0% CGST/SGST/IGST).',
+    answerKn: 'ಕೇಂದ್ರ ಸರ್ಕಾರದ ಜಿಎಸ್ಟಿ ನಿಯಮಗಳನ್ವಯ (HSN 4901), ಮುದ್ರಿತ ಗ್ರಂಥಗಳು ಮತ್ತು ಧಾರ್ಮಿಕ ಸಾಹಿತ್ಯಕ್ಕೆ ಸಂಪೂರ್ಣ 0% ತೆರಿಗೆ ವಿನಾಯಿತಿ ಇದೆ.',
+    status: 'published'
+  },
+  {
+    id: 'faq-05',
+    category: 'Bulk Orders',
+    question: 'Can universities, colleges, and libraries place bulk procurement orders?',
+    questionKn: 'ವಿಶ್ವವಿದ್ಯಾಲಯಗಳು, ಕಾಲೇಜುಗಳು ಮತ್ತು ಗ್ರಂಥಾಲಯಗಳು ಸಗಟು ಆದೇಶ ನೀಡಬಹುದೇ?',
+    answer: 'Yes. JSS Publications provides institutional library procurement desks with graded institutional subsidies (10% to 20%), official proforma invoices, and direct dispatch for universities, colleges, research institutes, and public libraries.',
+    answerKn: 'ಹೌದು. ಗ್ರಂಥಾಲಯಗಳು ಮತ್ತು ಶಿಕ್ಷಣ ಸಂಸ್ಥೆಗಳಿಗೆ ವಿಶೇಷ ರಿಯಾಯಿತಿ, ಪ್ರೊಫಾರ್ಮಾ ಇನ್‌ವಾಯ್ಸ್ ಮತ್ತು ನೇರ ಸಾಗಾಟ ವ್ಯವಸ್ಥೆ ಇದೆ.',
+    status: 'published'
+  },
+  {
+    id: 'faq-06',
+    category: 'Vachana Literature',
+    question: 'Are genuine editions of the 12th-century Vachanas available with commentaries?',
+    questionKn: '12ನೇ ಶತಮಾನದ ವಚನಗಳ ಅಧಿಕೃತ ಆವೃತ್ತಿಗಳು ವಿವರಣೆಯೊಂದಿಗೆ ಲಭ್ಯವಿದೆಯೇ?',
+    answer: 'Yes. We publish exhaustive anthologies of Basavanna, Allama Prabhu, Akkamahadevi, and hundreds of minor Sharanas with word-for-word glosses, philosophical introductions, English translations, and critical apparatus.',
+    answerKn: 'ಹೌದು. ಬಸವಣ್ಣ, ಅಲ್ಲಮಪ್ರಭು, ಅಕ್ಕಮಹಾದೇವಿ ಹಾಗೂ ಇತರ ಶರಣರ ವಚನಗಳನ್ನು ಶಾಸ್ತ್ರೀಯ ವ್ಯಾಖ್ಯಾನ ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಅನುವಾದದೊಂದಿಗೆ ಪ್ರಕಟಿಸಲಾಗಿದೆ.',
+    status: 'published'
+  }
+];
+
+// Published FAQs for Homepage with guaranteed fallback
+  const [homeFaqs, setHomeFaqs] = useState(() => {
+    try {
+      const pub = adminService.getPublishedFaqs();
+      if (Array.isArray(pub) && pub.length > 0) return pub.slice(0, 6);
+    } catch (e) {
+      console.warn('FAQ retrieval error:', e);
+    }
+    return CANONICAL_HOME_FAQS;
+  });
   const [expandedHomeFaqId, setExpandedHomeFaqId] = useState('faq-01');
 
   useEffect(() => {
-    return adminService.subscribe(() => {
-      setHomeFaqs(adminService.getPublishedFaqs().slice(0, 6));
-    });
+    const updateFaqs = () => {
+      try {
+        const pub = adminService.getPublishedFaqs();
+        if (Array.isArray(pub) && pub.length > 0) {
+          setHomeFaqs(pub.slice(0, 6));
+          return;
+        }
+      } catch (e) {
+        console.warn('FAQ sync error:', e);
+      }
+      setHomeFaqs(CANONICAL_HOME_FAQS);
+    };
+
+    updateFaqs();
+    return adminService.subscribe(updateFaqs);
   }, []);
 
   // Curated canonical books for Featured Publications based on active tab
@@ -458,7 +536,7 @@ export default function HomePage({
       </section>
 
       {/* 7. FREQUENTLY ASKED QUESTIONS (BILINGUAL FAQ ACCORDION) */}
-      <section className="homepage-section reveal-on-scroll" aria-label="Frequently Asked Questions" style={{ backgroundColor: '#FAF7F2', padding: '64px 0' }}>
+      <section id="faqs" className="homepage-section reveal-on-scroll revealed" aria-label="Frequently Asked Questions" style={{ backgroundColor: '#FAF7F2', padding: '64px 0' }}>
         <div className="container" style={{ maxWidth: '920px' }}>
           {/* Section Header */}
           <div style={{ textAlign: 'center', marginBottom: '36px' }}>

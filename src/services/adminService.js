@@ -1106,7 +1106,9 @@ export const adminService = {
   },
 
   getPublishedFaqs() {
-    return this.getFaqs().filter(f => f.status === 'published');
+    const all = this.getFaqs();
+    const published = all.filter(f => f.status === 'published' || !f.status || f.status === 'active');
+    return published.length > 0 ? published : all;
   },
 
   addFaq({
