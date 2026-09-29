@@ -11,6 +11,10 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
+import FaqsPage from './pages/FaqsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import AdminPage from './pages/AdminPage';
 import BookPreviewModal from './components/BookPreviewModal';
 import OrderTrackingModal from './components/OrderTrackingModal';
 import WishlistDrawer from './components/WishlistDrawer';
@@ -201,6 +205,10 @@ export default function App() {
     if (path === '/contact') return { type: 'contact' };
     if (path === '/cart') return { type: 'cart' };
     if (path === '/checkout') return { type: 'checkout' };
+    if (path === '/faqs') return { type: 'faqs' };
+    if (path === '/privacy') return { type: 'privacy' };
+    if (path === '/terms') return { type: 'terms' };
+    if (path === '/admin' || path.startsWith('/admin')) return { type: 'admin' };
 
     // Unknown or unmapped route -> dedicated 404 view
     return { type: 'not-found', path };
@@ -224,6 +232,13 @@ export default function App() {
   const totalCartCount = useMemo(() => {
     return cart.reduce((acc, item) => acc + item.quantity, 0);
   }, [cart]);
+
+  // Dedicated Full-Screen Workspace for JSS Publications Enterprise Admin Suite
+  if (routeView.type === 'admin') {
+    return (
+      <AdminPage onNavigate={navigate} />
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', overflowX: 'hidden' }}>
@@ -334,6 +349,18 @@ export default function App() {
               onClearCart={handleClearCart}
               onNavigate={navigate}
             />
+          )}
+
+          {routeView.type === 'faqs' && (
+            <FaqsPage onNavigate={navigate} />
+          )}
+
+          {routeView.type === 'privacy' && (
+            <PrivacyPage onNavigate={navigate} />
+          )}
+
+          {routeView.type === 'terms' && (
+            <TermsPage onNavigate={navigate} />
           )}
 
           {routeView.type === 'not-found' && (

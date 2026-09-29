@@ -104,6 +104,17 @@ const Navbar = React.memo(function Navbar({
 
             <button
               type="button"
+              onClick={() => onNavigate('/faqs')}
+              className="top-bar-btn"
+              title="Frequently Asked Questions"
+            >
+              <span>FAQs</span>
+            </button>
+
+            <span style={{ opacity: 0.35 }}>|</span>
+
+            <button
+              type="button"
               onClick={() => setLanguageMode(languageMode === 'en' ? 'kn' : 'en')}
               style={{
                 background: 'rgba(255,255,255,0.12)',

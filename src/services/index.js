@@ -10,4 +10,4 @@ export { pricingService } from './pricingService';
 export { shippingService } from './shippingService';
 export { checkoutStateMachine } from './checkoutStateMachine';
 export { recentlyViewedService } from './recentlyViewedService';
-
+export { adminService } from './adminService';

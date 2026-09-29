@@ -1724,6 +1724,31 @@ img {
   text-decoration: underline;
 }
 
+/* Social Media Channels with Exact Respective Brand Color on Hover */
+.social-footer-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #EDE7DC;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.social-footer-btn:hover {
+  color: #FFFFFF !important;
+  transform: translateY(-3px) scale(1.08);
+  background: var(--social-hover-gradient, var(--social-hover-bg)) !important;
+  border-color: var(--social-border, var(--social-hover-bg)) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
 .footer-bottom-bar {
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   padding-top: 18px;
