@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Truck, CheckCircle2, ShieldCheck, MapPin, Phone, Mail, ArrowLeft, ArrowRight, Building, PackageCheck } from 'lucide-react';
+import { Truck, CheckCircle2, ShieldCheck, MapPin, Phone, Mail, ArrowLeft, ArrowRight, Building, PackageCheck, Scale } from 'lucide-react';
+import { cartService } from '../services/cartService.js';
 
 export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
   const [formData, setFormData] = useState({
@@ -21,9 +22,12 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
   const [orderReference, setOrderReference] = useState('');
   const [placedOrderData, setPlacedOrderData] = useState(null);
 
-  const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const shipping = formData.dispatchMethod === 'counter-pickup' ? 0 : (subtotal >= 500 || subtotal === 0 ? 0 : 40);
-  const total = subtotal + shipping;
+  const isCounterPickup = formData.dispatchMethod === 'counter-pickup';
+  const totals = cartService.getTotals(cart, 0, isCounterPickup ? 0 : null);
+  const subtotal = totals.subtotal;
+  const shipping = totals.shippingFee;
+  const total = totals.grandTotal;
+  const totalWeightGrams = totals.totalWeightGrams;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -614,19 +618,25 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                 <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.86rem', marginBottom: '18px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text-secondary)' }}>
                     <span>Publications Subtotal</span>
-                    <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>₹{subtotal}</span>
+                    <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>₹{subtotal.toLocaleString('en-IN')}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text-secondary)' }}>
                     <span>India Post Packing & Transit</span>
                     <span>{shipping === 0 ? <strong style={{ color: '#2E7D32' }}>FREE</strong> : `₹${shipping}`}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text-secondary)' }}>
+                    <span>Consignment Parcel Weight</span>
+                    <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                      {totalWeightGrams >= 1000 ? `${(totalWeightGrams / 1000).toFixed(2)} kg` : `${totalWeightGrams} g`}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text-secondary)' }}>
                     <span>Tax (GST on Printed Books)</span>
-                    <span style={{ color: '#2E7D32', fontWeight: 600 }}>0% Exempt</span>
+                    <span style={{ color: '#2E7D32', fontWeight: 600 }}>0% Exempt (HSN 4901)</span>
                   </div>
                   <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                     <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>Grand Total</span>
-                    <span style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--color-accent-maroon)' }}>₹{total}</span>
+                    <span style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--color-accent-maroon)' }}>₹{total.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
 

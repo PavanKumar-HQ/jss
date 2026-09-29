@@ -79,10 +79,13 @@ src/
 ## ⚙️ Domain Services Specification
 
 ### 1. `cartService` ([`src/services/cartService.js`](src/services/cartService.js))
-- **Item Bounds**: Enforces a strict retail limit of maximum 10 copies per title (bulk orders redirected to institutional workflow).
-- **Variant Pricing**: Resolves binding variants dynamically (e.g. Paperback ₹200 vs. Deluxe Hardbound ₹350).
-- **Financial Calculations**: Computes item counts, gross subtotal, applied discount, ₹40 standard shipping vs. free postal delivery over ₹500, and 0% GST compliance.
-- **Pub/Sub Reactivity**: Exposes `subscribe(callback)` allowing disparate components (`Navbar`, `CartDrawer`, `BookCard`) to synchronize state automatically without prop drilling.
+- **Authoritative Price Reconciliation**: Reconciles all prices directly against `catalogueService`. Any tampered client prices (e.g. attempting to submit ₹1 for a ₹1000 volume) are immediately overwritten with authoritative catalogue pricing.
+- **Multi-Binding Edition Snapshots**: Captures full physical attributes upon item addition: `binding`, `formatLabel`, `editionId`, `isbn`, `weightGrams`, `mrp`, and authoritative `price`.
+- **Item Bounds & Retail Ceilings**: Enforces strict retail limits (max 10 copies for standard editions, max 5 copies for deluxe collector editions). Quantities exceeding limits are clamped automatically.
+- **Storage Self-Healing**: Automatically detects corrupted or malformed `localStorage` state (non-array records or corrupted entries), cleans them, and restores valid cart state without UI crashes.
+- **Catalogue Synchronization on Mount**: In `CartPage.jsx`, runs `reconcileCart()` to detect discontinued titles or price changes and displays a dismissible institutional alert banner.
+- **Deterministic Currency & Weight Arithmetic**: Integer-safe calculations for subtotal, ₹500 free shipping qualification, standard ₹40 India Post delivery, statutory 0% GST (HSN 4901), and cumulative consignment parcel weight.
+- **Pub/Sub Reactivity**: Exposes `subscribe(callback)` allowing `Navbar`, `CartPage`, `CheckoutPage`, and quick-view modals to remain synchronised in real time.
 
 ### 2. `wishlistService` ([`src/services/wishlistService.js`](src/services/wishlistService.js))
 - **Study Reading List (ನನ್ನ ಆಯ್ಕೆಯ ಗ್ರಂಥಗಳು)**: Enables scholars, research students, and readers to bookmark works for later consultation.
@@ -118,6 +121,28 @@ src/
 ### 6. `recentlyViewedService` ([`src/services/recentlyViewedService.js`](src/services/recentlyViewedService.js))
 - **Browse Tracking**: Records visited publications on every product detail navigation.
 - **Deduplication & Capping**: Automatically moves re-visited titles to the front and caps history to the 10 most recent titles.
+
+---
+
+## 🏗️ Domain-by-Domain Architecture Progression
+
+The platform is systematically constructed following rigorous domain boundaries. Every domain includes isolated service logic, defensive edge-case handling, full UI integration, and an automated verification test suite:
+
+| Phase | Domain | Service / Components | Verification Suite | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 0** | Architecture Audit | Component & route decoupling | Build & Tree-shake Audit | ✅ Completed |
+| **Phase 1** | Catalogue Service | `catalogueService.js`, `rawBooks.js` (49 books) | `scripts/test-catalogue.mjs` (11 tests) | ✅ Verified & Pushed |
+| **Phase 2** | Search & Discovery | `searchService.js`, `Navbar.jsx`, `CataloguePage.jsx` | `scripts/test-search.mjs` (9 tests) | ✅ Verified & Pushed |
+| **Phase 3** | Product / Edition Domain | `BookDetailPage.jsx`, `BookPreviewModal.jsx`, `recentlyViewedService.js` | `scripts/test-product-edition.mjs` (6 tests) | ✅ Verified & Pushed |
+| **Phase 4** | Cart Domain Service | `cartService.js`, `CartPage.jsx`, `CheckoutPage.jsx` | `scripts/test-cart.mjs` (8 tests) | ✅ Verified |
+| **Phase 5** | Wishlist / Reading List | `wishlistService.js`, `WishlistDrawer.jsx` | Pending Execution | ⏳ Next Domain |
+| **Phase 6** | Inventory Service | Available, Reserved, Sold, Returned, Damaged, Restocked | Pending Execution | ⏳ Scheduled |
+| **Phase 7** | Pricing & Tax Service | HSN 4901 0% GST, Institutional discounts | Pending Execution | ⏳ Scheduled |
+| **Phase 8** | Promotions & Coupons | Subsidies, Endowment vouchers | Pending Execution | ⏳ Scheduled |
+| **Phase 9** | Shipping Service | India Post Speed Post, Weight tiers, Pin lookup | Pending Execution | ⏳ Scheduled |
+| **Phase 10** | Checkout State Machine | Strict server-aligned state transitions | Pending Execution | ⏳ Scheduled |
+
+**Total Automated Domain Tests Passing**: **34/34** tests across 4 implemented domains with 0 regressions.
 
 ---
 
