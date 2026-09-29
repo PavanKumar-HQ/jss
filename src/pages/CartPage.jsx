@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingBag, ArrowLeft, ArrowRight, Trash2, Truck, ShieldCheck, BookOpen, AlertCircle, CheckCircle2, Sparkles, Scale } from 'lucide-react';
 import { cartService } from '../services/cartService.js';
 
-export default function CartPage({ cart = [], onUpdateQuantity, onRemoveItem, onNavigate }) {
+export default function CartPage({ cart = [], onUpdateQuantity, onRemoveItem, onNavigate, onGoBack }) {
   const [reconciliationNotices, setReconciliationNotices] = useState([]);
 
   // Authoritative catalogue reconciliation on mount
@@ -77,12 +77,17 @@ export default function CartPage({ cart = [], onUpdateQuantity, onRemoveItem, on
         <div style={{ marginBottom: '20px' }}>
           <button
             type="button"
-            onClick={() => onNavigate('/books')}
+            onClick={() => {
+              if (onGoBack) onGoBack('/books');
+              else if (typeof window !== 'undefined' && window.history.length > 1) window.history.back();
+              else onNavigate('/books');
+            }}
             className="btn btn-outline btn-sm"
-            style={{ gap: '6px' }}
+            style={{ gap: '6px', minHeight: '36px', alignItems: 'center' }}
+            aria-label="Return to previous page"
           >
             <ArrowLeft size={13} />
-            <span>Continue Browsing Catalogue</span>
+            <span>Continue Browsing</span>
           </button>
         </div>
 

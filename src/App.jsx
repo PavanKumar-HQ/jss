@@ -90,23 +90,10 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Browser Navigation History Listener
-  useEffect(() => {
-    const handlePopState = () => {
-      const hash = window.location.hash.replace(/^#/, '');
-      if (hash) {
-        setCurrentRoute(hash.startsWith('/') ? hash : `/${hash}`);
-      } else {
-        setCurrentRoute(window.location.pathname || '/');
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+  // Scroll Restoration Map
+  const scrollPositions = React.useRef({});
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  // Central Router Dispatcher (Memoized)
+  // Central Router Dispatcher with scroll memory
   const navigate = useCallback((to) => {
     let clean = to;
     if (!clean.startsWith('/')) {
@@ -116,69 +103,125 @@ export default function App() {
       clean = '/';
     }
 
+    // Save scroll position for current route before navigating
+    if (typeof window !== 'undefined') {
+      scrollPositions.current[currentRoute] = window.scrollY;
+    }
+
     try {
-      window.history.pushState({}, '', clean);
+      window.history.pushState({ path: clean }, '', clean);
     } catch (e) {
       window.location.hash = clean;
     }
 
     setCurrentRoute(clean);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  }, [currentRoute]);
 
-  // Domain Service Cart Operations
-  const handleAddToCart = useCallback((bookToAdd) => {
-    const format = bookToAdd.selectedVariant || bookToAdd.format || 'Paperback';
-    const qty = bookToAdd.quantity || 1;
-    const result = cartService.addItem(bookToAdd, format, qty);
-
-    if (result.hitMaxLimit) {
-      showToast(`Maximum limit of 10 reached for "${bookToAdd.title}"`);
+  // Unified Mobile & Desktop In-App Back Navigation Key
+  const goBack = useCallback((fallback = '/') => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      window.history.back();
     } else {
-      showToast(`Added "${bookToAdd.title}" to cart`);
+      navigate(fallback);
     }
-  }, [showToast]);
+  }, [navigate]);
 
-  const handleUpdateQuantity = useCallback((id, format, newQty) => {
-    cartService.updateQuantity(id, format, newQty);
-  }, []);
-
-  const handleRemoveFromCart = useCallback((id, format) => {
-    cartService.removeItem(id, format);
-  }, []);
-
-  const handleClearCart = useCallback(() => {
-    cartService.clearCart();
-  }, []);
-
-  const handleResetFilters = useCallback(() => {
-    setSearchQuery('');
-    setActiveCategory('All Categories');
-    setActiveSeries('All Series');
-    setActiveLanguage('All Languages');
-    setPriceMax(2000);
-  }, []);
-
-  // Modal Handlers
+  // Modal Handlers with Mobile History Layer Integration
   const handleSelectBook = useCallback((book) => {
+    try {
+      window.history.pushState({ modal: 'book-preview' }, '');
+    } catch (e) {}
     setSelectedBook(book);
   }, []);
 
   const handleOpenExcerpt = useCallback((book) => {
+    try {
+      window.history.pushState({ modal: 'book-excerpt' }, '');
+    } catch (e) {}
     setSelectedBook({ ...book, initialTab: 'excerpt' });
   }, []);
 
   const handleCloseBookModal = useCallback(() => {
-    setSelectedBook(null);
+    if (typeof window !== 'undefined' && window.history.state?.modal) {
+      window.history.back();
+    } else {
+      setSelectedBook(null);
+    }
   }, []);
 
   const handleOpenTrackingModal = useCallback(() => {
+    try {
+      window.history.pushState({ modal: 'tracking' }, '');
+    } catch (e) {}
     setIsTrackingModalOpen(true);
   }, []);
 
   const handleCloseTrackingModal = useCallback(() => {
-    setIsTrackingModalOpen(false);
+    if (typeof window !== 'undefined' && window.history.state?.modal) {
+      window.history.back();
+    } else {
+      setIsTrackingModalOpen(false);
+    }
   }, []);
+
+  const handleOpenWishlist = useCallback(() => {
+    try {
+      window.history.pushState({ modal: 'wishlist' }, '');
+    } catch (e) {}
+    setIsWishlistOpen(true);
+  }, []);
+
+  const handleCloseWishlist = useCallback(() => {
+    if (typeof window !== 'undefined' && window.history.state?.modal) {
+      window.history.back();
+    } else {
+      setIsWishlistOpen(false);
+    }
+  }, []);
+
+  // Lock background body scroll whenever a modal or drawer is active on mobile/desktop
+  useEffect(() => {
+    const isModalActive = Boolean(selectedBook || isTrackingModalOpen || isWishlistOpen);
+    if (isModalActive) {
+      const origOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = origOverflow;
+      };
+    }
+  }, [selectedBook, isTrackingModalOpen, isWishlistOpen]);
+
+  // Mobile Back Navigation Key & Browser PopState Interception
+  useEffect(() => {
+    const handlePopState = (event) => {
+      // 1. Edge Case: If any modal or drawer is open on mobile, Back key dismisses it!
+      if (selectedBook || isTrackingModalOpen || isWishlistOpen) {
+        setSelectedBook(null);
+        setIsTrackingModalOpen(false);
+        setIsWishlistOpen(false);
+        return; // Prevent navigating away from the page behind the modal
+      }
+
+      // 2. Normal Route Back Navigation
+      const hash = window.location.hash.replace(/^#/, '');
+      const target = hash ? (hash.startsWith('/') ? hash : `/${hash}`) : (window.location.pathname || '/');
+      setCurrentRoute(target);
+
+      // 3. Edge Case: Restore reader's scroll position on Back Navigation
+      const savedY = scrollPositions.current[target];
+      if (savedY !== undefined && savedY > 0) {
+        setTimeout(() => {
+          window.scrollTo({ top: savedY, behavior: 'auto' });
+        }, 20);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedBook, isTrackingModalOpen, isWishlistOpen]);
 
   // Parse Route and Determine Active View
   const routeView = useMemo(() => {
@@ -254,7 +297,7 @@ export default function App() {
         setLanguageMode={setLanguageMode}
         onSelectBook={handleSelectBook}
         onOpenTrackingModal={handleOpenTrackingModal}
-        onOpenWishlist={() => setIsWishlistOpen(true)}
+        onOpenWishlist={handleOpenWishlist}
       />
 
       {/* Main Routed Page Content */}
@@ -294,6 +337,7 @@ export default function App() {
               setPriceMax={setPriceMax}
               onResetFilters={handleResetFilters}
               onNavigate={navigate}
+              onGoBack={goBack}
             />
           )}
 
@@ -302,6 +346,7 @@ export default function App() {
               book={routeView.data}
               allBooks={products}
               onNavigate={navigate}
+              onGoBack={goBack}
               onAddToCart={handleAddToCart}
               onBuyNow={(b) => {
                 handleAddToCart(b);
@@ -315,6 +360,7 @@ export default function App() {
           {routeView.type === 'categories' && (
             <CategoriesPage
               onNavigate={navigate}
+              onGoBack={goBack}
               onSelectCategory={(catName) => {
                 setActiveCategory(catName);
                 navigate('/books');
@@ -323,15 +369,15 @@ export default function App() {
           )}
 
           {routeView.type === 'bulk-orders' && (
-            <BulkOrdersPage onNavigate={navigate} />
+            <BulkOrdersPage onNavigate={navigate} onGoBack={goBack} />
           )}
 
           {routeView.type === 'about' && (
-            <AboutPage onNavigate={navigate} />
+            <AboutPage onNavigate={navigate} onGoBack={goBack} />
           )}
 
           {routeView.type === 'contact' && (
-            <ContactPage onNavigate={navigate} />
+            <ContactPage onNavigate={navigate} onGoBack={goBack} />
           )}
 
           {routeView.type === 'cart' && (
@@ -340,6 +386,7 @@ export default function App() {
               onUpdateQuantity={handleUpdateQuantity}
               onRemoveItem={handleRemoveFromCart}
               onNavigate={navigate}
+              onGoBack={goBack}
             />
           )}
 
@@ -348,19 +395,20 @@ export default function App() {
               cart={cart}
               onClearCart={handleClearCart}
               onNavigate={navigate}
+              onGoBack={goBack}
             />
           )}
 
           {routeView.type === 'faqs' && (
-            <FaqsPage onNavigate={navigate} />
+            <FaqsPage onNavigate={navigate} onGoBack={goBack} />
           )}
 
           {routeView.type === 'privacy' && (
-            <PrivacyPage onNavigate={navigate} />
+            <PrivacyPage onNavigate={navigate} onGoBack={goBack} />
           )}
 
           {routeView.type === 'terms' && (
-            <TermsPage onNavigate={navigate} />
+            <TermsPage onNavigate={navigate} onGoBack={goBack} />
           )}
 
           {routeView.type === 'not-found' && (
@@ -416,11 +464,11 @@ export default function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate('/')}
+                  onClick={() => goBack('/')}
                   className="btn btn-outline"
                   style={{ padding: '12px 24px' }}
                 >
-                  Return to Home
+                  Return to Previous Page
                 </button>
               </div>
             </section>
@@ -455,7 +503,7 @@ export default function App() {
 
         <WishlistDrawer
           isOpen={isWishlistOpen}
-          onClose={() => setIsWishlistOpen(false)}
+          onClose={handleCloseWishlist}
           onNavigate={navigate}
           onAddToCart={handleAddToCart}
         />

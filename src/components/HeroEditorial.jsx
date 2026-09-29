@@ -55,9 +55,19 @@ export default function HeroEditorial({
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
 
   const activeBook = SHOWCASE_BOOKS[activeIndex];
   const isAdded = cart.some(item => item.id === activeBook.id);
+
+  const handleSelectVolume = (index) => {
+    if (index === activeIndex || isSwitching) return;
+    setIsSwitching(true);
+    setActiveIndex(index);
+    setTimeout(() => {
+      setIsSwitching(false);
+    }, 180);
+  };
 
   const handleAdd = (e) => {
     e.stopPropagation();
@@ -179,7 +189,7 @@ export default function HeroEditorial({
                       type="button"
                       role="tab"
                       aria-selected={i === activeIndex}
-                      onClick={() => setActiveIndex(i)}
+                      onClick={() => handleSelectVolume(i)}
                       className={`hero-book-tab ${i === activeIndex ? 'active' : ''}`}
                       title={b.title}
                     >
@@ -190,7 +200,7 @@ export default function HeroEditorial({
               </div>
 
               {/* Book Presentation: Dedicated Showcase Stage + Details */}
-              <div className="hero-book-body">
+              <div className={`hero-book-body ${isSwitching ? 'fade-switching' : ''}`}>
                 {/* Book Cover Stage with 3D Depth */}
                 <div
                   className="hero-book-cover-stage"

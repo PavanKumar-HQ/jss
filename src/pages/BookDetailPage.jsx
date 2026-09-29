@@ -7,6 +7,7 @@ export default function BookDetailPage({
   book,
   allBooks = [],
   onNavigate,
+  onGoBack,
   onAddToCart,
   onBuyNow,
   cart = [],
@@ -154,14 +155,20 @@ export default function BookDetailPage({
           <span style={{ color: 'var(--color-text-charcoal)', fontWeight: 600 }}>{book.title}</span>
         </nav>
 
-        {/* Back Link */}
+        {/* Smart Back Navigation Link */}
         <button
-          onClick={() => onNavigate('/books')}
+          type="button"
+          onClick={() => {
+            if (onGoBack) onGoBack('/books');
+            else if (typeof window !== 'undefined' && window.history.length > 1) window.history.back();
+            else onNavigate('/books');
+          }}
           className="btn btn-outline btn-sm"
-          style={{ marginBottom: '24px', gap: '6px' }}
+          style={{ marginBottom: '24px', gap: '6px', minHeight: '38px', alignItems: 'center' }}
+          aria-label="Return to previous page"
         >
           <ArrowLeft size={14} />
-          <span>Back to Catalogue</span>
+          <span>Back to Books</span>
         </button>
 
         {/* Product Layout Grid: Left Cover & Right Details */}

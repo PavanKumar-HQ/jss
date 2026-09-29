@@ -1,7 +1,7 @@
 import React from 'react';
 import { ShieldCheck, Lock, EyeOff, FileText, ArrowLeft, Mail, Phone, MapPin } from 'lucide-react';
 
-export default function PrivacyPage({ onNavigate }) {
+export default function PrivacyPage({ onNavigate, onGoBack }) {
   return (
     <div className="privacy-page-wrapper" style={{ backgroundColor: '#FAF7F2', minHeight: '85vh', paddingBottom: '70px' }}>
       {/* Header */}
@@ -9,7 +9,11 @@ export default function PrivacyPage({ onNavigate }) {
         <div className="container" style={{ maxWidth: '860px' }}>
           <button
             type="button"
-            onClick={() => onNavigate && onNavigate('/')}
+            onClick={() => {
+              if (onGoBack) onGoBack('/');
+              else if (typeof window !== 'undefined' && window.history.length > 1) window.history.back();
+              else onNavigate && onNavigate('/');
+            }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',

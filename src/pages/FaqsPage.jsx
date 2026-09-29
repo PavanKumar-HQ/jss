@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, ChevronDown, ChevronUp, HelpCircle, Phone, Mail, MapPin, ArrowRight, BookOpen, ShieldCheck, Truck } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, HelpCircle, Phone, Mail, MapPin, ArrowRight, ArrowLeft, BookOpen, ShieldCheck, Truck } from 'lucide-react';
 import { adminService } from '../services';
 
 const FAQ_CATEGORIES = [
@@ -13,7 +13,7 @@ const FAQ_CATEGORIES = [
   'JSS Publications'
 ];
 
-export default function FaqsPage({ onNavigate }) {
+export default function FaqsPage({ onNavigate, onGoBack }) {
   const [faqs, setFaqs] = useState(() => adminService.getPublishedFaqs());
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
@@ -50,6 +50,23 @@ export default function FaqsPage({ onNavigate }) {
       {/* Editorial Page Header */}
       <section style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--color-border)', padding: '48px 0 38px' }}>
         <div className="container" style={{ maxWidth: '920px', textAlign: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px' }}>
+            <button
+              type="button"
+              onClick={() => {
+                if (onGoBack) onGoBack('/');
+                else if (typeof window !== 'undefined' && window.history.length > 1) window.history.back();
+                else onNavigate('/');
+              }}
+              className="btn btn-outline btn-sm"
+              style={{ gap: '6px', minHeight: '36px', alignItems: 'center' }}
+              aria-label="Return to previous page"
+            >
+              <ArrowLeft size={13} />
+              <span>Back to Storefront</span>
+            </button>
+          </div>
+
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <HelpCircle size={18} color="var(--color-maroon)" />
             <span style={{ fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--color-maroon)' }}>

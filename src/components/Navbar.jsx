@@ -27,6 +27,31 @@ const Navbar = React.memo(function Navbar({
     });
   }, []);
 
+  // Intercept mobile back button and Escape key to close mobile menu
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const handleMobileBack = () => {
+      setIsMobileMenuOpen(false);
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+
+    window.addEventListener('popstate', handleMobileBack);
+    window.addEventListener('keydown', handleKeyDown);
+
+    const origOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      window.removeEventListener('popstate', handleMobileBack);
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = origOverflow;
+    };
+  }, [isMobileMenuOpen]);
+
   const handleLinkClick = (route, e) => {
     if (e) e.preventDefault();
     onNavigate(route);
