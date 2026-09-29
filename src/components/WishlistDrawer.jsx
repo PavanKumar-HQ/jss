@@ -6,17 +6,20 @@ export default function WishlistDrawer({ isOpen, onClose, onNavigate, onAddToCar
   const [items, setItems] = useState(() => wishlistService.getWishlist());
 
   useEffect(() => {
+    if (isOpen) {
+      wishlistService.reconcileWishlist();
+    }
     return wishlistService.subscribe((updatedList) => {
       setItems(updatedList);
     });
-  }, []);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleMoveToCart = (item) => {
     if (onAddToCart) {
       onAddToCart(item);
-      wishlistService.removeItem(item.id);
+      wishlistService.removeItem(item.id, item.binding);
     } else {
       wishlistService.moveToCart(item.id, cartService, item.binding || 'Paperback');
     }
@@ -31,8 +34,8 @@ export default function WishlistDrawer({ isOpen, onClose, onNavigate, onAddToCar
     }
   };
 
-  const handleRemove = (productId) => {
-    wishlistService.removeItem(productId);
+  const handleRemove = (item) => {
+    wishlistService.removeItem(item.id, item.binding);
   };
 
   const handleBookClick = (slugOrId) => {
@@ -204,14 +207,48 @@ export default function WishlistDrawer({ isOpen, onClose, onNavigate, onAddToCar
                       </span>
                     )}
 
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          padding: '2px 8px',
+                          borderRadius: 'var(--radius-xs)',
+                          backgroundColor: 'var(--color-bg-neutral)',
+                          border: '1px solid var(--color-border)',
+                          fontSize: '0.74rem',
+                          fontWeight: 600,
+                          color: 'var(--color-text-charcoal)'
+                        }}
+                      >
+                        {item.formatLabel || `${item.binding || 'Paperback'} Edition`}
+                      </span>
+                      {item.weightGrams && (
+                        <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                          {item.weightGrams}g
+                        </span>
+                      )}
+                      {item.isbn && (
+                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-subtle)', fontFamily: 'monospace' }}>
+                          ISBN: {item.isbn}
+                        </span>
+                      )}
+                    </div>
+
                     <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '10px' }}>
-                      {item.author} · {item.binding || 'Paperback'}
+                      {item.author}
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                      <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--color-maroon)' }}>
-                        ₹{item.price}
-                      </span>
+                      <div>
+                        <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--color-maroon)' }}>
+                          ₹{item.price}
+                        </span>
+                        {item.mrp && item.mrp > item.price && (
+                          <span style={{ fontSize: '0.75rem', textDecoration: 'line-through', color: 'var(--color-text-muted)', marginLeft: '6px' }}>
+                            ₹{item.mrp}
+                          </span>
+                        )}
+                      </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <button
@@ -226,7 +263,7 @@ export default function WishlistDrawer({ isOpen, onClose, onNavigate, onAddToCar
 
                         <button
                           type="button"
-                          onClick={() => handleRemove(item.id)}
+                          onClick={() => handleRemove(item)}
                           style={{
                             background: 'none',
                             border: 'none',
@@ -263,6 +300,13 @@ export default function WishlistDrawer({ isOpen, onClose, onNavigate, onAddToCar
               gap: '10px'
             }}
           >
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.84rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
+              <span>Total Value ({items.length} titles)</span>
+              <strong style={{ color: 'var(--color-maroon)', fontSize: '0.94rem' }}>
+                ₹{items.reduce((sum, i) => sum + (i.price || 0), 0).toLocaleString('en-IN')}
+              </strong>
+            </div>
+
             <button
               type="button"
               onClick={handleMoveAllToCart}

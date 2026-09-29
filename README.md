@@ -134,15 +134,15 @@ The platform is systematically constructed following rigorous domain boundaries.
 | **Phase 1** | Catalogue Service | `catalogueService.js`, `rawBooks.js` (49 books) | `scripts/test-catalogue.mjs` (11 tests) | ✅ Verified & Pushed |
 | **Phase 2** | Search & Discovery | `searchService.js`, `Navbar.jsx`, `CataloguePage.jsx` | `scripts/test-search.mjs` (9 tests) | ✅ Verified & Pushed |
 | **Phase 3** | Product / Edition Domain | `BookDetailPage.jsx`, `BookPreviewModal.jsx`, `recentlyViewedService.js` | `scripts/test-product-edition.mjs` (6 tests) | ✅ Verified & Pushed |
-| **Phase 4** | Cart Domain Service | `cartService.js`, `CartPage.jsx`, `CheckoutPage.jsx` | `scripts/test-cart.mjs` (8 tests) | ✅ Verified |
-| **Phase 5** | Wishlist / Reading List | `wishlistService.js`, `WishlistDrawer.jsx` | Pending Execution | ⏳ Next Domain |
-| **Phase 6** | Inventory Service | Available, Reserved, Sold, Returned, Damaged, Restocked | Pending Execution | ⏳ Scheduled |
+| **Phase 4** | Cart Domain Service | `cartService.js`, `CartPage.jsx`, `CheckoutPage.jsx` | `scripts/test-cart.mjs` (8 tests) | ✅ Verified & Pushed |
+| **Phase 5** | Wishlist / Reading List | `wishlistService.js`, `WishlistDrawer.jsx` | `scripts/test-wishlist.mjs` (8 tests) | ✅ Verified |
+| **Phase 6** | Inventory Service | Available, Reserved, Sold, Returned, Damaged, Restocked | Pending Execution | ⏳ Next Domain |
 | **Phase 7** | Pricing & Tax Service | HSN 4901 0% GST, Institutional discounts | Pending Execution | ⏳ Scheduled |
 | **Phase 8** | Promotions & Coupons | Subsidies, Endowment vouchers | Pending Execution | ⏳ Scheduled |
 | **Phase 9** | Shipping Service | India Post Speed Post, Weight tiers, Pin lookup | Pending Execution | ⏳ Scheduled |
 | **Phase 10** | Checkout State Machine | Strict server-aligned state transitions | Pending Execution | ⏳ Scheduled |
 
-**Total Automated Domain Tests Passing**: **34/34** tests across 4 implemented domains with 0 regressions.
+**Total Automated Domain Tests Passing**: **42/42** tests across 5 implemented domains with 0 regressions.
 
 ---
 
