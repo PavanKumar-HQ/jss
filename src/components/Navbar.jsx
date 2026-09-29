@@ -160,10 +160,10 @@ const Navbar = React.memo(function Navbar({
               />
             </div>
             <div>
-              <span className="text-brand" style={{ fontSize: '1.24rem', fontWeight: 800, letterSpacing: '0.8px', color: 'var(--color-maroon)', display: 'block', lineHeight: 1.1 }}>
+              <span className="text-brand" style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '0.6px', color: 'var(--color-maroon)', display: 'block', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
                 JSS PUBLICATIONS
               </span>
-              <span className="text-kannada" style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', display: 'block', lineHeight: 1.2, fontWeight: 500 }}>
+              <span className="text-kannada" style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', display: 'block', lineHeight: 1.2, fontWeight: 500, whiteSpace: 'nowrap' }}>
                 {languageMode === 'kn' ? 'ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆ · ಮೈಸೂರು' : 'ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆ · Mysuru'}
               </span>
             </div>
@@ -190,7 +190,7 @@ const Navbar = React.memo(function Navbar({
           </nav>
 
           {/* Desktop Search & Cart */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
             {/* Prominent Search Box */}
             <div ref={searchContainerRef} className="desktop-only" style={{ position: 'relative' }}>
               <div style={{ position: 'relative' }}>
@@ -208,13 +208,13 @@ const Navbar = React.memo(function Navbar({
                       onNavigate('/books');
                     }
                   }}
-                  placeholder="Search books, authors, subjects..."
+                  placeholder="Search books, authors..."
                   style={{
-                    width: isSearchFocused || searchQuery ? '300px' : '260px',
+                    width: isSearchFocused || searchQuery ? '240px' : '180px',
                     padding: '7px 12px 7px 32px',
                     fontSize: '0.84rem',
-                    borderRadius: 'var(--radius-xs)',
-                    border: '1px solid var(--color-border-dark)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1.5px solid var(--color-border)',
                     backgroundColor: '#FFFFFF',
                     outline: 'none',
                     transition: 'all var(--transition-fast)'
