@@ -31,6 +31,8 @@ import {
   Copy
 } from 'lucide-react';
 import { adminService, catalogueService } from '../services';
+import { apiClient } from '../services/apiClient.js';
+import { realtimeClient } from '../services/realtimeClient.js';
 
 export default function AdminPage({ onNavigate }) {
   // Navigation State
@@ -92,9 +94,9 @@ export default function AdminPage({ onNavigate }) {
     onConfirm: null
   });
 
-  // Reactive subscription to adminService events
+  // Reactive subscription to adminService events & Backend Server SSE Stream
   useEffect(() => {
-    return adminService.subscribe(() => {
+    const unsubLocal = adminService.subscribe(() => {
       setMetrics(adminService.getDashboardMetrics());
       setOrders(adminService.getOrders());
       setBulkEnquiries(adminService.getBulkEnquiries());
@@ -107,6 +109,46 @@ export default function AdminPage({ onNavigate }) {
       setStaffUsers(adminService.getStaffUsers());
       setSettings(adminService.getSettings());
     });
+
+    const refreshServerState = async () => {
+      try {
+        const [serverOrders, serverBooks, serverMetrics, serverFaqs] = await Promise.all([
+          apiClient.getOrders().catch(() => null),
+          apiClient.getBooks({ status: 'All' }).catch(() => null),
+          apiClient.getDashboardMetrics().catch(() => null),
+          apiClient.getFaqs().catch(() => null)
+        ]);
+        if (serverOrders?.length) setOrders(serverOrders);
+        if (serverBooks?.length) setBooks(serverBooks);
+        if (serverMetrics) setMetrics(serverMetrics);
+        if (serverFaqs?.length) setFaqs(serverFaqs);
+      } catch (err) {
+        console.warn('[admin] Server sync fallback:', err.message);
+      }
+    };
+
+    refreshServerState();
+
+    const unsubOrder = realtimeClient.on('ORDER_CREATED', (data) => {
+      showToast(`New Order: ${data.orderReference} (${data.itemsCount} copies, ₹${data.grandTotal})`);
+      refreshServerState();
+    });
+
+    const unsubStatus = realtimeClient.on('ORDER_STATUS_CHANGED', () => refreshServerState());
+    const unsubInv = realtimeClient.on('INVENTORY_UPDATED', () => refreshServerState());
+    const unsubPrice = realtimeClient.on('PRICE_CHANGED', () => refreshServerState());
+    const unsubBook = realtimeClient.on('BOOK_MUTATED', () => refreshServerState());
+    const unsubFaq = realtimeClient.on('FAQ_MUTATED', () => refreshServerState());
+
+    return () => {
+      unsubLocal();
+      unsubOrder();
+      unsubStatus();
+      unsubInv();
+      unsubPrice();
+      unsubBook();
+      unsubFaq();
+    };
   }, []);
 
   const showToast = (msg) => {
@@ -2076,9 +2118,11 @@ export default function AdminPage({ onNavigate }) {
               <select
                 value={selectedOrder.status}
                 onChange={(e) => {
-                  const res = adminService.updateOrderStatus(selectedOrder.orderId, e.target.value);
+                  const newStatus = e.target.value;
+                  const res = adminService.updateOrderStatus(selectedOrder.orderId, newStatus);
                   if (res.success) {
-                    showToast(`Order status updated to ${e.target.value}`);
+                    apiClient.updateOrderStatus(selectedOrder.orderId, newStatus, { reason: 'Status change', actor: 'Admin Pavan' }).catch(() => {});
+                    showToast(`Order status updated to ${newStatus}`);
                     setSelectedOrder(res.order);
                   }
                 }}
@@ -2141,6 +2185,14 @@ export default function AdminPage({ onNavigate }) {
                   status: 'published'
                 });
                 if (res.success) {
+                  apiClient.addBook({
+                    title: fd.get('title'),
+                    titleKannada: fd.get('kannadaTitle'),
+                    author: fd.get('author'),
+                    category: fd.get('category'),
+                    price: fd.get('price'),
+                    stock: fd.get('stock')
+                  }).catch(() => {});
                   showToast(`Publication "${res.book.title}" added to catalogue.`);
                   setIsNewBookModalOpen(false);
                 } else {
@@ -2341,6 +2393,7 @@ export default function AdminPage({ onNavigate }) {
                   onClick={() => {
                     const res = adminService.adjustStock(selectedStockBook.id, stockAdjustAmount, stockReason);
                     if (res.success) {
+                      apiClient.adjustStock(`${selectedStockBook.id}-pb`, stockAdjustAmount, stockReason, 'Admin Pavan').catch(() => {});
                       showToast(`Updated stock to ${res.newStock} copies.`);
                       setIsStockModalOpen(false);
                     } else {
@@ -2400,6 +2453,7 @@ export default function AdminPage({ onNavigate }) {
                   onClick={() => {
                     const res = adminService.updateBookPrice(selectedPriceBook.id, newPriceInput, priceChangeReason);
                     if (res.success) {
+                      apiClient.updateBookPrice(selectedPriceBook.id, 'Paperback', newPriceInput, priceChangeReason, 'Admin Pavan').catch(() => {});
                       showToast(`Catalogue price changed to ₹${res.newPrice}.`);
                       setIsPriceModalOpen(false);
                     } else {

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Truck, CheckCircle2, ShieldCheck, MapPin, Phone, Mail, ArrowLeft, ArrowRight, Building, PackageCheck, Scale } from 'lucide-react';
+import { Truck, CheckCircle2, ShieldCheck, MapPin, Phone, Mail, ArrowLeft, ArrowRight, Building, PackageCheck, Scale, AlertCircle } from 'lucide-react';
 import { cartService } from '../services/cartService.js';
 import { orderService } from '../services/orderService.js';
+import { apiClient } from '../services/apiClient.js';
 import ids from '../utils/ids.js';
 
 export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
@@ -23,6 +24,8 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [orderReference, setOrderReference] = useState('');
   const [placedOrderData, setPlacedOrderData] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const isCounterPickup = formData.dispatchMethod === 'counter-pickup';
   const totals = cartService.getTotals(cart, 0, isCounterPickup ? 0 : null);
@@ -36,65 +39,97 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePlaceOrder = (e) => {
+  const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    const generatedOrderRef = ids.generateOrderId();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setErrorMessage('');
 
-    const orderResult = orderService.createOrder({
-      customer: {
-        fullName: formData.fullName,
-        phone: formData.phone,
-        email: formData.email
-      },
-      shippingAddress: {
-        addressLine: formData.streetAddress,
-        landmark: formData.landmark,
-        city: formData.city,
-        state: formData.state,
-        pincode: formData.pincode
-      },
-      items: [...cart],
-      totals: {
-        itemsCount: cart.reduce((acc, i) => acc + i.quantity, 0),
-        subtotal: subtotal,
-        discount: 0,
-        shippingFee: shipping,
-        grandTotal: total
-      },
-      paymentMethod: formData.paymentPreference === 'vpp'
-        ? 'Value Payable Post (V.P.P. - Pay at delivery)'
+    try {
+      const paymentMethodLabel = formData.paymentPreference === 'vpp'
+        ? 'Value Payable Post (V.P.P. - Postal Collection)'
         : formData.paymentPreference === 'bank-transfer'
         ? 'Direct Bank Transfer / NEFT to JSS Mahavidyapeetha'
-        : 'Counter Collection at JSS Book House Counter, Mysuru',
-      notes: formData.specialInstructions
-    });
+        : 'Counter Collection at JSS Book House Counter, Mysuru';
 
-    const newOrder = orderResult.success ? orderResult.order : {
-      orderReference: generatedOrderRef,
-      orderId: generatedOrderRef,
-      date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-      fullName: formData.fullName,
-      phone: formData.phone,
-      email: formData.email,
-      streetAddress: formData.streetAddress,
-      city: formData.city,
-      district: formData.district,
-      state: formData.state,
-      pincode: formData.pincode,
-      dispatchMethod: formData.dispatchMethod,
-      paymentPreference: formData.paymentPreference,
-      items: [...cart],
-      subtotal: subtotal,
-      shipping: shipping,
-      total: total,
-      status: 'Order Recorded at JSS Publications Counter'
-    };
+      const payload = {
+        customer: {
+          fullName: formData.fullName,
+          phone: formData.phone,
+          email: formData.email
+        },
+        shippingAddress: {
+          addressLine: formData.streetAddress,
+          landmark: formData.landmark,
+          city: formData.city,
+          district: formData.district,
+          state: formData.state,
+          pincode: formData.pincode
+        },
+        items: cart.map(i => ({
+          editionId: i.editionId || `${i.id}-pb`,
+          id: i.id,
+          quantity: i.quantity
+        })),
+        dispatchMethod: formData.dispatchMethod,
+        paymentMethod: paymentMethodLabel,
+        notes: formData.specialInstructions
+      };
 
-    setPlacedOrderData(newOrder);
-    setOrderReference(generatedOrderRef);
-    setIsCompleted(true);
-    if (onClearCart) {
-      onClearCart();
+      // 1. Authoritative Backend Transaction
+      let serverOrder = null;
+      try {
+        serverOrder = await apiClient.createOrder(payload);
+      } catch (apiErr) {
+        console.warn('[checkout] Server API unavailable, using resilient local storage:', apiErr.message);
+      }
+
+      // 2. Also register in local client orderService for full offline compatibility
+      const localResult = orderService.createOrder({
+        customer: payload.customer,
+        shippingAddress: payload.shippingAddress,
+        items: [...cart],
+        totals: {
+          itemsCount: cart.reduce((acc, i) => acc + i.quantity, 0),
+          subtotal,
+          discount: 0,
+          shippingFee: shipping,
+          grandTotal: total
+        },
+        paymentMethod: paymentMethodLabel,
+        notes: formData.specialInstructions
+      });
+
+      const finalOrder = serverOrder || (localResult.success ? localResult.order : {
+        orderReference: ids.generateOrderId(),
+        orderId: ids.generateOrderId(),
+        date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+        fullName: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
+        streetAddress: formData.streetAddress,
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.pincode,
+        dispatchMethod: formData.dispatchMethod,
+        paymentPreference: formData.paymentPreference,
+        items: [...cart],
+        subtotal,
+        shipping,
+        total,
+        status: 'Order Recorded at JSS Publications Counter'
+      });
+
+      setPlacedOrderData(finalOrder);
+      setOrderReference(finalOrder.orderReference || finalOrder.id);
+      setIsCompleted(true);
+      if (onClearCart) {
+        onClearCart();
+      }
+    } catch (err) {
+      setErrorMessage(err.message || 'Failed to place order. Please verify your items and try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -666,8 +701,29 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                   </div>
                 </div>
 
+                {errorMessage && (
+                  <div
+                    style={{
+                      backgroundColor: '#FFEBEE',
+                      border: '1px solid #FFCDD2',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '12px 14px',
+                      color: '#C62828',
+                      fontSize: '0.84rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '14px'
+                    }}
+                  >
+                    <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
+
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="btn btn-primary"
                   style={{
                     width: '100%',
@@ -676,10 +732,12 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
                     fontWeight: 600,
                     justifyContent: 'center',
                     gap: '8px',
-                    marginBottom: '14px'
+                    marginBottom: '14px',
+                    opacity: isSubmitting ? 0.7 : 1,
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  <span>Confirm Postal Consignment</span>
+                  <span>{isSubmitting ? 'Processing Transaction...' : 'Confirm Postal Consignment'}</span>
                   <ArrowRight size={16} />
                 </button>
 
