@@ -295,11 +295,13 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
               {/* Box 1: Delivery Address */}
               <div
                 style={{
-                  backgroundColor: 'var(--color-bg-surface)',
-                  border: '1px solid var(--color-border-subtle)',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid var(--color-border)',
+                  borderTop: '4px solid var(--color-maroon)',
                   borderRadius: 'var(--radius-md)',
                   padding: 'clamp(18px, 3vw, 28px)',
-                  marginBottom: '24px'
+                  marginBottom: '24px',
+                  boxShadow: 'var(--shadow-box-elevated)'
                 }}
               >
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '16px' }}>
@@ -496,10 +498,12 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
               {/* Box 2: Payment & Dispatch Preference */}
               <div
                 style={{
-                  backgroundColor: 'var(--color-bg-surface)',
-                  border: '1px solid var(--color-border-subtle)',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid var(--color-border)',
+                  borderTop: '3px solid var(--color-accent-gold)',
                   borderRadius: 'var(--radius-md)',
-                  padding: '28px'
+                  padding: '28px',
+                  boxShadow: 'var(--shadow-box-elevated)'
                 }}
               >
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '16px' }}>
@@ -610,12 +614,14 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
             <div style={{ flex: '1 1 35%' }}>
               <div
                 style={{
-                  backgroundColor: 'var(--color-bg-surface)',
-                  border: '1px solid var(--color-border-subtle)',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid var(--color-border)',
+                  borderTop: '4px solid var(--color-maroon)',
                   borderRadius: 'var(--radius-md)',
                   padding: '24px',
                   position: 'sticky',
-                  top: '90px'
+                  top: '90px',
+                  boxShadow: 'var(--shadow-box-elevated)'
                 }}
               >
                 <h3 className="text-serif-classical" style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '14px', borderBottom: '1px solid var(--color-border-subtle)', paddingBottom: '10px' }}>

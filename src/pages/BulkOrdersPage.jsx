@@ -98,9 +98,10 @@ export default function BulkOrdersPage({ onNavigate }) {
             style={{
               backgroundColor: '#FFFFFF',
               border: '1px solid var(--color-border)',
+              borderTop: '4px solid var(--color-maroon)',
               borderRadius: 'var(--radius-lg)',
               padding: '32px',
-              boxShadow: 'var(--shadow-card)'
+              boxShadow: 'var(--shadow-box-elevated)'
             }}
           >
             {submitted ? (
@@ -442,6 +443,7 @@ export default function BulkOrdersPage({ onNavigate }) {
               style={{
                 backgroundColor: '#FFFFFF',
                 border: '1px solid var(--color-border)',
+                borderTop: '3px solid var(--color-accent-gold)',
                 borderRadius: 'var(--radius-lg)',
                 padding: '26px',
                 boxShadow: 'var(--shadow-card)',
@@ -496,6 +498,7 @@ export default function BulkOrdersPage({ onNavigate }) {
               style={{
                 backgroundColor: '#FFFFFF',
                 border: '1px solid var(--color-border)',
+                borderTop: '3px solid var(--color-maroon)',
                 borderRadius: 'var(--radius-lg)',
                 padding: '26px',
                 boxShadow: 'var(--shadow-card)',

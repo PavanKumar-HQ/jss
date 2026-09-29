@@ -136,12 +136,13 @@ export default function AboutPage({ onNavigate }) {
           ref={missionRef}
           className="reveal-on-scroll"
           style={{
-            backgroundColor: 'var(--color-bg-surface)',
-            border: '1px solid var(--color-border-subtle)',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid var(--color-border)',
+            borderTop: '4px solid var(--color-maroon)',
             borderRadius: 'var(--radius-lg)',
             padding: '44px 38px',
             marginBottom: '44px',
-            boxShadow: '0 4px 20px rgba(94, 22, 36, 0.04)'
+            boxShadow: 'var(--shadow-box-elevated)'
           }}
         >
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '40px', alignItems: 'center' }}>
@@ -321,15 +322,16 @@ export default function AboutPage({ onNavigate }) {
               <div
                 key={index}
                 style={{
-                  backgroundColor: 'var(--color-bg-surface)',
-                  border: '1px solid var(--color-border-subtle)',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid var(--color-border)',
+                  borderLeft: '4px solid var(--color-maroon)',
                   borderRadius: 'var(--radius-md)',
                   padding: '24px 28px',
                   display: 'grid',
                   gridTemplateColumns: '150px 1fr',
                   gap: '24px',
                   alignItems: 'start',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                  boxShadow: '0 3px 12px rgba(28, 25, 23, 0.05)',
                   transition: 'border-color 0.2s ease, transform 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
@@ -379,8 +381,9 @@ export default function AboutPage({ onNavigate }) {
           ref={ecosystemRef}
           className="reveal-on-scroll"
           style={{
-            backgroundColor: 'var(--color-bg-surface)',
-            border: '1.5px solid var(--color-border-subtle)',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid var(--color-border)',
+            borderTop: '4px solid var(--color-accent-gold)',
             borderRadius: 'var(--radius-lg)',
             padding: '38px 34px',
             display: 'flex',
@@ -388,7 +391,7 @@ export default function AboutPage({ onNavigate }) {
             justifyContent: 'space-between',
             alignItems: 'center',
             gap: '28px',
-            boxShadow: '0 4px 20px rgba(94, 22, 36, 0.03)'
+            boxShadow: 'var(--shadow-box-elevated)'
           }}
         >
           <div style={{ maxWidth: '660px' }}>

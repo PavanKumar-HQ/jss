@@ -122,6 +122,7 @@ export default function CategoriesPage({ onNavigate, onSelectCategory }) {
                 style={{
                   backgroundColor: '#FFFFFF',
                   border: '1px solid var(--color-border)',
+                  borderTop: '3px solid var(--color-maroon)',
                   borderRadius: 'var(--radius-sm)',
                   padding: '24px',
                   display: 'flex',
