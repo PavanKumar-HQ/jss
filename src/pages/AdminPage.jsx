@@ -35,13 +35,68 @@ import { apiClient } from '../services/apiClient.js';
 import { realtimeClient } from '../services/realtimeClient.js';
 import jssLogo from '../assets/jss-logo.webp';
 
+export function normalizeOrder(o) {
+  if (!o) return null;
+  const orderId = o.orderId || o.order_reference || o.orderReference || o.id || 'JSS-ORD';
+  const customerName = o.customer?.fullName || o.customerName || o.customer_name || 'Valued Reader';
+  const phone = o.customer?.phone || o.customerPhone || o.customer_phone || '';
+  const email = o.customer?.email || o.customerEmail || o.customer_email || '';
+  const addressLine = o.shippingAddress?.addressLine || o.shipping_address_line || o.address || 'Direct Dispatch';
+  const city = o.shippingAddress?.city || o.city || 'Mysuru';
+  const state = o.shippingAddress?.state || o.state || 'Karnataka';
+  const pincode = o.shippingAddress?.pincode || o.pincode || '';
+  const paymentMethod = o.payment?.method || o.payment_method || o.paymentMethod || 'Online Payment';
+  const paymentStatus = o.payment?.status || o.payment_status || (o.status === 'confirmed' ? 'Completed' : 'Pending');
+  const grandTotal = Number(o.totals?.grandTotal ?? o.total_amount ?? o.grandTotal ?? 0);
+  const trackingNumber = o.dispatch?.trackingNumber || o.tracking_number || o.trackingNumber || null;
+  const items = Array.isArray(o.items)
+    ? o.items.map(it => ({
+        ...it,
+        title: it.title || it.book_title || it.bookTitle || 'Publication Title',
+        quantity: Number(it.quantity || 1),
+        price: Number(it.price || it.unit_price || it.unitPrice || 0)
+      }))
+    : [];
+  const createdAt = o.createdAt || o.created_at || new Date().toISOString();
+  const status = o.status || 'confirmed';
+
+  return {
+    ...o,
+    orderId,
+    customer: {
+      fullName: customerName,
+      phone,
+      email
+    },
+    shippingAddress: {
+      addressLine,
+      city,
+      state,
+      pincode
+    },
+    payment: {
+      method: paymentMethod,
+      status: paymentStatus
+    },
+    totals: {
+      grandTotal
+    },
+    dispatch: {
+      trackingNumber
+    },
+    items,
+    createdAt,
+    status
+  };
+}
+
 export default function AdminPage({ onNavigate }) {
   // Navigation State
   const [activeTab, setActiveTab] = useState('dashboard');
 
   // Real Domain Store State
   const [metrics, setMetrics] = useState(() => adminService.getDashboardMetrics());
-  const [orders, setOrders] = useState(() => adminService.getOrders());
+  const [orders, setOrders] = useState(() => adminService.getOrders().map(normalizeOrder));
   const [bulkEnquiries, setBulkEnquiries] = useState(() => adminService.getBulkEnquiries());
   const [books, setBooks] = useState(() => catalogueService.getBooksSync());
   const [periodicals, setPeriodicals] = useState(() => adminService.getPeriodicals());
@@ -99,7 +154,7 @@ export default function AdminPage({ onNavigate }) {
   useEffect(() => {
     const unsubLocal = adminService.subscribe(() => {
       setMetrics(adminService.getDashboardMetrics());
-      setOrders(adminService.getOrders());
+      setOrders(adminService.getOrders().map(normalizeOrder));
       setBulkEnquiries(adminService.getBulkEnquiries());
       setBooks(catalogueService.getBooksSync());
       setPeriodicals(adminService.getPeriodicals());
@@ -119,7 +174,7 @@ export default function AdminPage({ onNavigate }) {
           apiClient.getDashboardMetrics().catch(() => null),
           apiClient.getFaqs().catch(() => null)
         ]);
-        if (serverOrders?.length) setOrders(serverOrders);
+        if (serverOrders?.length) setOrders(serverOrders.map(normalizeOrder));
         if (serverBooks?.length) setBooks(serverBooks);
         if (serverMetrics) setMetrics(serverMetrics);
         if (serverFaqs?.length) setFaqs(serverFaqs);
@@ -220,11 +275,16 @@ export default function AdminPage({ onNavigate }) {
 
   // Filtered Orders
   const filteredOrders = useMemo(() => {
-    return orders.filter(o => {
-      const matchesSearch =
-        o.orderId.toLowerCase().includes(orderSearch.toLowerCase()) ||
-        o.customer.fullName.toLowerCase().includes(orderSearch.toLowerCase()) ||
-        o.customer.phone.includes(orderSearch);
+    const q = (orderSearch || '').toLowerCase().trim();
+    return (orders || []).map(normalizeOrder).filter(o => {
+      if (!o) return false;
+      const orderIdStr = (o.orderId || '').toLowerCase();
+      const customerNameStr = (o.customer?.fullName || '').toLowerCase();
+      const phoneStr = (o.customer?.phone || '');
+      const matchesSearch = !q ||
+        orderIdStr.includes(q) ||
+        customerNameStr.includes(q) ||
+        phoneStr.includes(q);
       const matchesStatus = orderStatusFilter === 'All' || o.status === orderStatusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -232,7 +292,8 @@ export default function AdminPage({ onNavigate }) {
 
   // Filtered Bulk Enquiries
   const filteredBulkEnquiries = useMemo(() => {
-    return bulkEnquiries.filter(b => {
+    return (bulkEnquiries || []).filter(b => {
+      if (!b) return false;
       if (bulkStatusFilter === 'All') return true;
       if (bulkStatusFilter === 'Quoted') return b.status === 'Quoted' || b.status === 'Quotation Generated' || b.status === 'Quotation Sent';
       return b.status === bulkStatusFilter;
@@ -241,12 +302,16 @@ export default function AdminPage({ onNavigate }) {
 
   // Filtered Books
   const filteredBooks = useMemo(() => {
-    return books.filter(b => {
-      const q = bookSearch.toLowerCase();
-      const matchesQuery =
-        b.title.toLowerCase().includes(q) ||
-        (b.kannadaTitle && b.kannadaTitle.toLowerCase().includes(q)) ||
-        (b.author && b.author.toLowerCase().includes(q));
+    const q = (bookSearch || '').toLowerCase().trim();
+    return (books || []).filter(b => {
+      if (!b) return false;
+      const title = (b.title || '').toLowerCase();
+      const kannadaTitle = (b.kannadaTitle || '').toLowerCase();
+      const author = (b.author || '').toLowerCase();
+      const matchesQuery = !q ||
+        title.includes(q) ||
+        kannadaTitle.includes(q) ||
+        author.includes(q);
       const matchesCategory = bookCategoryFilter === 'All' || b.category === bookCategoryFilter;
       const status = b.status || 'published';
       const matchesStatus = bookStatusFilter === 'All' || status === bookStatusFilter;
