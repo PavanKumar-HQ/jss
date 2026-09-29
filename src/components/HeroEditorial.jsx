@@ -103,7 +103,7 @@ export default function HeroEditorial({
             </div>
 
             {/* Regal Editorial Headline */}
-            <h1 className="hero-grand-title text-serif">
+            <h1 className="hero-grand-title text-serif-display">
               Sacred Vachana Literature, Agamas & Indian Philosophy
             </h1>
 
@@ -112,9 +112,9 @@ export default function HeroEditorial({
               ವಚನ ಸಾಹಿತ್ಯ, ಶೈವಾಗಮ, ಭಾರತೀಯ ತತ್ವಶಾಸ್ತ್ರ ಹಾಗೂ ಜ್ಞಾನ ಪರಂಪರೆಯ ಅಧಿಕೃತ ಉದ್ಗ್ರಂಥಗಳು
             </p>
 
-            {/* Factual Concise Description */}
+            {/* Factual Concise Narrative Description */}
             <p className="hero-lead-narrative">
-              Preserving centuries of sacred palm-leaf manuscripts and publishing authoritative scholarly works, translations, and commentaries at non-profit subsidized prices for readers worldwide.
+              Preserving centuries of sacred palm-leaf manuscripts and publishing authoritative scholarly works, critical translations, and commentaries at non-profit subsidized prices for readers and researchers worldwide.
             </p>
 
             {/* Primary Navigation Actions */}
@@ -125,7 +125,7 @@ export default function HeroEditorial({
                 className="btn btn-primary hero-btn-main"
               >
                 <span>Explore Full Catalogue (49)</span>
-                <ArrowRight size={15} />
+                <ArrowRight size={16} />
               </button>
 
               <button
@@ -137,26 +137,32 @@ export default function HeroEditorial({
               </button>
             </div>
 
-            {/* Institutional Trust Highlights */}
+            {/* Institutional Trust Highlights: Refined tactile pills */}
             <div className="hero-trust-bar">
-              <div className="hero-trust-point">
-                <Award size={15} color="var(--color-maroon)" />
+              <div className="hero-trust-pill">
+                <div className="hero-trust-icon-box">
+                  <Award size={14} />
+                </div>
                 <span>Subsidized Non-Profit Editions</span>
               </div>
-              <span className="hero-trust-sep" aria-hidden="true">·</span>
-              <div className="hero-trust-point">
-                <ShieldCheck size={15} color="var(--color-maroon)" />
+
+              <div className="hero-trust-pill">
+                <div className="hero-trust-icon-box">
+                  <ShieldCheck size={14} />
+                </div>
                 <span>0% GST (Govt. Exempt)</span>
               </div>
-              <span className="hero-trust-sep" aria-hidden="true">·</span>
-              <div className="hero-trust-point">
-                <Truck size={15} color="var(--color-maroon)" />
+
+              <div className="hero-trust-pill">
+                <div className="hero-trust-icon-box">
+                  <Truck size={14} />
+                </div>
                 <span>India Post Direct Dispatch</span>
               </div>
             </div>
           </div>
 
-          {/* RIGHT: Featured Book Showcase (Like Earlier, with Clean Modern Styling) */}
+          {/* RIGHT: Featured Book Showcase Spotlight */}
           <div className="hero-editorial-right">
             <div className="hero-book-showcase-card">
               {/* Card Header with Volume / Edition Switchers */}
@@ -177,17 +183,17 @@ export default function HeroEditorial({
                       className={`hero-book-tab ${i === activeIndex ? 'active' : ''}`}
                       title={b.title}
                     >
-                      {i + 1}
+                      Vol. 0{i + 1}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Book Presentation: Square Cover Canvas + Meta */}
+              {/* Book Presentation: Dedicated Showcase Stage + Details */}
               <div className="hero-book-body">
-                {/* Book Cover Frame (Square-Oriented) */}
+                {/* Book Cover Stage with 3D Depth */}
                 <div
-                  className="hero-book-cover-frame"
+                  className="hero-book-cover-stage"
                   onClick={handleOpenProduct}
                   title={`View details for ${activeBook.title}`}
                   role="button"
@@ -199,11 +205,11 @@ export default function HeroEditorial({
                     alt={`Showcase edition cover of ${activeBook.title} - ${activeBook.category}`}
                     loading="eager"
                     fetchPriority="high"
-                    width="240"
-                    height="340"
-                    className="hero-book-cover-img"
+                    width="140"
+                    height="200"
+                    className="hero-book-stage-cover"
                   />
-                  <div className="hero-book-hover-tag">
+                  <div className="hero-book-stage-tag">
                     <BookOpen size={12} />
                     <span>View Book</span>
                   </div>
@@ -216,7 +222,7 @@ export default function HeroEditorial({
                   </span>
 
                   <h2
-                    className="hero-book-title text-serif"
+                    className="hero-book-title text-serif-display"
                     onClick={handleOpenProduct}
                     title={activeBook.title}
                   >
@@ -243,7 +249,7 @@ export default function HeroEditorial({
                     <span className="hero-book-gst">
                       0% GST (Exempt)
                     </span>
-                    <span className="hero-book-pages">
+                    <span className="hero-book-binding">
                       · {activeBook.binding} · {activeBook.pages} pp
                     </span>
                   </div>
