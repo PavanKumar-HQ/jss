@@ -323,25 +323,24 @@ const Navbar = React.memo(function Navbar({
               )}
             </div>
 
-            {/* Mobile Search Toggle Icon */}
+            {/* Mobile Header Action Cluster: Search + Cart + Hamburger (clean spacing, zero overlap) */}
             <button
               type="button"
-              className="mobile-only"
+              className="header-mobile-icon-btn mobile-only"
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
-              style={{ background: 'none', border: 'none', color: 'var(--color-text-charcoal)', cursor: 'pointer', padding: '6px' }}
               aria-label="Toggle mobile search"
             >
-              <Search size={20} />
+              <Search size={18} />
             </button>
 
-            {/* Study Reading List / Wishlist Button */}
+            {/* Study Reading List / Wishlist Button (Desktop Only) */}
             <button
               type="button"
               onClick={() => onOpenWishlist && onOpenWishlist()}
-              className="btn btn-secondary btn-sm"
+              className="btn btn-secondary btn-sm desktop-only"
               style={{
                 position: 'relative',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
                 padding: '6px 12px'
@@ -350,7 +349,7 @@ const Navbar = React.memo(function Navbar({
               title="View Study Reading List"
             >
               <Bookmark size={15} color="var(--color-maroon)" fill={wishlistCount > 0 ? '#DFBF5F' : 'none'} />
-              <span className="desktop-only" style={{ fontWeight: 600, fontSize: '0.84rem' }}>Study List</span>
+              <span style={{ fontWeight: 600, fontSize: '0.84rem' }}>Study List</span>
               {wishlistCount > 0 && (
                 <span
                   style={{
@@ -368,14 +367,14 @@ const Navbar = React.memo(function Navbar({
               )}
             </button>
 
-            {/* Cart Button */}
+            {/* Cart Button (Desktop Only) */}
             <button
               type="button"
               onClick={() => onNavigate('/cart')}
-              className="btn btn-secondary btn-sm"
+              className="btn btn-secondary btn-sm desktop-only"
               style={{
                 position: 'relative',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
                 padding: '6px 12px'
@@ -383,7 +382,7 @@ const Navbar = React.memo(function Navbar({
               aria-label={`Cart with ${cartCount} items`}
             >
               <ShoppingBag size={16} color="var(--color-maroon)" />
-              <span className="desktop-only" style={{ fontWeight: 600, fontSize: '0.84rem' }}>Cart</span>
+              <span style={{ fontWeight: 600, fontSize: '0.84rem' }}>Cart</span>
               {cartCount > 0 && (
                 <span
                   style={{
@@ -401,15 +400,29 @@ const Navbar = React.memo(function Navbar({
               )}
             </button>
 
+            {/* Mobile Quick Cart Button */}
+            <button
+              type="button"
+              onClick={() => onNavigate('/cart')}
+              className="header-mobile-icon-btn mobile-only"
+              aria-label={`Shopping Cart with ${cartCount} items`}
+            >
+              <ShoppingBag size={18} />
+              {cartCount > 0 && (
+                <span className="header-mobile-badge">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </button>
+
             {/* Mobile Menu Hamburger */}
             <button
               type="button"
-              className="mobile-only"
+              className="header-mobile-icon-btn mobile-only"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              style={{ background: 'none', border: 'none', color: 'var(--color-text-charcoal)', cursor: 'pointer', padding: '6px' }}
               aria-label="Toggle mobile navigation menu"
             >
-              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>

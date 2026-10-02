@@ -12,11 +12,72 @@ class RealtimeClient {
     this.eventSource = null;
     this.isConnected = false;
     this.reconnectTimeout = null;
+    this.retryDelay = 5000;
+    this.maxRetryDelay = 60000;
+    this.consecutiveFailures = 0;
+    this.isProbing = false;
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', () => {
+        if (!this.isConnected) {
+          this.consecutiveFailures = 0;
+          this.init();
+        }
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && !this.isConnected && !this.eventSource) {
+          this.init();
+        }
+      });
+    }
+
     this.init();
   }
 
-  init() {
+  async checkServerHealth() {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch('/api/v1/health', {
+        method: 'GET',
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      const contentType = res.headers.get('content-type') || '';
+      return res.ok && contentType.includes('application/json');
+    } catch {
+      return false;
+    }
+  }
+
+  async init() {
     if (typeof window === 'undefined' || !('EventSource' in window)) {
+      return;
+    }
+
+    if (this.isProbing || this.isConnected) {
+      return;
+    }
+
+    this.isProbing = true;
+
+    // Clean up any stale existing instance
+    if (this.eventSource) {
+      try {
+        this.eventSource.close();
+      } catch (e) {}
+      this.eventSource = null;
+    }
+
+    // Probe server health first before creating EventSource.
+    // If Express backend is offline or Vite proxy returns HTML,
+    // this cleanly prevents native EventSource browser abort/MIME-type errors.
+    const isServerReady = await this.checkServerHealth();
+    this.isProbing = false;
+
+    if (!isServerReady) {
+      this.consecutiveFailures++;
+      this.scheduleReconnect();
       return;
     }
 
@@ -25,15 +86,20 @@ class RealtimeClient {
 
       this.eventSource.onopen = () => {
         this.isConnected = true;
+        this.consecutiveFailures = 0;
+        this.retryDelay = 5000;
         console.log('[realtimeClient] Connected to JSS Publications SSE event stream.');
       };
 
-      this.eventSource.onerror = (err) => {
+      this.eventSource.onerror = () => {
         this.isConnected = false;
-        if (this.eventSource.readyState === EventSource.CLOSED) {
-          console.warn('[realtimeClient] Stream closed. Attempting reconnect in 4s...');
-          this.scheduleReconnect();
+        if (this.eventSource) {
+          try {
+            this.eventSource.close();
+          } catch (e) {}
+          this.eventSource = null;
         }
+        this.scheduleReconnect();
       };
 
       // Listen for operational events
@@ -57,16 +123,17 @@ class RealtimeClient {
         });
       });
     } catch (err) {
-      console.warn('[realtimeClient] Failed to initialize EventSource:', err);
+      this.isConnected = false;
       this.scheduleReconnect();
     }
   }
 
   scheduleReconnect() {
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
+    const delay = Math.min(this.retryDelay * Math.pow(1.5, Math.min(this.consecutiveFailures, 5)), this.maxRetryDelay);
     this.reconnectTimeout = setTimeout(() => {
       this.init();
-    }, 4000);
+    }, delay);
   }
 
   on(eventType, callback) {

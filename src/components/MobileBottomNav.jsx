@@ -30,7 +30,7 @@ export default function MobileBottomNav({
         aria-label="Home"
       >
         <div className="mobile-bottom-icon-wrap">
-          <Home size={20} strokeWidth={isHome ? 2.4 : 1.8} />
+          <Home size={18} strokeWidth={isHome ? 2.3 : 1.7} />
         </div>
         <span className="mobile-bottom-label">Home</span>
       </button>
@@ -42,7 +42,7 @@ export default function MobileBottomNav({
         aria-label="Books Catalogue"
       >
         <div className="mobile-bottom-icon-wrap">
-          <BookOpen size={20} strokeWidth={isBooks ? 2.4 : 1.8} />
+          <BookOpen size={18} strokeWidth={isBooks ? 2.3 : 1.7} />
         </div>
         <span className="mobile-bottom-label">Books</span>
       </button>
@@ -61,7 +61,7 @@ export default function MobileBottomNav({
         aria-label="Search Publications"
       >
         <div className="mobile-bottom-icon-wrap">
-          <Search size={20} strokeWidth={1.8} />
+          <Search size={18} strokeWidth={1.7} />
         </div>
         <span className="mobile-bottom-label">Search</span>
       </button>
@@ -78,7 +78,7 @@ export default function MobileBottomNav({
         aria-label={`Study Reading List with ${wishlistCount} saved titles`}
       >
         <div className="mobile-bottom-icon-wrap">
-          <Bookmark size={20} strokeWidth={1.8} fill={wishlistCount > 0 ? '#DFBF5F' : 'none'} color={wishlistCount > 0 ? '#8C6708' : 'currentColor'} />
+          <Bookmark size={18} strokeWidth={1.7} fill={wishlistCount > 0 ? '#DFBF5F' : 'none'} color={wishlistCount > 0 ? '#8C6708' : 'currentColor'} />
           {wishlistCount > 0 && (
             <span className="mobile-bottom-badge mobile-bottom-badge-gold">
               {wishlistCount > 9 ? '9+' : wishlistCount}
@@ -95,7 +95,7 @@ export default function MobileBottomNav({
         aria-label={`Shopping Cart with ${cartCount} items`}
       >
         <div className="mobile-bottom-icon-wrap">
-          <ShoppingBag size={20} strokeWidth={isCart ? 2.4 : 1.8} />
+          <ShoppingBag size={18} strokeWidth={isCart ? 2.3 : 1.7} />
           {cartCount > 0 && (
             <span className="mobile-bottom-badge">
               {cartCount > 99 ? '99+' : cartCount}

@@ -3705,6 +3705,7 @@ html {
   text-decoration: none;
   flex-shrink: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .navbar-logo-wrap {
@@ -3726,20 +3727,23 @@ html {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow: hidden;
 }
 
 .navbar-brand-title {
-  font-size: clamp(0.95rem, 2.5vw, 1.22rem);
+  font-size: clamp(0.92rem, 3.4vw, 1.22rem);
   font-weight: 800;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   color: var(--color-maroon);
   display: block;
   line-height: 1.15;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .navbar-brand-subtitle {
-  font-size: clamp(0.66rem, 1.6vw, 0.74rem);
+  font-size: clamp(0.62rem, 2.2vw, 0.74rem);
   color: var(--color-text-muted);
   display: block;
   line-height: 1.2;
@@ -3747,7 +3751,53 @@ html {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 220px;
+}
+
+/* Mobile Header Action Icon Buttons */
+.header-mobile-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-maroon);
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.header-mobile-icon-btn:active {
+  transform: scale(0.92);
+  background-color: var(--color-maroon-subtle);
+  border-color: var(--color-maroon);
+}
+
+.header-mobile-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: var(--color-maroon);
+  color: #FFFFFF;
+  font-size: 0.62rem;
+  font-weight: 800;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  border: 1.5px solid #FFFFFF;
 }
 
 /* Top bar Kannada/English toggle */
@@ -3961,21 +4011,28 @@ html {
 }
 
 @media (max-width: 768px) {
+  .header-main-bar {
+    gap: 8px;
+    padding: 8px 0;
+  }
+
   .mobile-bottom-nav {
     display: flex;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: calc(58px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    background-color: rgba(255, 255, 255, 0.95);
+    height: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding-top: 5px;
+    padding-bottom: calc(5px + env(safe-area-inset-bottom, 0px));
+    background-color: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid rgba(197, 155, 39, 0.35);
     box-shadow: 0 -4px 20px rgba(94, 22, 36, 0.08);
     z-index: 9999;
-    align-items: stretch;
+    align-items: center;
+    box-sizing: border-box;
   }
 
   .mobile-bottom-nav-item {
@@ -3986,7 +4043,7 @@ html {
     justify-content: center;
     background: none;
     border: none;
-    padding: 4px 2px;
+    padding: 2px 0;
     color: var(--color-text-muted);
     cursor: pointer;
     text-decoration: none;
@@ -3996,7 +4053,7 @@ html {
   }
 
   .mobile-bottom-nav-item:active {
-    transform: scale(0.94);
+    transform: scale(0.92);
   }
 
   .mobile-bottom-nav-item.active {
@@ -4008,14 +4065,19 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 2px;
+    height: 22px;
+    width: 28px;
   }
 
   .mobile-bottom-label {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    letter-spacing: 0.2px;
-    line-height: 1.1;
+    letter-spacing: 0.1px;
+    line-height: 1;
+    margin-top: 2px;
+    text-align: center;
+    white-space: nowrap;
+    display: block;
   }
 
   .mobile-bottom-nav-item.active .mobile-bottom-label {
@@ -4026,20 +4088,21 @@ html {
   .mobile-bottom-badge {
     position: absolute;
     top: -5px;
-    right: -10px;
+    right: -8px;
     background-color: var(--color-maroon);
     color: #FFFFFF;
-    font-size: 0.64rem;
+    font-size: 0.62rem;
     font-weight: 800;
-    min-width: 17px;
-    height: 17px;
+    min-width: 16px;
+    height: 16px;
     border-radius: 999px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 4px;
+    padding: 0 3px;
     line-height: 1;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    border: 1.5px solid #FFFFFF;
   }
 
   .mobile-bottom-badge-gold {
@@ -4049,7 +4112,7 @@ html {
 
   /* Page clearance for bottom navigation */
   .site-footer {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .product-page-section,
@@ -4059,7 +4122,7 @@ html {
   .about-page,
   .faqs-page-wrapper,
   .bulk-orders-page {
-    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
@@ -4175,7 +4238,7 @@ html {
   .product-mobile-sticky-bar {
     display: flex;
     position: fixed;
-    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     left: 0;
     right: 0;
     padding: 10px 16px;
