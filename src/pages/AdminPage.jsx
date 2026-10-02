@@ -33,7 +33,8 @@ import {
   Lock,
   LogOut,
   Loader2,
-  User
+  User,
+  Menu
 } from 'lucide-react';
 import { adminService, catalogueService } from '../services';
 import { apiClient } from '../services/apiClient.js';
@@ -126,7 +127,7 @@ export default function AdminPage({ onNavigate }) {
           setToastMessage('Authenticated successfully as JSS Granthamale Administrator.');
         } else {
           setIsAuthenticating(false);
-          setLoginError('Invalid credentials. Please enter username: "admin" and password: "12345".');
+          setLoginError('Invalid credentials. Access restricted to authorized personnel.');
         }
       }, 500);
     }, 450);
@@ -141,6 +142,7 @@ export default function AdminPage({ onNavigate }) {
 
   // Navigation State
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Real Domain Store State
   const [metrics, setMetrics] = useState(() => adminService.getDashboardMetrics());
@@ -499,7 +501,7 @@ export default function AdminPage({ onNavigate }) {
             ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆ · ಮೈಸೂರು
           </p>
 
-          {/* Demo Credentials Helper Notice */}
+          {/* Security Notice banner */}
           <div
             style={{
               backgroundColor: '#FAF5E8',
@@ -516,9 +518,8 @@ export default function AdminPage({ onNavigate }) {
               <Lock size={12} color="#8C6708" />
               <span>Authorized Administrator Login</span>
             </div>
-            <div>
-              Username: <code style={{ backgroundColor: '#FFFFFF', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>admin</code>
-              {' '}· Password: <code style={{ backgroundColor: '#FFFFFF', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>12345</code>
+            <div style={{ color: '#5C4813', fontSize: '0.78rem' }}>
+              Restricted management console for authorized JSS Publications Division officers.
             </div>
           </div>
 
@@ -603,7 +604,7 @@ export default function AdminPage({ onNavigate }) {
                   type={showPassword ? 'text' : 'password'}
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
-                  placeholder="Enter passkey (12345)"
+                  placeholder="Enter administrator passkey"
                   required
                   disabled={isAuthenticating}
                   style={{
@@ -723,9 +724,18 @@ export default function AdminPage({ onNavigate }) {
         </div>
       )}
 
+      {/* Mobile Drawer Backdrop */}
+      {isMobileSidebarOpen && (
+        <div
+          className="admin-mobile-backdrop"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          aria-label="Close navigation overlay"
+        />
+      )}
+
       {/* LEFT SIDEBAR - Clean, Focused Navigation */}
       <aside
-        className="admin-sidebar"
+        className={`admin-sidebar ${isMobileSidebarOpen ? 'mobile-open' : ''}`}
         style={{
           width: '260px',
           height: '100vh',
@@ -739,11 +749,11 @@ export default function AdminPage({ onNavigate }) {
         }}
       >
         {/* Brand Header */}
-        <div style={{ padding: '16px', borderBottom: '1px solid rgba(223, 191, 95, 0.2)' }}>
+        <div style={{ padding: '16px', borderBottom: '1px solid rgba(223, 191, 95, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div
             onClick={() => onNavigate && onNavigate('/')}
             title="Return to Public Storefront"
-            style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', flex: 1 }}
           >
             <div
               style={{
@@ -775,6 +785,27 @@ export default function AdminPage({ onNavigate }) {
               </span>
             </div>
           </div>
+
+          {/* Close button on mobile */}
+          <button
+            type="button"
+            onClick={() => setIsMobileSidebarOpen(false)}
+            className="admin-mobile-menu-btn"
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              borderRadius: '4px',
+              color: '#EDE7DC',
+              cursor: 'pointer',
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            aria-label="Close sidebar menu"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Live Storefront Shortcut */}
@@ -829,7 +860,10 @@ export default function AdminPage({ onNavigate }) {
                     <button
                       key={item.id}
                       type="button"
-                      onClick={() => setActiveTab(item.id)}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setIsMobileSidebarOpen(false);
+                      }}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -915,6 +949,7 @@ export default function AdminPage({ onNavigate }) {
       >
         {/* Top Navbar */}
         <header
+          className="admin-top-header"
           style={{
             height: '60px',
             backgroundColor: '#FFFFFF',
@@ -927,6 +962,30 @@ export default function AdminPage({ onNavigate }) {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.86rem' }}>
+            {/* Mobile Hamburger Drawer Trigger */}
+            <button
+              type="button"
+              className="admin-mobile-menu-btn"
+              onClick={() => setIsMobileSidebarOpen(prev => !prev)}
+              aria-label="Toggle navigation menu"
+              style={{
+                display: 'none',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 10px',
+                backgroundColor: 'var(--color-maroon-subtle)',
+                color: 'var(--color-maroon)',
+                border: '1px solid rgba(94, 22, 36, 0.2)',
+                borderRadius: '6px',
+                fontWeight: 700,
+                fontSize: '0.82rem',
+                cursor: 'pointer'
+              }}
+            >
+              <Menu size={18} />
+              <span>Menu</span>
+            </button>
+
             <div
               onClick={() => onNavigate && onNavigate('/')}
               title="Return to Public Storefront"
@@ -984,8 +1043,32 @@ export default function AdminPage({ onNavigate }) {
           </div>
         </header>
 
+        {/* Mobile Quick Horizontal Tab Pills */}
+        <div className="admin-mobile-quick-tabs">
+          {NAVIGATION_GROUPS.flatMap(g => g.items).map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`admin-mobile-quick-tab-btn ${isActive ? 'active' : ''}`}
+              >
+                <Icon size={14} />
+                <span>{tab.label.split(' ')[0]}</span>
+                {tab.badge && (
+                  <span style={{ fontSize: '0.66rem', opacity: 0.85, fontWeight: 700 }}>
+                    ({tab.badge})
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
         {/* TAB BODY CONTAINER */}
-        <div style={{ padding: '28px', flex: 1 }}>
+        <div className="admin-view-container" style={{ padding: '28px', flex: 1 }}>
           {/* ========================================================================= */}
           {/* TAB 1: DASHBOARD OVERVIEW */}
           {/* ========================================================================= */}

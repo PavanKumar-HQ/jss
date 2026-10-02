@@ -20,13 +20,23 @@ async function request(endpoint, options = {}) {
 
   try {
     const res = await fetch(url, config);
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const err = new Error(`API server offline or returned non-JSON response (${res.status})`);
+      err.isOffline = true;
+      throw err;
+    }
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.error || `HTTP ${res.status}: Request failed`);
     }
     return data;
   } catch (err) {
-    console.error(`[apiClient] Request to ${endpoint} failed:`, err.message);
+    if (err.isOffline || err.message?.includes('non-JSON') || err.message?.includes('Failed to fetch')) {
+      // Offline fallback mode; avoid polluting console with HTML parse failures
+      throw err;
+    }
+    console.warn(`[apiClient] Request to ${endpoint} failed:`, err.message);
     throw err;
   }
 }
