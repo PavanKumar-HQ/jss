@@ -88,9 +88,9 @@ const Navbar = React.memo(function Navbar({
     <header className="site-header" role="banner">
       {/* 1. TOP UTILITY BAR */}
       <div className="header-top-bar">
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
           {/* Location & Hours & Phone */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
               <MapPin size={12} color="#DFBF5F" />
               <span>JSS Book House, Dr. Shivarathri Rajendra Circle, Mysuru</span>
@@ -98,14 +98,14 @@ const Navbar = React.memo(function Navbar({
             <span className="desktop-only" style={{ opacity: 0.35 }}>|</span>
             <span className="desktop-only">Mon–Sat: 09:30 AM – 06:00 PM</span>
             <span className="desktop-only" style={{ opacity: 0.35 }}>|</span>
-            <a href="tel:08212548212" style={{ color: '#F8F5EE', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <a href="tel:08212548212" style={{ color: '#F8F5EE', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontSize: '0.76rem' }}>
               <Phone size={12} color="#DFBF5F" />
               <span>0821-2548212</span>
             </a>
           </div>
 
           {/* Consignment, Bulk Orders, Language */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               type="button"
               onClick={() => onOpenTrackingModal && onOpenTrackingModal()}
@@ -113,47 +113,38 @@ const Navbar = React.memo(function Navbar({
               title="Track consignment shipping"
             >
               <Truck size={12} />
-              <span>Track Consignment</span>
+              <span className="desktop-only">Track Consignment</span>
+              <span className="mobile-only">Track</span>
             </button>
 
             <button
               type="button"
               onClick={() => onNavigate('/bulk-orders')}
-              className="top-bar-btn"
+              className="top-bar-btn desktop-only"
               title="Institutional bulk enquiries"
             >
               <span>Bulk Orders</span>
             </button>
 
-            <span style={{ opacity: 0.35 }}>|</span>
+            <span className="desktop-only" style={{ opacity: 0.35 }}>|</span>
 
             <button
               type="button"
               onClick={() => onNavigate('/faqs')}
-              className="top-bar-btn"
+              className="top-bar-btn desktop-only"
               title="Frequently Asked Questions"
             >
               <span>FAQs</span>
             </button>
 
-            <span style={{ opacity: 0.35 }}>|</span>
+            <span className="desktop-only" style={{ opacity: 0.35 }}>|</span>
 
             <button
               type="button"
               onClick={() => setLanguageMode(languageMode === 'en' ? 'kn' : 'en')}
-              style={{
-                background: 'rgba(255,255,255,0.12)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                color: '#FFFFFF',
-                padding: '2px 7px',
-                borderRadius: 'var(--radius-xs)',
-                cursor: 'pointer',
-                fontSize: '0.72rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
+              className="top-bar-lang-btn"
               title="Toggle English / Kannada"
+              aria-label="Toggle language"
             >
               <Globe size={11} />
               <span>{languageMode === 'en' ? 'ಕನ್ನಡ' : 'English'}</span>
@@ -169,37 +160,21 @@ const Navbar = React.memo(function Navbar({
           <a
             href="/"
             onClick={(e) => handleLinkClick('/', e)}
-            style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}
+            className="navbar-brand-link"
             aria-label="JSS Publications Home"
           >
-            <div
-              style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '8px',
-                backgroundColor: '#FFFFFF',
-                border: '1.5px solid rgba(197, 155, 39, 0.4)',
-                boxShadow: '0 2px 8px rgba(94, 22, 36, 0.08)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '3px',
-                flexShrink: 0,
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-              }}
-              className="navbar-logo-wrap"
-            >
+            <div className="navbar-logo-wrap">
               <img
                 src={jssLogo}
                 alt="JSS Publications Emblem Logo"
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
-            <div>
-              <span className="text-brand" style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '0.6px', color: 'var(--color-maroon)', display: 'block', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
+            <div className="navbar-brand-text-wrap">
+              <span className="navbar-brand-title">
                 JSS PUBLICATIONS
               </span>
-              <span className="text-kannada" style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', display: 'block', lineHeight: 1.2, fontWeight: 500, whiteSpace: 'nowrap' }}>
+              <span className="navbar-brand-subtitle text-kannada">
                 {languageMode === 'kn' ? 'ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆ · ಮೈಸೂರು' : 'ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆ · Mysuru'}
               </span>
             </div>
@@ -469,69 +444,162 @@ const Navbar = React.memo(function Navbar({
         )}
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Slide-Over Navigation Drawer with Backdrop Blur */}
       {isMobileMenuOpen && (
         <div
-          className="mobile-only"
-          style={{
-            borderTop: '1px solid var(--color-border)',
-            backgroundColor: '#FAF7F2',
-            padding: '16px 20px',
-            boxShadow: '0 8px 16px rgba(0,0,0,0.06)'
-          }}
+          className="nav-drawer-overlay mobile-only"
+          onClick={() => setIsMobileMenuOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation Menu"
         >
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', padding: 0, margin: 0 }}>
-            {navItems.map((item) => {
-              const isActive = currentRoute === item.route;
-              return (
-                <li key={item.route}>
+          <div
+            className="nav-drawer-panel"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div className="nav-drawer-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className="nav-drawer-logo">
+                  <img src={jssLogo} alt="JSS Publications Crest" />
+                </div>
+                <div>
+                  <strong style={{ fontSize: '1rem', color: 'var(--color-maroon)', display: 'block', lineHeight: 1.1 }}>
+                    JSS PUBLICATIONS
+                  </strong>
+                  <span className="text-kannada" style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                    ಜೆಎಸ್ಎಸ್ ಮಹಾವಿದ್ಯಾಪೀಠ · ಮೈಸೂರು
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="nav-drawer-close-btn"
+                aria-label="Close menu"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Language Switcher Strip inside Drawer */}
+            <div className="nav-drawer-lang-strip">
+              <span style={{ fontSize: '0.76rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Language / ಭಾಷೆ:</span>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button
+                  type="button"
+                  onClick={() => setLanguageMode('en')}
+                  className={`nav-drawer-lang-toggle ${languageMode === 'en' ? 'active' : ''}`}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLanguageMode('kn')}
+                  className={`nav-drawer-lang-toggle ${languageMode === 'kn' ? 'active' : ''}`}
+                >
+                  ಕನ್ನಡ
+                </button>
+              </div>
+            </div>
+
+            {/* Drawer Navigation Links */}
+            <div className="nav-drawer-scroll">
+              <ul className="nav-drawer-list">
+                {navItems.map((item) => {
+                  const isActive = currentRoute === item.route;
+                  return (
+                    <li key={item.route}>
+                      <a
+                        href={item.route}
+                        onClick={(e) => handleLinkClick(item.route, e)}
+                        className={`nav-drawer-link ${isActive ? 'active' : ''}`}
+                      >
+                        <span>{item.label}</span>
+                        <ArrowRight size={14} className="nav-drawer-arrow" />
+                      </a>
+                    </li>
+                  );
+                })}
+
+                <li>
                   <a
-                    href={item.route}
-                    onClick={(e) => handleLinkClick(item.route, e)}
-                    className={`mobile-nav-btn ${isActive ? 'active' : ''}`}
+                    href="/faqs"
+                    onClick={(e) => handleLinkClick('/faqs', e)}
+                    className={`nav-drawer-link ${currentRoute === '/faqs' ? 'active' : ''}`}
                   >
-                    <span>{item.label}</span>
-                    <ArrowRight size={14} opacity={isActive ? 1 : 0.4} />
+                    <span>Frequently Asked Questions (FAQs)</span>
+                    <ArrowRight size={14} className="nav-drawer-arrow" />
                   </a>
                 </li>
-              );
-            })}
-            <li style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '10px', marginTop: '6px' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  if (onOpenWishlist) onOpenWishlist();
-                }}
-                className="mobile-nav-btn"
-                style={{ width: '100%', cursor: 'pointer' }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Bookmark size={16} color="var(--color-maroon)" fill={wishlistCount > 0 ? '#DFBF5F' : 'none'} />
-                  <span>My Study List (Saved Books)</span>
-                </div>
-                {wishlistCount > 0 && (
-                  <span className="badge badge-gold" style={{ fontSize: '0.72rem' }}>
-                    {wishlistCount}
+              </ul>
+
+              {/* Action Buttons in Drawer */}
+              <div className="nav-drawer-actions">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    if (onOpenWishlist) onOpenWishlist();
+                  }}
+                  className="btn btn-secondary nav-drawer-action-btn"
+                  style={{ width: '100%', justifyContent: 'space-between' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Bookmark size={16} color="var(--color-maroon)" fill={wishlistCount > 0 ? '#DFBF5F' : 'none'} />
+                    <span>My Study List</span>
+                  </div>
+                  {wishlistCount > 0 && (
+                    <span className="badge badge-gold" style={{ fontSize: '0.72rem' }}>
+                      {wishlistCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    if (onOpenTrackingModal) onOpenTrackingModal();
+                  }}
+                  className="btn btn-outline nav-drawer-action-btn"
+                  style={{ width: '100%', justifyContent: 'flex-start', gap: '8px' }}
+                >
+                  <Truck size={16} color="var(--color-maroon)" />
+                  <span>Track Consignment</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onNavigate('/bulk-orders');
+                  }}
+                  className="btn btn-institutional-gold nav-drawer-action-btn"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  <span>Bulk & Institutional Orders</span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
+
+              {/* Quick Contact & Store Info */}
+              <div className="nav-drawer-contact-box">
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '8px' }}>
+                  <MapPin size={14} color="var(--color-maroon)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span style={{ fontSize: '0.76rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+                    Dr. Shivarathri Rajendra Circle, Mysuru, Karnataka 570004
                   </span>
-                )}
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  onNavigate('/bulk-orders');
-                }}
-                className="btn btn-institutional-gold"
-                style={{ width: '100%', justifyContent: 'center' }}
-              >
-                <span>Bulk & Institutional Orders</span>
-                <ArrowRight size={14} />
-              </button>
-            </li>
-          </ul>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Phone size={14} color="var(--color-maroon)" />
+                  <a href="tel:08212548212" style={{ fontSize: '0.8rem', color: 'var(--color-maroon)', fontWeight: 700, textDecoration: 'none' }}>
+                    0821-2548212
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </header>

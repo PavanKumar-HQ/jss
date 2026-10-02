@@ -19,8 +19,9 @@ import BookPreviewModal from './components/BookPreviewModal';
 import OrderTrackingModal from './components/OrderTrackingModal';
 import WishlistDrawer from './components/WishlistDrawer';
 import FlippingBookLoader from './components/FlippingBookLoader';
+import MobileBottomNav from './components/MobileBottomNav';
 import useScrollReveal from './hooks/useScrollReveal';
-import { catalogueService, cartService, recentlyViewedService } from './services';
+import { catalogueService, cartService, recentlyViewedService, wishlistService } from './services';
 import { updateSEO } from './utils/seo';
 import { CheckCircle2 } from 'lucide-react';
 
@@ -71,6 +72,14 @@ export default function App() {
   useEffect(() => {
     return cartService.subscribe((updatedCart) => {
       setCart(updatedCart);
+    });
+  }, []);
+
+  const [wishlistCount, setWishlistCount] = useState(() => wishlistService.getWishlist().length);
+
+  useEffect(() => {
+    return wishlistService.subscribe((list) => {
+      setWishlistCount(list.length);
     });
   }, []);
 
@@ -514,6 +523,16 @@ export default function App() {
         onOpenLocation={() => navigate('/contact')}
         onOpenBulkEnquiry={() => navigate('/bulk-orders')}
         onOpenTrackingModal={handleOpenTrackingModal}
+      />
+
+      {/* Floating Mobile Bottom Navigation Bar (≤ 768px Viewports) */}
+      <MobileBottomNav
+        currentRoute={currentRoute}
+        onNavigate={navigate}
+        cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+        wishlistCount={wishlistCount}
+        onOpenWishlist={handleOpenWishlist}
+        onOpenMobileSearch={() => navigate('/books')}
       />
 
       {/* Suspended Modals */}

@@ -523,6 +523,49 @@ export default function BookDetailPage({
           </div>
         )}
       </div>
+
+      {/* Sticky Mobile Purchase Bar (Appears on Mobile Screens) */}
+      <div className="product-mobile-sticky-bar mobile-only" aria-label="Quick Purchase Bar">
+        <div className="product-mobile-sticky-info">
+          <span className="product-mobile-sticky-price">
+            ₹{currentPrice.toLocaleString('en-IN')}
+          </span>
+          <span className="product-mobile-sticky-format">
+            {activeEdition.binding} · 0% GST
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button
+            type="button"
+            onClick={handleAdd}
+            className={`btn btn-sm ${isAdded ? 'btn-secondary' : 'btn-primary'}`}
+            disabled={isAdding}
+            style={{ minHeight: '38px', padding: '8px 12px' }}
+          >
+            {isAdding ? (
+              <span>Adding...</span>
+            ) : isAdded ? (
+              <>
+                <Check size={14} color="var(--color-green)" />
+                <span>In Cart</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag size={14} />
+                <span>Add to Cart</span>
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={handleBuy}
+            className="btn btn-secondary btn-sm"
+            style={{ minHeight: '38px', padding: '8px 12px' }}
+          >
+            Buy Now
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

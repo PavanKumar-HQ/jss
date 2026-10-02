@@ -57,15 +57,15 @@ export default function CataloguePage({
     <div className="catalogue-page-section">
       <div className="container">
         {/* Mobile Filter & Sort Triggers */}
-        <div className="mobile-only" style={{ marginBottom: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+        <div className="mobile-only" style={{ marginBottom: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '8px' }}>
             <button
               type="button"
               onClick={() => setIsMobileFilterOpen(true)}
               className="btn btn-outline"
-              style={{ justifyContent: 'center', gap: '6px' }}
+              style={{ justifyContent: 'center', gap: '6px', minHeight: '40px' }}
             >
-              <SlidersHorizontal size={14} color="var(--color-maroon)" />
+              <SlidersHorizontal size={15} color="var(--color-maroon)" />
               <span>Filters ({filteredProducts.length})</span>
             </button>
 
@@ -73,7 +73,8 @@ export default function CataloguePage({
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="form-select"
-              style={{ fontSize: '0.84rem', padding: '8px' }}
+              style={{ fontSize: '0.84rem', padding: '8px 10px', minHeight: '40px' }}
+              aria-label="Sort publications"
             >
               <option value="relevance">Sort: Relevance</option>
               <option value="title-asc">Title: A–Z</option>
@@ -83,56 +84,90 @@ export default function CataloguePage({
           </div>
         </div>
 
+        {/* Quick Horizontal Category Scroll Bar on Mobile */}
+        <div className="catalogue-category-scroll-bar mobile-only">
+          {['All Categories', 'Vachana Literature', 'Veerashaiva Philosophy', 'Spirituality & Yoga', 'Biographies & Heritage', 'Education & Science'].map((cat) => {
+            const isSelected = activeCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setActiveCategory(cat)}
+                className={`catalogue-cat-pill ${isSelected ? 'active' : ''}`}
+              >
+                <span>{cat === 'All Categories' ? 'All (49)' : cat}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Mobile Filter Drawer Overlay */}
         {isMobileFilterOpen && (
           <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              zIndex: 1100,
-              display: 'flex'
-            }}
+            className="catalogue-filter-drawer-overlay"
             onClick={() => setIsMobileFilterOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Catalogue Filters"
           >
             <div
-              style={{
-                width: '300px',
-                height: '100%',
-                backgroundColor: '#FFFFFF',
-                padding: '20px',
-                overflowY: 'auto'
-              }}
+              className="catalogue-filter-drawer-panel"
               onClick={(e) => e.stopPropagation()}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '10px', borderBottom: '1px solid var(--color-border)' }}>
-                <strong style={{ color: 'var(--color-maroon)', fontSize: '0.94rem', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-                  Catalogue Filters
-                </strong>
+              <div className="catalogue-filter-drawer-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <SlidersHorizontal size={16} color="var(--color-maroon)" />
+                  <strong style={{ color: 'var(--color-maroon)', fontSize: '0.94rem', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                    Catalogue Filters ({filteredProducts.length})
+                  </strong>
+                </div>
                 <button
+                  type="button"
                   onClick={() => setIsMobileFilterOpen(false)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+                  className="catalogue-filter-drawer-close"
                   aria-label="Close filters"
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              <FilterSidebar
-                activeCategory={activeCategory}
-                setActiveCategory={(cat) => { setActiveCategory(cat); setIsMobileFilterOpen(false); }}
-                activeSeries={activeSeries}
-                setActiveSeries={(s) => { setActiveSeries(s); setIsMobileFilterOpen(false); }}
-                activeLanguage={activeLanguage}
-                setActiveLanguage={(l) => { setActiveLanguage(l); setIsMobileFilterOpen(false); }}
-                priceMax={priceMax}
-                setPriceMax={setPriceMax}
-                onResetFilters={onResetFilters}
-                totalMatchingBooks={filteredProducts.length}
-              />
+              <div className="catalogue-filter-drawer-body">
+                <FilterSidebar
+                  activeCategory={activeCategory}
+                  setActiveCategory={setActiveCategory}
+                  activeSeries={activeSeries}
+                  setActiveSeries={setActiveSeries}
+                  activeLanguage={activeLanguage}
+                  setActiveLanguage={setActiveLanguage}
+                  priceMax={priceMax}
+                  setPriceMax={setPriceMax}
+                  onResetFilters={onResetFilters}
+                  totalMatchingBooks={filteredProducts.length}
+                />
+              </div>
+
+              <div className="catalogue-filter-drawer-footer">
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onResetFilters) onResetFilters();
+                    }}
+                    className="btn btn-outline btn-sm"
+                    style={{ flex: 1, minHeight: '38px' }}
+                  >
+                    Reset All
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsMobileFilterOpen(false)}
+                  className="btn btn-primary btn-sm"
+                  style={{ flex: 2, justifyContent: 'center', minHeight: '38px' }}
+                >
+                  Show {filteredProducts.length} Books
+                </button>
+              </div>
             </div>
           </div>
         )}
