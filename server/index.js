@@ -19,8 +19,11 @@ import { inventoryService } from './services/inventoryService.js';
 import { pricingService } from './services/pricingService.js';
 import { orderService } from './services/orderService.js';
 import { paymentService } from './services/paymentService.js';
+import { serverValidator, ValidationError } from './services/validator.js';
 
 dotenv.config();
+
+const idempotencyKeyMap = new Map();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -175,10 +178,21 @@ app.post('/api/v1/coupons/validate', (req, res) => {
 // -------------------------------------------------------------
 app.post('/api/v1/orders', (req, res) => {
   try {
+    const idempotencyKey = req.headers['idempotency-key'] || req.body?.idempotencyKey;
+    if (idempotencyKey && idempotencyKeyMap.has(idempotencyKey)) {
+      return res.status(200).json({ success: true, order: idempotencyKeyMap.get(idempotencyKey), idempotent: true });
+    }
+
+    serverValidator.validateOrderPayload(req.body);
     const order = orderService.createOrder(req.body);
+
+    if (idempotencyKey) {
+      idempotencyKeyMap.set(idempotencyKey, order);
+    }
+
     res.status(201).json({ success: true, order });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: err.message, errors: err.errors || [] });
   }
 });
 

@@ -10,7 +10,7 @@
     "start": "node server/index.js",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node scripts/test-catalogue.mjs && node scripts/test-search.mjs && node scripts/test-product-edition.mjs && node scripts/test-cart.mjs && node scripts/test-wishlist.mjs && node scripts/test-inventory.mjs && node scripts/test-pricing.mjs && node scripts/test-shipping.mjs && node scripts/test-order-checkout.mjs && node scripts/test-seo.mjs && node scripts/test-production-e2e.mjs"
+    "test": "node scripts/test-catalogue.mjs && node scripts/test-search.mjs && node scripts/test-product-edition.mjs && node scripts/test-cart.mjs && node scripts/test-wishlist.mjs && node scripts/test-inventory.mjs && node scripts/test-pricing.mjs && node scripts/test-shipping.mjs && node scripts/test-order-checkout.mjs && node scripts/test-seo.mjs && node scripts/test-repositories.mjs && node scripts/test-production-e2e.mjs"
   },
   "dependencies": {
     "cors": "^2.8.6",

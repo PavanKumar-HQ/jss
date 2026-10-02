@@ -3,6 +3,7 @@ import { Truck, CheckCircle2, ShieldCheck, MapPin, Phone, Mail, ArrowLeft, Arrow
 import { cartService } from '../services/cartService.js';
 import { orderService } from '../services/orderService.js';
 import { apiClient } from '../services/apiClient.js';
+import { orderRepository } from '../repositories/index.js';
 import ids from '../utils/ids.js';
 
 export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
@@ -76,52 +77,36 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
         notes: formData.specialInstructions
       };
 
-      // 1. Authoritative Backend Transaction
-      let serverOrder = null;
+      // Authoritative Order Transaction via Repository Interface
+      const idempotencyKey = `idemp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      let finalOrder = null;
       try {
-        serverOrder = await apiClient.createOrder(payload);
-      } catch (apiErr) {
-        console.warn('[checkout] Server API unavailable, using resilient local storage:', apiErr.message);
+        finalOrder = await orderRepository.create(payload, idempotencyKey);
+      } catch (repoErr) {
+        console.warn('[checkout] Repository error, falling back to local client order creation:', repoErr.message);
+        const localResult = orderService.createOrder({
+          customer: payload.customer,
+          shippingAddress: payload.shippingAddress,
+          items: [...cart],
+          totals: {
+            itemsCount: cart.reduce((acc, i) => acc + i.quantity, 0),
+            subtotal,
+            discount: 0,
+            shippingFee: shipping,
+            grandTotal: total
+          },
+          paymentMethod: paymentMethodLabel,
+          notes: formData.specialInstructions
+        });
+        if (localResult.success) {
+          finalOrder = localResult.order;
+        } else {
+          throw repoErr;
+        }
       }
 
-      // 2. Also register in local client orderService for full offline compatibility
-      const localResult = orderService.createOrder({
-        customer: payload.customer,
-        shippingAddress: payload.shippingAddress,
-        items: [...cart],
-        totals: {
-          itemsCount: cart.reduce((acc, i) => acc + i.quantity, 0),
-          subtotal,
-          discount: 0,
-          shippingFee: shipping,
-          grandTotal: total
-        },
-        paymentMethod: paymentMethodLabel,
-        notes: formData.specialInstructions
-      });
-
-      const finalOrder = serverOrder || (localResult.success ? localResult.order : {
-        orderReference: ids.generateOrderId(),
-        orderId: ids.generateOrderId(),
-        date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-        fullName: formData.fullName,
-        phone: formData.phone,
-        email: formData.email,
-        streetAddress: formData.streetAddress,
-        city: formData.city,
-        state: formData.state,
-        pincode: formData.pincode,
-        dispatchMethod: formData.dispatchMethod,
-        paymentPreference: formData.paymentPreference,
-        items: [...cart],
-        subtotal,
-        shipping,
-        total,
-        status: 'Order Recorded at JSS Publications Counter'
-      });
-
       setPlacedOrderData(finalOrder);
-      setOrderReference(finalOrder.orderReference || finalOrder.id);
+      setOrderReference(finalOrder.orderReference || finalOrder.orderId || finalOrder.id);
       setIsCompleted(true);
       if (onClearCart) {
         onClearCart();
@@ -193,6 +178,24 @@ export default function CheckoutPage({ cart = [], onClearCart, onNavigate }) {
               <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'block' }}>Order Reference Number</span>
               <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--color-accent-maroon)', fontFamily: 'monospace' }}>
                 {orderReference}
+              </span>
+            </div>
+
+            <div style={{ marginBottom: '18px' }}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  backgroundColor: 'rgba(180, 83, 9, 0.08)',
+                  border: '1px solid rgba(180, 83, 9, 0.25)',
+                  padding: '4px 12px',
+                  borderRadius: '9999px',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  color: '#92400e',
+                  letterSpacing: '0.3px'
+                }}
+              >
+                Development Order • Demo Payment Adapter (Gateway Credentials Pending)
               </span>
             </div>
 
