@@ -128,17 +128,7 @@ export default function BulkOrdersPage({ onNavigate }) {
         <div className="two-col-responsive-grid">
           
           {/* Left: Requisition Form Card */}
-          <div
-            className="reveal-on-scroll"
-            style={{
-              backgroundColor: '#FFFFFF',
-              border: '1px solid var(--color-border)',
-              borderTop: '4px solid var(--color-maroon)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '32px',
-              boxShadow: 'var(--shadow-box-elevated)'
-            }}
-          >
+          <div className="reveal-on-scroll bulk-order-card">
             {submitted ? (
               <div style={{ textAlign: 'center', padding: '28px 10px' }}>
                 <div

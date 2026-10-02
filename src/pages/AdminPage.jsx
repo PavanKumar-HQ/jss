@@ -22,13 +22,18 @@ import {
   Check,
   X,
   Eye,
+  EyeOff,
   RefreshCw,
   Search,
   Sparkles,
   ChevronRight,
   Filter,
   Users,
-  Copy
+  Copy,
+  Lock,
+  LogOut,
+  Loader2,
+  User
 } from 'lucide-react';
 import { adminService, catalogueService } from '../services';
 import { apiClient } from '../services/apiClient.js';
@@ -91,6 +96,49 @@ export function normalizeOrder(o) {
 }
 
 export default function AdminPage({ onNavigate }) {
+  // Administrator Authentication Gate State
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('jss_admin_auth') === 'true';
+    }
+    return false;
+  });
+  const [usernameInput, setUsernameInput] = useState('admin');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState('');
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [authStepMessage, setAuthStepMessage] = useState('');
+
+  const handleLoginSubmit = (e) => {
+    e.preventDefault();
+    setLoginError('');
+    setIsAuthenticating(true);
+    setAuthStepMessage('Verifying administrative credentials...');
+
+    setTimeout(() => {
+      setAuthStepMessage('Connecting to authoritative JSS Granthamale SQLite 3 database...');
+      setTimeout(() => {
+        if (usernameInput.trim().toLowerCase() === 'admin' && passwordInput === '12345') {
+          sessionStorage.setItem('jss_admin_auth', 'true');
+          setIsAuthenticated(true);
+          setIsAuthenticating(false);
+          setToastMessage('Authenticated successfully as JSS Granthamale Administrator.');
+        } else {
+          setIsAuthenticating(false);
+          setLoginError('Invalid credentials. Please enter username: "admin" and password: "12345".');
+        }
+      }, 500);
+    }, 450);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('jss_admin_auth');
+    setIsAuthenticated(false);
+    setPasswordInput('');
+    setLoginError('');
+  };
+
   // Navigation State
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -338,6 +386,303 @@ export default function AdminPage({ onNavigate }) {
     });
   }, [supportTickets, ticketStatusFilter]);
 
+  // If administrator is not authenticated, render authentic institutional Login Gate
+  if (!isAuthenticated) {
+    return (
+      <div
+        className="admin-login-screen"
+        style={{
+          minHeight: '100vh',
+          width: '100vw',
+          backgroundColor: '#FAF7F2',
+          backgroundImage: 'radial-gradient(rgba(197, 155, 39, 0.22) 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px 16px',
+          fontFamily: 'var(--font-sans)',
+          boxSizing: 'border-box',
+          position: 'relative'
+        }}
+      >
+        {/* Return to Public Storefront Top Button */}
+        <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
+          <button
+            type="button"
+            onClick={() => onNavigate && onNavigate('/')}
+            className="btn btn-outline btn-sm"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', backgroundColor: '#FFFFFF' }}
+          >
+            <span>← Return to Public Storefront</span>
+          </button>
+        </div>
+
+        {/* Central Auth Card */}
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '430px',
+            backgroundColor: '#FFFFFF',
+            border: '1.5px solid rgba(197, 155, 39, 0.45)',
+            borderTop: '5px solid var(--color-maroon)',
+            borderRadius: '12px',
+            boxShadow: '0 16px 40px rgba(94, 22, 36, 0.12), 0 2px 6px rgba(0,0,0,0.04)',
+            padding: '36px 28px',
+            boxSizing: 'border-box',
+            textAlign: 'center'
+          }}
+        >
+          {/* Institution Crest */}
+          <div
+            style={{
+              width: '58px',
+              height: '58px',
+              borderRadius: '10px',
+              backgroundColor: '#FFFFFF',
+              border: '2px solid rgba(197, 155, 39, 0.5)',
+              boxShadow: '0 4px 12px rgba(94, 22, 36, 0.12)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              padding: '4px'
+            }}
+          >
+            <img
+              src={jssLogo}
+              alt="JSS Publications Emblem Logo"
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            />
+          </div>
+
+          <span
+            style={{
+              display: 'inline-block',
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              color: 'var(--color-maroon)',
+              backgroundColor: 'rgba(94, 22, 36, 0.08)',
+              padding: '3px 10px',
+              borderRadius: '4px',
+              marginBottom: '10px'
+            }}
+          >
+            Administrative Console
+          </span>
+
+          <h1
+            className="text-serif"
+            style={{
+              fontSize: '1.45rem',
+              fontWeight: 800,
+              color: 'var(--color-maroon)',
+              marginBottom: '4px',
+              lineHeight: 1.2
+            }}
+          >
+            JSS PUBLICATIONS
+          </h1>
+
+          <p
+            className="text-kannada"
+            style={{
+              fontSize: '0.85rem',
+              color: '#8C6708',
+              marginBottom: '18px',
+              fontWeight: 600
+            }}
+          >
+            ಜಗದ್ಗುರು ಶ್ರೀ ಶಿವರಾತ್ರೀಶ್ವರ ಗ್ರಂಥಮಾಲೆ · ಮೈಸೂರು
+          </p>
+
+          {/* Demo Credentials Helper Notice */}
+          <div
+            style={{
+              backgroundColor: '#FAF5E8',
+              border: '1px solid rgba(197, 155, 39, 0.4)',
+              borderRadius: '6px',
+              padding: '10px 14px',
+              marginBottom: '20px',
+              textAlign: 'left',
+              fontSize: '0.8rem',
+              color: '#420D18'
+            }}
+          >
+            <div style={{ fontWeight: 700, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Lock size={12} color="#8C6708" />
+              <span>Authorized Administrator Login</span>
+            </div>
+            <div>
+              Username: <code style={{ backgroundColor: '#FFFFFF', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>admin</code>
+              {' '}· Password: <code style={{ backgroundColor: '#FFFFFF', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>12345</code>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {loginError && (
+            <div
+              style={{
+                backgroundColor: 'rgba(94, 22, 36, 0.1)',
+                border: '1px solid var(--color-maroon)',
+                color: 'var(--color-maroon)',
+                padding: '10px 12px',
+                borderRadius: '6px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                marginBottom: '18px',
+                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <AlertTriangle size={15} color="var(--color-maroon)" style={{ flexShrink: 0 }} />
+              <span>{loginError}</span>
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleLoginSubmit} style={{ textAlign: 'left' }}>
+            <div style={{ marginBottom: '14px' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: 'var(--color-text-charcoal)',
+                  marginBottom: '5px'
+                }}
+              >
+                Username
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
+                  placeholder="admin"
+                  required
+                  disabled={isAuthenticating}
+                  style={{
+                    width: '100%',
+                    padding: '9px 12px 9px 34px',
+                    fontSize: '0.88rem',
+                    borderRadius: '6px',
+                    border: '1.5px solid var(--color-border)',
+                    backgroundColor: isAuthenticating ? '#F5F5F5' : '#FFFFFF',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <User
+                  size={15}
+                  color="var(--color-text-muted)"
+                  style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '22px' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: 'var(--color-text-charcoal)',
+                  marginBottom: '5px'
+                }}
+              >
+                Administrator Password
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  placeholder="Enter passkey (12345)"
+                  required
+                  disabled={isAuthenticating}
+                  style={{
+                    width: '100%',
+                    padding: '9px 36px 9px 34px',
+                    fontSize: '0.88rem',
+                    borderRadius: '6px',
+                    border: '1.5px solid var(--color-border)',
+                    backgroundColor: isAuthenticating ? '#F5F5F5' : '#FFFFFF',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <Lock
+                  size={15}
+                  color="var(--color-text-muted)"
+                  style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--color-text-muted)',
+                    cursor: 'pointer',
+                    padding: 0
+                  }}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isAuthenticating}
+              className="btn btn-primary"
+              style={{
+                width: '100%',
+                padding: '11px',
+                fontSize: '0.92rem',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                borderRadius: '6px',
+                cursor: isAuthenticating ? 'wait' : 'pointer'
+              }}
+            >
+              {isAuthenticating ? (
+                <>
+                  <Loader2 size={16} style={{ animation: 'spin 0.6s linear infinite' }} />
+                  <span>{authStepMessage || 'Authenticating...'}</span>
+                </>
+              ) : (
+                <>
+                  <Lock size={15} />
+                  <span>Authenticate & Enter Console</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer note */}
+          <div style={{ marginTop: '20px', fontSize: '0.72rem', color: 'var(--color-text-muted)', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '14px' }}>
+            <span>JSS Mahavidyapeetha · Mysuru · Authoritative SQLite 3 Store</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="admin-layout-root"
@@ -528,9 +873,31 @@ export default function AdminPage({ onNavigate }) {
         </nav>
 
         {/* Footer Meta */}
-        <div style={{ padding: '14px 16px', borderTop: '1px solid rgba(223, 191, 95, 0.2)', fontSize: '0.72rem', color: 'rgba(237, 231, 220, 0.5)' }}>
-          <span>Sri Suttur Math · Mysuru</span>
-          <div style={{ color: '#DFBF5F', fontWeight: 600, marginTop: '2px' }}>Pavan Kumar (Admin)</div>
+        <div style={{ padding: '14px 16px', borderTop: '1px solid rgba(223, 191, 95, 0.2)', fontSize: '0.72rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <span style={{ color: 'rgba(237, 231, 220, 0.5)' }}>Sri Suttur Math · Mysuru</span>
+            <div style={{ color: '#DFBF5F', fontWeight: 600, marginTop: '2px' }}>admin (Authenticated)</div>
+          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(223, 191, 95, 0.3)',
+              color: '#DFBF5F',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '0.7rem'
+            }}
+            title="Sign out of admin portal"
+          >
+            <LogOut size={12} />
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
 
@@ -591,7 +958,7 @@ export default function AdminPage({ onNavigate }) {
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '0.74rem', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#FAF7F2', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
               Speed Post Threshold: ₹{settings.freeShippingThreshold}
             </span>
@@ -603,6 +970,16 @@ export default function AdminPage({ onNavigate }) {
             >
               <ExternalLink size={13} />
               <span>Storefront</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="btn btn-secondary btn-sm"
+              style={{ fontSize: '0.76rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-maroon)' }}
+              title="Sign out of admin session"
+            >
+              <LogOut size={13} />
+              <span>Sign Out</span>
             </button>
           </div>
         </header>

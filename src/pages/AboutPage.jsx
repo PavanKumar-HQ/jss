@@ -321,19 +321,7 @@ export default function AboutPage({ onNavigate }) {
             {timelineMilestones.map((item, index) => (
               <div
                 key={index}
-                style={{
-                  backgroundColor: '#FFFFFF',
-                  border: '1px solid var(--color-border)',
-                  borderLeft: '4px solid var(--color-maroon)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '24px 28px',
-                  display: 'grid',
-                  gridTemplateColumns: '150px 1fr',
-                  gap: '24px',
-                  alignItems: 'start',
-                  boxShadow: '0 3px 12px rgba(28, 25, 23, 0.05)',
-                  transition: 'border-color 0.2s ease, transform 0.2s ease'
-                }}
+                className="about-timeline-card"
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = 'var(--color-accent-gold)';
                   e.currentTarget.style.transform = 'translateX(4px)';
