@@ -1010,21 +1010,31 @@ export default function AdminPage({ onNavigate }) {
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
-            <span style={{ color: 'var(--color-text-muted)' }}>JSS Operations</span>
-            <span style={{ color: 'var(--color-border)' }}>/</span>
+            <span className="admin-header-breadcrumb-prefix" style={{ color: 'var(--color-text-muted)' }}>JSS Operations</span>
+            <span className="admin-header-breadcrumb-prefix" style={{ color: 'var(--color-border)' }}>/</span>
             <span style={{ fontWeight: 800, color: 'var(--color-maroon)' }}>
               {NAVIGATION_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'Console'}
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '0.74rem', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#FAF7F2', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <span
+              className="admin-header-threshold-badge"
+              style={{
+                fontSize: '0.74rem',
+                padding: '3px 8px',
+                borderRadius: '4px',
+                backgroundColor: '#FAF7F2',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-muted)'
+              }}
+            >
               Speed Post Threshold: ₹{settings.freeShippingThreshold}
             </span>
             <button
               type="button"
               onClick={() => onNavigate && onNavigate('/')}
-              className="btn btn-outline btn-sm"
+              className="btn btn-outline btn-sm admin-header-storefront-btn"
               style={{ fontSize: '0.76rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <ExternalLink size={13} />
@@ -1034,11 +1044,11 @@ export default function AdminPage({ onNavigate }) {
               type="button"
               onClick={handleLogout}
               className="btn btn-secondary btn-sm"
-              style={{ fontSize: '0.76rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-maroon)' }}
+              style={{ fontSize: '0.76rem', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-maroon)' }}
               title="Sign out of admin session"
             >
               <LogOut size={13} />
-              <span>Sign Out</span>
+              <span className="admin-signout-text">Sign Out</span>
             </button>
           </div>
         </header>
@@ -1076,6 +1086,7 @@ export default function AdminPage({ onNavigate }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* Executive Heritage Banner */}
               <div
+                className="admin-hero-banner"
                 style={{
                   backgroundColor: '#26060C',
                   backgroundImage: 'radial-gradient(ellipse at top right, rgba(197, 155, 39, 0.25), transparent 70%)',
@@ -1096,14 +1107,14 @@ export default function AdminPage({ onNavigate }) {
                     Preserving and distributing 12th-century Vachana literature, Shaiva Agamas, and classical philosophical treatises under the spiritual patronage of Sri Suttur Veerashimhasana Math.
                   </p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
+                <div className="admin-hero-dispatch-col" style={{ textAlign: 'right' }}>
                   <span style={{ fontSize: '0.72rem', color: 'rgba(237, 231, 220, 0.6)', display: 'block' }}>Operational Dispatch</span>
                   <span style={{ fontSize: '0.94rem', fontWeight: 800, color: '#FFFFFF' }}>India Post Speed Post</span>
                 </div>
               </div>
 
               {/* 4 Essential KPI Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px' }}>
+              <div className="admin-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '16px' }}>
                 <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '18px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
                   <span style={{ fontSize: '0.76rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Total Revenue</span>
                   <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--color-maroon)', marginTop: '4px' }}>
@@ -1186,18 +1197,18 @@ export default function AdminPage({ onNavigate }) {
               </div>
 
               {/* Two Column Grid: Recent Orders & Low Stock Radar */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '20px' }}>
+              <div className="admin-dashboard-split-grid" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '20px' }}>
                 {/* Recent Orders Timeline */}
                 <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '20px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
                     <h2 style={{ fontSize: '1.02rem', fontWeight: 700, margin: 0, color: 'var(--color-text-charcoal)' }}>Recent Orders Timeline</h2>
                     <button type="button" onClick={() => setActiveTab('orders')} className="btn btn-outline btn-sm" style={{ fontSize: '0.76rem', padding: '4px 10px' }}>
                       All Orders ({orders.length})
                     </button>
                   </div>
 
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                  <div className="admin-table-scroll-wrap" style={{ overflowX: 'auto', width: '100%', WebkitOverflowScrolling: 'touch' }}>
+                    <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)', textAlign: 'left' }}>
                           <th style={{ padding: '8px 10px' }}>Order ID</th>
