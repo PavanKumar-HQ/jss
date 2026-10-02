@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Clock, Building2, Send, CheckCircle2, Navigation, ExternalLink, ShieldCheck, ArrowRight } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Building2, Send, CheckCircle2, Navigation, ExternalLink, ShieldCheck, ArrowRight, Copy, Check } from 'lucide-react';
 
 export default function ContactPage({ onNavigate }) {
   const [formData, setFormData] = useState({
@@ -344,17 +344,25 @@ export default function ContactPage({ onNavigate }) {
                       <button
                         type="button"
                         onClick={handleCopyAddress}
+                        title={copiedAddress ? "Address copied to clipboard!" : "Copy full postal address"}
+                        aria-label={copiedAddress ? "Address copied to clipboard" : "Copy postal address"}
                         style={{
-                          background: 'none',
-                          border: 'none',
-                          color: copiedAddress ? 'var(--color-green)' : 'var(--color-maroon)',
-                          fontSize: '0.74rem',
-                          fontWeight: 600,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '30px',
+                          height: '30px',
+                          borderRadius: '6px',
+                          border: '1px solid',
+                          borderColor: copiedAddress ? 'rgba(22, 163, 74, 0.4)' : 'rgba(94, 22, 36, 0.2)',
+                          backgroundColor: copiedAddress ? 'rgba(22, 163, 74, 0.12)' : 'rgba(94, 22, 36, 0.06)',
+                          color: copiedAddress ? '#16A34A' : 'var(--color-maroon)',
                           cursor: 'pointer',
+                          transition: 'all 0.2s ease',
                           padding: 0
                         }}
                       >
-                        {copiedAddress ? 'Copied ✓' : 'Copy'}
+                        {copiedAddress ? <Check size={15} /> : <Copy size={15} />}
                       </button>
                     </div>
                     <address style={{ fontStyle: 'normal', fontSize: '0.88rem', color: 'var(--color-text-body)', lineHeight: 1.55 }}>

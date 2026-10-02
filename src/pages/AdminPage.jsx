@@ -1199,37 +1199,50 @@ export default function AdminPage({ onNavigate }) {
               {/* Two Column Grid: Recent Orders & Low Stock Radar */}
               <div className="admin-dashboard-split-grid" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '20px' }}>
                 {/* Recent Orders Timeline */}
-                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '20px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+                <div className="admin-dashboard-card" style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '20px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                     <h2 style={{ fontSize: '1.02rem', fontWeight: 700, margin: 0, color: 'var(--color-text-charcoal)' }}>Recent Orders Timeline</h2>
                     <button type="button" onClick={() => setActiveTab('orders')} className="btn btn-outline btn-sm" style={{ fontSize: '0.76rem', padding: '4px 10px' }}>
                       All Orders ({orders.length})
                     </button>
                   </div>
 
+                  {/* Mobile Horizontal Scroll Cue */}
+                  <div className="admin-scroll-cue-badge">
+                    <span>⇄ Swipe horizontally to view full order columns</span>
+                  </div>
+
                   <div className="admin-table-scroll-wrap" style={{ overflowX: 'auto', width: '100%', WebkitOverflowScrolling: 'touch' }}>
-                    <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                    <table style={{ width: '100%', minWidth: '420px', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)', textAlign: 'left' }}>
-                          <th style={{ padding: '8px 10px' }}>Order ID</th>
-                          <th style={{ padding: '8px 10px' }}>Customer</th>
-                          <th style={{ padding: '8px 10px' }}>Total</th>
-                          <th style={{ padding: '8px 10px' }}>Status</th>
-                          <th style={{ padding: '8px 10px' }}>Action</th>
+                          <th style={{ padding: '8px 8px', whiteSpace: 'nowrap' }}>Order ID</th>
+                          <th style={{ padding: '8px 8px', whiteSpace: 'nowrap' }}>Customer</th>
+                          <th style={{ padding: '8px 8px', whiteSpace: 'nowrap' }}>Total</th>
+                          <th style={{ padding: '8px 8px', whiteSpace: 'nowrap' }}>Status</th>
+                          <th style={{ padding: '8px 8px', whiteSpace: 'nowrap' }}>Action</th>
                         </tr>
                       </thead>
                       <tbody>
                         {orders.slice(0, 5).map((o) => (
                           <tr key={o.orderId} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                            <td style={{ padding: '10px', fontWeight: 700, color: 'var(--color-maroon)' }}>{o.orderId}</td>
-                            <td style={{ padding: '10px' }}>{o.customer.fullName}</td>
-                            <td style={{ padding: '10px', fontWeight: 600 }}>₹{o.totals?.grandTotal || 0}</td>
-                            <td style={{ padding: '10px' }}>
+                            <td style={{ padding: '8px', fontWeight: 700, color: 'var(--color-maroon)', whiteSpace: 'nowrap' }}>
+                              {o.orderId}
+                            </td>
+                            <td style={{ padding: '8px' }}>
+                              <div style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={o.customer.fullName}>
+                                {o.customer.fullName}
+                              </div>
+                            </td>
+                            <td style={{ padding: '8px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                              ₹{o.totals?.grandTotal || 0}
+                            </td>
+                            <td style={{ padding: '8px', whiteSpace: 'nowrap' }}>
                               <span
                                 style={{
-                                  fontSize: '0.72rem',
+                                  fontSize: '0.7rem',
                                   fontWeight: 700,
-                                  padding: '2px 8px',
+                                  padding: '2px 7px',
                                   borderRadius: '4px',
                                   textTransform: 'capitalize',
                                   backgroundColor: o.status === 'delivered' ? '#DCFCE7' : o.status === 'shipped' ? '#E0F2FE' : '#FEF3C7',
@@ -1239,11 +1252,12 @@ export default function AdminPage({ onNavigate }) {
                                 {o.status.replace('_', ' ')}
                               </span>
                             </td>
-                            <td style={{ padding: '10px' }}>
+                            <td style={{ padding: '8px', whiteSpace: 'nowrap' }}>
                               <button
                                 type="button"
                                 onClick={() => { setSelectedOrder(o); setOrderTrackingInput(o.dispatch?.trackingNumber || ''); }}
-                                style={{ background: 'none', border: 'none', color: 'var(--color-maroon)', fontWeight: 600, cursor: 'pointer', fontSize: '0.78rem' }}
+                                className="btn btn-secondary btn-sm"
+                                style={{ padding: '3px 8px', fontSize: '0.72rem', whiteSpace: 'nowrap' }}
                               >
                                 Manage
                               </button>
@@ -1256,7 +1270,7 @@ export default function AdminPage({ onNavigate }) {
                 </div>
 
                 {/* Low Stock Radar */}
-                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '20px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
+                <div className="admin-dashboard-card" style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '20px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <AlertTriangle size={16} color="#D97706" />
@@ -1346,7 +1360,7 @@ export default function AdminPage({ onNavigate }) {
                   />
                 </div>
 
-                <div style={{ display: 'flex', gap: '6px' }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {['All', 'confirmed', 'processing', 'shipped', 'delivered'].map((st) => (
                     <button
                       key={st}
@@ -1371,9 +1385,14 @@ export default function AdminPage({ onNavigate }) {
                 </div>
               </div>
 
+              {/* Mobile Horizontal Scroll Cue */}
+              <div className="admin-scroll-cue-badge">
+                <span>⇄ Swipe horizontally to inspect all order records & actions</span>
+              </div>
+
               {/* Orders Table */}
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+              <div className="admin-table-scroll-wrap" style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto', width: '100%' }}>
+                <table style={{ width: '100%', minWidth: '780px', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
                       <th style={{ padding: '12px 14px' }}>Order ID & Date</th>
@@ -1487,7 +1506,7 @@ export default function AdminPage({ onNavigate }) {
               </div>
 
               {/* Status Filter */}
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {['All', 'New Enquiry', 'Quoted', 'Dispatched', 'Closed'].map((st) => (
                   <button
                     key={st}
@@ -1510,9 +1529,14 @@ export default function AdminPage({ onNavigate }) {
                 ))}
               </div>
 
+              {/* Mobile Horizontal Scroll Cue */}
+              <div className="admin-scroll-cue-badge">
+                <span>⇄ Swipe horizontally to inspect all enquiry records</span>
+              </div>
+
               {/* Bulk Enquiries Table */}
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+              <div className="admin-table-scroll-wrap" style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto', width: '100%' }}>
+                <table style={{ width: '100%', minWidth: '680px', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
                       <th style={{ padding: '12px 14px' }}>Institution / Organization</th>
@@ -1692,9 +1716,14 @@ export default function AdminPage({ onNavigate }) {
                 </div>
               </div>
 
+              {/* Mobile Horizontal Scroll Cue */}
+              <div className="admin-scroll-cue-badge">
+                <span>⇄ Swipe horizontally to inspect titles, stock & pricing</span>
+              </div>
+
               {/* Publications Table */}
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+              <div className="admin-table-scroll-wrap" style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto', width: '100%' }}>
+                <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
                       <th style={{ padding: '12px 14px' }}>Title & Series</th>
@@ -1874,9 +1903,14 @@ export default function AdminPage({ onNavigate }) {
                 </label>
               </div>
 
+              {/* Mobile Horizontal Scroll Cue */}
+              <div className="admin-scroll-cue-badge">
+                <span>⇄ Swipe horizontally to inspect inventory, stock on hand & threshold</span>
+              </div>
+
               {/* Inventory Table */}
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+              <div className="admin-table-scroll-wrap" style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto', width: '100%' }}>
+                <table style={{ width: '100%', minWidth: '650px', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
                       <th style={{ padding: '12px 14px' }}>Publication Title</th>
@@ -1992,9 +2026,14 @@ export default function AdminPage({ onNavigate }) {
                 </div>
               </div>
 
+              {/* Mobile Horizontal Scroll Cue */}
+              <div className="admin-scroll-cue-badge">
+                <span>⇄ Swipe horizontally to inspect periodical issues & circulation</span>
+              </div>
+
               {/* Periodicals Table */}
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+              <div className="admin-table-scroll-wrap" style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto', width: '100%' }}>
+                <table style={{ width: '100%', minWidth: '680px', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
                       <th style={{ padding: '12px 14px' }}>Periodical Title</th>
@@ -2371,7 +2410,7 @@ export default function AdminPage({ onNavigate }) {
               </div>
 
               {/* Status Filter */}
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {['All', 'Open', 'In Progress', 'Resolved'].map((st) => (
                   <button
                     key={st}
@@ -2395,8 +2434,11 @@ export default function AdminPage({ onNavigate }) {
               </div>
 
               {/* Support Tickets Table */}
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+              <div className="admin-scroll-cue-badge" style={{ display: 'none' }}>
+                ⇄ Swipe horizontally to view full ticket details
+              </div>
+              <div className="admin-table-scroll-wrap" style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', minWidth: '780px', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
                       <th style={{ padding: '12px 14px' }}>Ticket & Date</th>
@@ -2536,8 +2578,8 @@ export default function AdminPage({ onNavigate }) {
               </div>
 
               {/* Staff Personnel Table */}
-              <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div className="admin-dashboard-card" style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                   <h3 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--color-maroon)' }}>
                     Operations Staff Accounts ({staffUsers.length})
                   </h3>
@@ -2552,50 +2594,55 @@ export default function AdminPage({ onNavigate }) {
                   </button>
                 </div>
 
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
-                      <th style={{ padding: '10px 12px' }}>Staff Name</th>
-                      <th style={{ padding: '10px 12px' }}>Institutional Email</th>
-                      <th style={{ padding: '10px 12px' }}>Role</th>
-                      <th style={{ padding: '10px 12px' }}>Status</th>
-                      <th style={{ padding: '10px 12px' }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {staffUsers.map((u) => (
-                      <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                        <td style={{ padding: '10px 12px', fontWeight: 700 }}>{u.name}</td>
-                        <td style={{ padding: '10px 12px', color: 'var(--color-text-charcoal)' }}>{u.email}</td>
-                        <td style={{ padding: '10px 12px' }}>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#FAF7F2', border: '1px solid var(--color-border)', color: 'var(--color-maroon)' }}>
-                            {u.role}
-                          </span>
-                        </td>
-                        <td style={{ padding: '10px 12px' }}>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: u.status === 'Active' ? '#DCFCE7' : '#F3F4F6', color: u.status === 'Active' ? '#15803D' : '#6B7280' }}>
-                            {u.status}
-                          </span>
-                        </td>
-                        <td style={{ padding: '10px 12px' }}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const res = adminService.toggleStaffStatus(u.id);
-                              if (res.success) {
-                                showToast(`User ${u.name} status updated.`);
-                              }
-                            }}
-                            className="btn btn-outline btn-sm"
-                            style={{ padding: '2px 8px', fontSize: '0.72rem' }}
-                          >
-                            {u.status === 'Active' ? 'Deactivate' : 'Activate'}
-                          </button>
-                        </td>
+                <div className="admin-scroll-cue-badge" style={{ display: 'none' }}>
+                  ⇄ Swipe horizontally to view staff roster
+                </div>
+                <div className="admin-table-scroll-wrap" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                  <table style={{ width: '100%', minWidth: '580px', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left', color: 'var(--color-text-muted)' }}>
+                        <th style={{ padding: '10px 12px' }}>Staff Name</th>
+                        <th style={{ padding: '10px 12px' }}>Institutional Email</th>
+                        <th style={{ padding: '10px 12px' }}>Role</th>
+                        <th style={{ padding: '10px 12px' }}>Status</th>
+                        <th style={{ padding: '10px 12px' }}>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {staffUsers.map((u) => (
+                        <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                          <td style={{ padding: '10px 12px', fontWeight: 700 }}>{u.name}</td>
+                          <td style={{ padding: '10px 12px', color: 'var(--color-text-charcoal)' }}>{u.email}</td>
+                          <td style={{ padding: '10px 12px' }}>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#FAF7F2', border: '1px solid var(--color-border)', color: 'var(--color-maroon)' }}>
+                              {u.role}
+                            </span>
+                          </td>
+                          <td style={{ padding: '10px 12px' }}>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', backgroundColor: u.status === 'Active' ? '#DCFCE7' : '#F3F4F6', color: u.status === 'Active' ? '#15803D' : '#6B7280' }}>
+                              {u.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: '10px 12px' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const res = adminService.toggleStaffStatus(u.id);
+                                if (res.success) {
+                                  showToast(`User ${u.name} status updated.`);
+                                }
+                              }}
+                              className="btn btn-outline btn-sm"
+                              style={{ padding: '2px 8px', fontSize: '0.72rem' }}
+                            >
+                              {u.status === 'Active' ? 'Deactivate' : 'Activate'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -3449,28 +3496,30 @@ export default function AdminPage({ onNavigate }) {
               </div>
             </div>
 
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', marginBottom: '20px' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left' }}>
-                  <th style={{ padding: '8px' }}>Title & Format</th>
-                  <th style={{ padding: '8px' }}>HSN</th>
-                  <th style={{ padding: '8px' }}>Qty</th>
-                  <th style={{ padding: '8px', textAlign: 'right' }}>Rate</th>
-                  <th style={{ padding: '8px', textAlign: 'right' }}>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoicePrintOrder.items.map((it, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                    <td style={{ padding: '8px' }}>{it.title} ({it.format || 'Paperback'})</td>
-                    <td style={{ padding: '8px' }}>4901</td>
-                    <td style={{ padding: '8px' }}>{it.quantity}</td>
-                    <td style={{ padding: '8px', textAlign: 'right' }}>₹{it.price}</td>
-                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 700 }}>₹{it.price * it.quantity}</td>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: '20px' }}>
+              <table style={{ width: '100%', minWidth: '460px', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#FAF7F2', borderBottom: '1px solid var(--color-border)', textAlign: 'left' }}>
+                    <th style={{ padding: '8px' }}>Title & Format</th>
+                    <th style={{ padding: '8px' }}>HSN</th>
+                    <th style={{ padding: '8px' }}>Qty</th>
+                    <th style={{ padding: '8px', textAlign: 'right' }}>Rate</th>
+                    <th style={{ padding: '8px', textAlign: 'right' }}>Total</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {invoicePrintOrder.items.map((it, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                      <td style={{ padding: '8px' }}>{it.title} ({it.format || 'Paperback'})</td>
+                      <td style={{ padding: '8px' }}>4901</td>
+                      <td style={{ padding: '8px' }}>{it.quantity}</td>
+                      <td style={{ padding: '8px', textAlign: 'right' }}>₹{it.price}</td>
+                      <td style={{ padding: '8px', textAlign: 'right', fontWeight: 700 }}>₹{it.price * it.quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.94rem', fontWeight: 800, color: 'var(--color-maroon)', borderTop: '2px solid var(--color-border)', paddingTop: '10px', marginBottom: '24px' }}>
               <span>Grand Total: ₹{invoicePrintOrder.totals?.grandTotal || 0}</span>
